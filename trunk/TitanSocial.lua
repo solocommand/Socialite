@@ -129,7 +129,7 @@ function TitanPanelSocialButton_GetButtonText(id)
 	TITAN_SOCIAL_BUTTON_LABEL = "Social: ";
 	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s"..TitanUtils_GetNormalText("/").."%s"..TitanUtils_GetNormalText("/").."%s";
 
-	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cff00A2E8"..iRealIDOnline.."|r", TitanUtils_GetNormalText(iFriendsOnline), "|cff00FF00"..iGuildOnline.."|r");
+	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cff00A2E8"..iRealIDOnline.."|r", "|cffFFFFFF"..iFriendsOnline.."|r", "|cff00FF00"..iGuildOnline.."|r");
 	
 	--
 	-- Label Generation
@@ -204,6 +204,17 @@ function TitanPanelSocialButton_GetTooltipText()
 				else
 					playerStatus = ""
 				end
+				
+			-- Client Information
+				if (client == "WoW") then
+					clientName = "World of Warcraft"
+				elseif (client == "S2") then
+					clientName = "Starcraft 2"
+				elseif (client == "D3") then
+					clientName = "Diablo 3"
+				else
+					clientName = "Unknown Client"
+				end
 			
 			-- Class Colors
 				if (class == "Druid") then
@@ -227,23 +238,25 @@ function TitanPanelSocialButton_GetTooltipText()
 				elseif (class == "Death Knight") then
 					classColor = "|cffc41f3b";
 				else
-					classColor = "|cff000000";
+					classColor = "|cffCCCCCC";
 				end
 			
 			-- Stan Smith {SC2} ToonName 80 <AFK/DND>\t Location
-			-- Stan Smith Toonname 80
+			-- Stan Smith Toonname 80 (SC2)
 			
 			-- Full Name
 			tTooltipRichText = tTooltipRichText.."|cff00A2E8"..givenName.." "..surname.."|r "
 			
-			-- Game Name
-			--tTooltipRichText = tTooltipRichText.."{"..client.."} "
-
 			-- Character
 			tTooltipRichText = tTooltipRichText..classColor..toonName.."|r "
 				
 			-- Character Level
 			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r "
+			
+			-- Game Name
+			if(client~="WoW") then
+				tTooltipRichText = tTooltipRichText.."("..clientName..") ";
+			end
 						
 			-- Status
 			if (playerStatus ~= "") then
@@ -265,6 +278,45 @@ function TitanPanelSocialButton_GetTooltipText()
 	--
 		
 		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("Normal Friends Online:").."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
+		
+		for friendIndex=1, iFriendsOnline do
+		
+			name, playerLevel, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
+
+			-- Class Colors
+				if (class == "Druid") then				classColor = "|cffff7d0a";
+				elseif (class == "Hunter") then			classColor = "|cffabd473";
+				elseif (class == "Mage") then			classColor = "|cff69ccf0";
+				elseif (class == "Paladin") then		classColor = "|cfff58cba";
+				elseif (class == "Priest") then			classColor = "|cffffffff";
+				elseif (class == "Rogue") then			classColor = "|cfffff569";
+				elseif (class == "Shaman") then			classColor = "|cff2459ff";
+				elseif (class == "Warlock") then		classColor = "|cff9482ca";
+				elseif (class == "Warrior") then		classColor = "|cffc79c6e";
+				elseif (class == "Death Knight") then	classColor = "|cffc41f3b";
+				else									classColor = "|cffCCCCCC";
+				end
+			
+			-- Level
+			tToolTipRichText = tTooltipRichText.."|cffFFFFFF"..playerLevel.."|r  ";
+			
+			-- Name
+			tTooltipRichText = tTooltipRichText..classColor..name.."|r ";
+
+			-- Status
+			if (playerStatus ~= "") then
+				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..playerStatus.."|r ";
+			end
+			
+			-- Notes
+			--if(playerNote ~= "") then
+			--	tTooltipRichText = tTooltipRichText..playerNote;
+			--end
+			
+			-- Location
+			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..area.."|r\n";
+		
+		end
 		
 	--
 	-- Guild
