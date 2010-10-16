@@ -44,6 +44,7 @@ function TitanPanelSocialButton_OnLoad(self)
 			tooltipTitle = TITAN_SOCIAL_TOOLTIP,
 			tooltipTextFunction = "TitanPanelSocialButton_GetTooltipText",
 			iconWidth = 16,
+			icon = "Interface\\FriendsFrame\\BroadcastIcon";
 			savedVariables = {       
 				ShowRealID = 1,
 				ShowFriends = 1,
@@ -58,21 +59,6 @@ function TitanPanelSocialButton_OnLoad(self)
 	--
 	
 		-- Load these settings from SavedVariables/&Set Defaults
-		
-		-- Temporary hardcode needed settings
-		--bAltTracker	= false;	-- Enable/disable AltTracker -- Disabled for debugging
-		--bRealID = true;			-- Enable/disable RealID Friends Component
-		--bFriends = true;		-- Enable/disable Friends Component
-		--bGuild = true;			-- Enable/disable Guild Component
-		--bButtonLabel = true;	-- Enable/disable static label text
-		--bButtonIcon = false;	-- Enable/disable static button icon
-		
-		-- bAltTracker = TitanGetVar(TITAN_SOCIAL_ID, "bAltTracker");
-		--bRealID = 		TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID");
-		--bFriends = 		TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends");
-		--bGuild = 		TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild");
-		--bButtonLabel =	TitanGetVar(TITAN_SOCIAL_ID, "ShowLabel");
-		--bButtonIcon =	TitanGetVar(TITAN_SOCIAL_ID, "ShowIcon");
 		
 		-- Dynamic Settings
 		bGuildOffline = GetGuildRosterShowOffline()	-- Enable/disable including offline guild members
@@ -180,8 +166,14 @@ function TitanPanelSocialButton_GetButtonText(id)
 	local iFriendsTotal, iFriendsOnline = 0;
 	local iGuildTotal, iGuildOnline = 0;
 	local tButtonRichText = "";
-
 	
+	local tButtonTemplate1 = "%s";
+	local tButtonTemplate2 = "%s |cffffd200/|r %s";
+	local tButtonTemplate3 = "%s |cffffd200/|r %s |cffffd200/|r %s";
+
+	--
+	-- SavedVars//Colors
+	--
 	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil) then
 		iRealIDTotal, iRealIDOnline = BNGetNumFriends();
 		iRealIDOnline  = "|cff00A2E8"..iRealIDOnline.."|r";
@@ -191,23 +183,22 @@ function TitanPanelSocialButton_GetButtonText(id)
 		iFriendsTotal, iFriendsOnline = GetNumFriends();
 		iFriendsOnline = "|cffFFFFFF"..iFriendsOnline.."|r";
 	end
+	
 	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
 		iGuildTotal, iGuildOnline = GetNumGuildMembers();
 		iGuildOnline   = "|cff00FF00"..iGuildOnline.."|r";
 	end
 	
-	tButtonTemplate1 = "%s";
-	tButtonTemplate2 = "%s |cffffd200/|r %s";
-	tButtonTemplate3 = "%s |cffffd200/|r %s |cffffd200/|r %s";
-
 	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowLabel") ~= nil) then
 		TITAN_SOCIAL_BUTTON_LABEL = "Social: ";
 	else
 		TITAN_SOCIAL_BUTTON_LABEL = " ";
 	end
 	
-
-	-- Custom Labels
+	--
+	-- Custom Labels --
+	--
+	
 	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil) then
 		if (TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") ~= nil) then
 			if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
@@ -253,80 +244,7 @@ function TitanPanelSocialButton_GetButtonText(id)
 			end
 		end
 	end
-	
-	
-	-- Custom Labels
-	--if(bRealID) and (bFriends) and (bGuild) then
-	--	-- ## / ## / ##
-	--	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s"..TitanUtils_GetNormalText("/").."%s"..TitanUtils_GetNormalText("/").."%s";
-	--	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cff00A2E8"..iRealIDOnline.."|r", "|cffFFFFFF"..iFriendsOnline.."|r", "|cff00FF00"..iGuildOnline.."|r");
-	--elseif (bRealID) and (bFriends) and (not bGuild) then
-	--	-- ## / ## / XX
-	--	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s"..TitanUtils_GetNormalText("/").."%s";
-	--	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cff00A2E8"..iRealIDOnline.."|r", "|cffFFFFFF"..iFriendsOnline.."|r");
-	--elseif (bRealID) and (not bFriends) and (bGuild) then
-	--	-- ## / XX / ##
-	--	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s"..TitanUtils_GetNormalText("/").."%s";
-	--	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cff00A2E8"..iRealIDOnline.."|r", "|cffFFFFFF"..iGuildOnline.."|r");
-	--elseif (bRealID) and (not bFriends) and (not bGuild) then
-	--	-- ## / XX / XX
-	--	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s";
-	--	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cff00A2E8"..iRealIDOnline.."|r");
-	--elseif (not bRealID) and (bFriends) and (bGuild) then
-	--	-- XX / ## / ##
-	--	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s"..TitanUtils_GetNormalText("/").."%s";
-	--	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cffFFFFFF"..iFriendsOnline.."|r", "|cff00FF00"..iGuildOnline.."|r");
-	--elseif (not bRealID) and (bFriends) and (not bGuild) then
-	--	-- XX / ## / XX
-	--	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s";
-	--	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cffFFFFFF"..iFriendsOnline.."|r");
-	--elseif (not bRealID) and (not bFriends) and (bGuild) then
-	--	-- XX / XX / ##
-	--	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s";
-	--	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cff00FF00"..iGuildOnline.."|r");
-	--else
-	--	-- XX / XX / XX
-	--	TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s";
-	--	tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "Disabled");
-	--end
-	
-	
-	-- 		TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL.."%s"..TitanUtils_GetNormalText("/").."%s"..TitanUtils_GetNormalText("/").."%s";
-	--		tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "|cff00A2E8"..iRealIDOnline.."|r", "|cffFFFFFF"..iFriendsOnline.."|r", "|cff00FF00"..iGuildOnline.."|r");
-	
-	
-	--
-	-- Label Generation
-	--
-	--
-	--	-- Button Label
-	--	if(bButtonLabel) then
-	--		tButtonLabel = "Social: ";
-	--	end
-	--		
-	--	-- RealID
-	--	if(bRealID) then
-	--		tButtonRichText = tButtonRichText.."|cff00A2E8"..iRealIDOnline.."|r";
-	--	end
-	--	
-	--	-- Friends
-	--	if(bFriends) then
-	--		if(not bRealID) then
-	--			tButtonRichText = tButtonRichText..iFriendsOnline.." ";
-	--		else
-	--			tButtonRichText = tButtonRichText..TitanUtils_GetNormalText(" / ")..iFriendsOnline.." ";
-	--		end
-	--	end
-	--	
-	--	-- Guild
-	--	if(bGuild) then
-	--		if(not bFriends) and (not bRealID) then
-	--			tButtonRichText = tButtonRichText.."|cff00FF00"..iGuildOnline.."|r";
-	--		elseif(not bFriends) then
-	--			tButtonRichText = tButtonRichText..TitanUtils_GetNormalText(" / ").."|cff00FF00"..iGuildOnline.."|r";
-	--		end
-	--	end
-	
+
 	return TITAN_SOCIAL_BUTTON_LABEL, tButtonRichText;
 end
 
@@ -336,24 +254,20 @@ end
 
 function TitanPanelSocialButton_GetTooltipText()
 
-	local iRealIDTotal, iRealIDOnline = BNGetNumFriends();
-	local iFriendsTotal, iFriendsOnline = GetNumFriends();
-	local iGuildTotal, iGuildOnline = GetNumGuildMembers();
+	local iRealIDTotal, iRealIDOnline = 0;
+	local iFriendsTotal, iFriendsOnline = 0;
+	local iGuildTotal, iGuildOnline = 0;
 	local tTooltipRichText, playerStatus, clientName = "";
-		
-	--
-	-- Tooltip Header
-	--
-	--	tTooltipRichText = tTooltipRichText..TitanUtils_GetNormalText("RealID Friends Online:").."\t".."|cff00A2E8"..iRealIDOnline.."|r"..TitanUtils_GetNormalText("/"..iRealIDTotal).."\n"
-	--	tTooltipRichText = tTooltipRichText..TitanUtils_GetNormalText("Normal Friends Online:").."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
-	--	tTooltipRichText = tTooltipRichText..TitanUtils_GetNormalText("Guild Members Online:").."\t".."|cff00FF00"..iGuildOnline.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"
-	--	tTooltipRichText = tTooltipRichText.." ".."\n"	-- Line Break
 	
 	--
-	-- RealID Friends
+	--	RealID Friends
 	--
 	
-		tTooltipRichText = tTooltipRichText..TitanUtils_GetNormalText("RealID Friends Online:").."\t".."|cff00A2E8"..iRealIDOnline.."|r"..TitanUtils_GetNormalText("/"..iRealIDTotal).."\n"
+	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~=nil) then
+		iRealIDTotal, iRealIDOnline = BNGetNumFriends();
+		--iRealIDOnline  = "|cff00A2E8"..iRealIDOnline.."|r";
+
+		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("RealID Friends Online:").."\t".."|cff00A2E8"..iRealIDOnline.."|r"..TitanUtils_GetNormalText("/"..iRealIDTotal).."\n"
 		
 		for friendIndex=1, iRealIDOnline do
 
@@ -436,11 +350,16 @@ function TitanPanelSocialButton_GetTooltipText()
 			--end		
 		
 		end
+	end
 	
 	--
 	-- Friends
 	--
-		
+	
+	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") ~=nil) then
+	
+		iFriendsTotal, iFriendsOnline = GetNumFriends();
+	
 		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("Normal Friends Online:").."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
 		
 		for friendIndex=1, iFriendsOnline do
@@ -481,10 +400,16 @@ function TitanPanelSocialButton_GetTooltipText()
 			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..area.."|r\n";
 		
 		end
-		
+	end
+	
 	--
 	-- Guild
 	--
+	
+	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~=nil) then
+	
+		iGuildTotal, iGuildOnline = GetNumGuildMembers();
+		--iGuildOnline   = "|cff00FF00"..iGuildOnline.."|r";
 		
 		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("Guild Members Online:").."\t".."|cff00FF00"..iGuildOnline.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"
 		
@@ -525,6 +450,8 @@ function TitanPanelSocialButton_GetTooltipText()
 			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..zone.."|r\n"			
 			
 		end
+	
+	end
 	
 	return tTooltipRichText;
 end
