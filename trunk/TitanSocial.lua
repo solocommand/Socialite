@@ -4,18 +4,18 @@
 ----------------------------------------------------------------------
 
 -- Debugging Mode
-	bDebugMode = true;
+	bDebugMode = false;
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1r12-beta";
+	TITAN_SOCIAL_VERSION = "4.0.1r13-release";
 	TITAN_NIL = false;
 
 -- Friend-specific variables
 	iFriendsTab = 1;
 -- RealID-specific variables
 -- Guild-specific variables
-	
+	iGuildTab = 1;
 
 -- Counters for Titan Bar Display
 	iRealIDOnline, iFriendsOnline, iGuildOnline = 0;
@@ -94,14 +94,6 @@ function TitanPanelSocialButton_OnEvent(self, event, ...)
 	if(bDebugMode) then
 		if(event == "PLAYER_ENTERING_WORLD") then
 			DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.");
-			--DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." bRealID: "..bRealID);
-			if (TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil) then
-				svarresult = "True";
-			else
-				svarresult = "False";
-			end
-			DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." SavedVariable: "..svarresult);
-			
 		end
 		DEFAULT_CHAT_FRAME:AddMessage("Social: Caught Event "..event);
 	end
@@ -130,8 +122,10 @@ function TitanPanelSocialButton_OnClick(self, button)
 		if (not FriendsFrame:IsVisible()) then
 			ToggleFriendsFrame(iFriendsTab);
 			FriendsFrame_Update();
+			ToggleGuildFrame(iGuildTab);
 		elseif (FriendsFrame:IsVisible()) then
 			ToggleFriendsFrame(iFriendsTab);
+			ToggleGuildFrame(iGuildTab);
 		end
 	end
 	
@@ -284,46 +278,38 @@ function TitanPanelSocialButton_GetTooltipText()
 				end
 				
 			-- Client Information
-				if (client == "WoW") then
-					clientName = "World of Warcraft"
-				elseif (client == "S2") then
-					clientName = "Starcraft 2"
+				if (client == "S2") then
+					clientName = "S2"
 				elseif (client == "D3") then
-					clientName = "Diablo 3"
+					clientName = "D3"
 				else
-					clientName = "Unknown Client"
+					clientName = "??"
 				end
 			
 			-- Class Colors
-				if (class == "Druid") then
-					classColor = "|cffff7d0a";
-				elseif (class == "Hunter") then
-					classColor = "|cffabd473";
-				elseif (class == "Mage") then
-					classColor = "|cff69ccf0";
-				elseif (class == "Paladin") then
-					classColor = "|cfff58cba";
-				elseif (class == "Priest") then
-					classColor = "|cffffffff";
-				elseif (class == "Rogue") then
-					classColor = "|cfffff569";
-				elseif (class == "Shaman") then
-					classColor = "|cff2459ff";
-				elseif (class == "Warlock") then
-					classColor = "|cff9482ca";
-				elseif (class == "Warrior") then
-					classColor = "|cffc79c6e";
-				elseif (class == "Death Knight") then
-					classColor = "|cffc41f3b";
-				else
-					classColor = "|cffCCCCCC";
+				if (class == "Druid") then				classColor = "|cffff7d0a";
+				elseif (class == "Hunter") then			classColor = "|cffabd473";
+				elseif (class == "Mage") then			classColor = "|cff69ccf0";
+				elseif (class == "Paladin") then		classColor = "|cfff58cba";
+				elseif (class == "Priest") then			classColor = "|cffffffff";
+				elseif (class == "Rogue") then			classColor = "|cfffff569";
+				elseif (class == "Shaman") then			classColor = "|cff2459ff";
+				elseif (class == "Warlock") then		classColor = "|cff9482ca";
+				elseif (class == "Warrior") then		classColor = "|cffc79c6e";
+				elseif (class == "Death Knight") then	classColor = "|cffc41f3b";
+				else									classColor = "|cffCCCCCC";
 				end
 			
 			-- Stan Smith {SC2} ToonName 80 <AFK/DND>\t Location
 			-- Stan Smith Toonname 80 (SC2)
 			
-			-- Character Level
-			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
+			if(client ~= "WoW") then
+				-- Client Name
+				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..clientName.."|r  "
+			else
+				-- Character Level
+				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
+			end
 			
 			-- Character
 			tTooltipRichText = tTooltipRichText..classColor..toonName.."|r  "
@@ -331,11 +317,6 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- Full Name
 			tTooltipRichText = tTooltipRichText.."[|cff00A2E8"..givenName.." "..surname.."|r]  "
 			
-			-- Game Name
-			if(client~="WoW") then
-				tTooltipRichText = tTooltipRichText.."("..clientName..")  ";
-			end
-						
 			-- Status
 			if (playerStatus ~= "") then
 				tTooltipRichText = tTooltipRichText.."<"..playerStatus..">"
@@ -364,7 +345,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		
 		for friendIndex=1, iFriendsOnline do
 		
-			name, friendLevel, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
+			name, level, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
 
 			-- Class Colors
 				if (class == "Druid") then				classColor = "|cffff7d0a";
@@ -381,7 +362,8 @@ function TitanPanelSocialButton_GetTooltipText()
 				end
 			
 			-- Level
-			tToolTipRichText = tTooltipRichText.."|cffFFFFFF"..friendLevel.."|r  ";
+			--tToolTipRichText = tTooltipRichText.."|cffFFFFFF##"..level.."|r  ";
+			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  ";
 			
 			-- Name
 			tTooltipRichText = tTooltipRichText..classColor..name.."|r ";
@@ -417,7 +399,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		
 			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName = GetGuildRosterInfo(guildIndex);
 			
-				-- Class Colors
+			-- Class Colors
 				if (class == "Druid") then				classColor = "|cffff7d0a";
 				elseif (class == "Hunter") then			classColor = "|cffabd473";
 				elseif (class == "Mage") then			classColor = "|cff69ccf0";
