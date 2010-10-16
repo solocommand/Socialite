@@ -13,8 +13,12 @@
 					<OnEvent>
 						TitanPanelSocialButton_OnEvent(self, event, ...);
 					</OnEvent>
+					<OnUpdate>
+						TitanPanelSocialButton_OnUpdate(self, elapsed);
+					</OnUpdate>
 					<OnClick>
 						TitanPanelSocialButton_OnClick(self, button);
+						TitanPanelButton_OnClick(self, button);
 					</OnClick>													
 				</Scripts>
 

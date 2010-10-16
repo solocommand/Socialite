@@ -3,7 +3,8 @@
 ## Notes: A Titan Panel plugin incorporating Friends, Guild, and RealID Friends
 ## Author: solocommand
 ## SavedVariables:
+## SavedVariablesPerCharacter: TitanSocialVars
 ## OptionalDeps:
 ## Dependencies: Titan
-## Version: 4.0.1beta
+## Version: 4.0.1r12-beta
 TitanSocial.xml
