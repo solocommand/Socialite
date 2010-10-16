@@ -4,11 +4,11 @@
 ----------------------------------------------------------------------
 
 -- Debugging Mode
-	bDebugMode = true;
+	bDebugMode = false;
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1a1";
+	TITAN_SOCIAL_VERSION = "4.0.1beta r7";
 	TITAN_NIL = false;
 
 -- Friend-specific variables
@@ -244,18 +244,18 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- Stan Smith {SC2} ToonName 80 <AFK/DND>\t Location
 			-- Stan Smith Toonname 80 (SC2)
 			
-			-- Full Name
-			tTooltipRichText = tTooltipRichText.."|cff00A2E8"..givenName.." "..surname.."|r "
+			-- Character Level
+			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
 			
 			-- Character
-			tTooltipRichText = tTooltipRichText..classColor..toonName.."|r "
-				
-			-- Character Level
-			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r "
+			tTooltipRichText = tTooltipRichText..classColor..toonName.."|r  "
+			
+			-- Full Name
+			tTooltipRichText = tTooltipRichText.."[|cff00A2E8"..givenName.." "..surname.."|r]  "
 			
 			-- Game Name
 			if(client~="WoW") then
-				tTooltipRichText = tTooltipRichText.."("..clientName..") ";
+				tTooltipRichText = tTooltipRichText.."("..clientName..")  ";
 			end
 						
 			-- Status
@@ -281,7 +281,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		
 		for friendIndex=1, iFriendsOnline do
 		
-			name, playerLevel, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
+			name, friendLevel, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
 
 			-- Class Colors
 				if (class == "Druid") then				classColor = "|cffff7d0a";
@@ -298,7 +298,7 @@ function TitanPanelSocialButton_GetTooltipText()
 				end
 			
 			-- Level
-			tToolTipRichText = tTooltipRichText.."|cffFFFFFF"..playerLevel.."|r  ";
+			tToolTipRichText = tTooltipRichText.."|cffFFFFFF"..friendLevel.."|r  ";
 			
 			-- Name
 			tTooltipRichText = tTooltipRichText..classColor..name.."|r ";
@@ -323,6 +323,44 @@ function TitanPanelSocialButton_GetTooltipText()
 	--
 		
 		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("Guild Members Online:").."\t".."|cff00FF00"..iGuildOnline.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"
+		
+		for guildIndex=1, iGuildOnline do
+		
+			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName = GetGuildRosterInfo(guildIndex);
+			
+				-- Class Colors
+				if (class == "Druid") then				classColor = "|cffff7d0a";
+				elseif (class == "Hunter") then			classColor = "|cffabd473";
+				elseif (class == "Mage") then			classColor = "|cff69ccf0";
+				elseif (class == "Paladin") then		classColor = "|cfff58cba";
+				elseif (class == "Priest") then			classColor = "|cffffffff";
+				elseif (class == "Rogue") then			classColor = "|cfffff569";
+				elseif (class == "Shaman") then			classColor = "|cff2459ff";
+				elseif (class == "Warlock") then		classColor = "|cff9482ca";
+				elseif (class == "Warrior") then		classColor = "|cffc79c6e";
+				elseif (class == "Death Knight") then	classColor = "|cffc41f3b";
+				else									classColor = "|cffCCCCCC";
+				end
+		
+			-- 80 {color=class::Playername} {<AFK>} Rank Note ONote\t Location
+			
+			-- Level
+			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
+			-- Name
+			tTooltipRichText = tTooltipRichText..classColor..name.."|r  "
+			-- Status
+			if (playerStatus ~= "") then
+				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..playerStatus.."|r  ";
+			end
+			-- Rank
+			tTooltipRichText = tTooltipRichText..rank.."  ";
+			-- Notes
+			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..note.."|r  "
+			tTooltipRichText = tTooltipRichText.."|cffAAFFAA"..officernote.."|r  "
+			-- Location
+			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..zone.."|r\n"			
+			
+		end
 	
 	return tTooltipRichText;
 end
