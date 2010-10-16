@@ -5,5 +5,5 @@
 ## SavedVariables:
 ## OptionalDeps:
 ## Dependencies: Titan
-## Version: 4.0.1a1
+## Version: 4.0.1beta
 TitanSocial.xml
