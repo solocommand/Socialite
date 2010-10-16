@@ -4,11 +4,11 @@
 ----------------------------------------------------------------------
 
 -- Debugging Mode
-	bDebugMode = false;
+	bDebugMode = true;
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1beta r7";
+	TITAN_SOCIAL_VERSION = "4.0.1beta";
 	TITAN_NIL = false;
 
 -- Friend-specific variables
@@ -90,7 +90,7 @@ end
 
 function TitanPanelSocialButton_OnEvent(self, event, ...)
 
-	if(bDebugMode) then
+	if(not bDebugMode) then
 		if(event == "PLAYER_ENTERING_WORLD") then
 			DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.");
 		end
