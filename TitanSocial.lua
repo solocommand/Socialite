@@ -8,7 +8,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1r14-beta";
+	TITAN_SOCIAL_VERSION = "4.0.1b2";
 	TITAN_NIL = false;
 
 -- Friend-specific variables
@@ -62,7 +62,7 @@ function TitanPanelSocialButton_OnLoad(self)
 		-- Load these settings from SavedVariables/&Set Defaults
 		
 		-- Dynamic Settings
-		bGuildOffline = GetGuildRosterShowOffline()	-- Enable/disable including offline guild members
+
 
 	--
 	-- EVENT CATCHING --
@@ -93,6 +93,7 @@ end
 function TitanPanelSocialButton_OnEvent(self, event, ...)
 
 	if(bDebugMode) then
+		DEFAULT_CHAT_FRAME:AddMessage("Social: OnEvent");
 		if(event == "PLAYER_ENTERING_WORLD") then
 			DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.");
 		end
@@ -254,6 +255,7 @@ function TitanPanelSocialButton_GetTooltipText()
 	local iFriendsTotal, iFriendsOnline = 0;
 	local iGuildTotal, iGuildOnline = 0;
 	local tTooltipRichText, playerStatus, clientName = "";
+	local bGuildOffline = GetGuildRosterShowOffline()	-- Enable/disable including offline guild members
 	
 	--
 	--	RealID Friends
@@ -392,6 +394,9 @@ function TitanPanelSocialButton_GetTooltipText()
 	
 	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~=nil) then
 	
+		-- Turn off showoffline for tooltip
+		SetGuildRosterShowOffline(false);
+		
 		iGuildTotal, iGuildOnline = GetNumGuildMembers();
 		--iGuildOnline   = "|cff00FF00"..iGuildOnline.."|r";
 		
@@ -433,6 +438,11 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- Location
 			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..zone.."|r\n"			
 			
+		end
+		
+		-- Reset ShowOffline Guild Members to original value
+		if (bGuildOffline) then
+			SetGuildRosterShowOffline(true);
 		end
 	
 	end
