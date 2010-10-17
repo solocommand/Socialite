@@ -8,7 +8,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1r13-release";
+	TITAN_SOCIAL_VERSION = "4.0.1r14-beta";
 	TITAN_NIL = false;
 
 -- Friend-specific variables
@@ -51,6 +51,7 @@ function TitanPanelSocialButton_OnLoad(self)
 				ShowGuild = 1,
 				ShowLabel = 1,
 				ShowIcon = 1,
+				ShowMem = 1,
 			  }
 		};
 
@@ -145,6 +146,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
     TitanPanelRightClickMenu_AddSpacer();
     TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID);
 	TitanPanelRightClickMenu_AddToggleVar("Show Label", TITAN_SOCIAL_ID, "ShowLabel");
+	TitanPanelRightClickMenu_AddToggleVar("Show Memory Usage", TITAN_SOCIAL_ID, "ShowMem");
     TitanPanelRightClickMenu_AddSpacer();
     TitanPanelRightClickMenu_AddCommand("Hide", TITAN_SOCIAL_ID, TITAN_PANEL_MENU_FUNC_HIDE);
   
@@ -341,7 +343,7 @@ function TitanPanelSocialButton_GetTooltipText()
 	
 		iFriendsTotal, iFriendsOnline = GetNumFriends();
 	
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("Normal Friends Online:").."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
+		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("Friends Online:").."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
 		
 		for friendIndex=1, iFriendsOnline do
 		
@@ -433,6 +435,10 @@ function TitanPanelSocialButton_GetTooltipText()
 			
 		end
 	
+	end
+	
+	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowMem") ~=nil) then
+		tTooltipRichText = tTooltipRichText.." \nTitanSocial Memory Utilization:\t|cff00FF00"..floor(GetAddOnMemoryUsage( "TitanSocial")).." Kb|r";
 	end
 	
 	return tTooltipRichText;
