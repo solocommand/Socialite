@@ -7,6 +7,7 @@
 			<Button name="TitanPanelSocialButton" inherits="TitanPanelComboTemplate" frameStrata="FULLSCREEN" toplevel="true">
 				<Scripts>
 					<OnLoad>
+						self.TimeSinceLastUpdate = 0;
 						TitanPanelSocialButton_OnLoad(self);
 						TitanPanelButton_OnLoad(self);
 					</OnLoad>
@@ -16,6 +17,10 @@
 					<OnUpdate>
 						TitanPanelSocialButton_OnUpdate(self, elapsed);
 					</OnUpdate>
+					<OnEnter>
+						TitanPanelSocialButton_OnEnter();
+						TitanPanelButton_OnEnter(self);
+					</OnEnter>	
 					<OnClick>
 						TitanPanelSocialButton_OnClick(self, button);
 						TitanPanelButton_OnClick(self, button);
