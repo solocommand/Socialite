@@ -18,13 +18,13 @@
 	TITAN_SOCIAL_UPDATE = 15.0;	-- Update every 15 seconds to avoid roster update nastiness
 
 -- Friend-specific variables
-	iFriendsTab = 1;
+	local iFriendsTab = 1;
 -- RealID-specific variables
 -- Guild-specific variables
-	iGuildTab = 1;
+	local iGuildTab = 1;
 
 -- Counters for Titan Bar Display
-	iRealIDOnline, iFriendsOnline, iGuildOnline = 0;
+	local iRealIDOnline, iFriendsOnline, iGuildOnline = 0;
 
 ----------------------------------------------------------------------
 --  Global variables
@@ -91,6 +91,7 @@ function TitanPanelSocialButton_OnLoad(self)
 				ShowGuildLabel = 0,
 				ShowGuildNote = 1,
 				ShowGuildONote = 1,
+				ShowIcon = 1,
 				ShowLabel = 1,
 				ShowTooltipTotals = 1,
 				ShowMem = 0,
@@ -549,14 +550,16 @@ function TitanPanelSocialButton_GetTooltipText()
 				tTooltipRichText = tTooltipRichText.."<"..playerStatus..">"
 			end
 			
+			-- Broadcast
+			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDBroadcasts") ~= nil) then
+				if (broadcastText ~= nil) then
+				tTooltipRichText = tTooltipRichText.."|cff00A2E8"..broadcastText.."|r ";
+				end
+			end
+			
 			-- Character Location
 			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..gameText.."|r\n";
 
-			-- Broadcast
-			--if (broadcastText ~= "") then
-			--	tTooltipRichText = tTooltipRichText.." \t|cff00A0E0"..broadcastText.."|r\n";
-			--end		
-		
 		end
 	end
 	
