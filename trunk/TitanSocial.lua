@@ -4,11 +4,14 @@
 ----------------------------------------------------------------------
 
 -- Debugging Mode
-	bDebugMode = false;
+	local bDebugMode = false;
+	
+-- Localization
+	--local L = LibStub("AceLocale-3.0"):GetLocale("Titan", true)
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1b2";
+	TITAN_SOCIAL_VERSION = "4.0.1b3";
 	TITAN_NIL = false;
 	
 -- Update frequency
@@ -72,13 +75,25 @@ function TitanPanelSocialButton_OnLoad(self)
 			tooltipTextFunction = "TitanPanelSocialButton_GetTooltipText",
 			iconWidth = 16,
 			icon = "Interface\\FriendsFrame\\BroadcastIcon";
+			controlVariables = {
+				ShowIcon = true,
+				--ShowLabelText = true,
+				DisplayOnRightSide = false
+				--ShowRegularText = false,
+				--ShowColoredText = true,
+			},
 			savedVariables = {       
 				ShowRealID = 1,
+				ShowRealIDBroadcasts = 0,
 				ShowFriends = 1,
+				ShowFriendsNote = 1,
 				ShowGuild = 1,
+				ShowGuildLabel = 0,
+				ShowGuildNote = 1,
+				ShowGuildONote = 1,
 				ShowLabel = 1,
-				ShowIcon = 1,
-				ShowMem = 1,
+				ShowTooltipTotals = 1,
+				ShowMem = 0,
 			  }
 		};
 
@@ -200,19 +215,170 @@ end
 ----------------------------------------------------------------------
 
 function TitanPanelRightClickMenu_PrepareSocialMenu()     
+	
+	local info = {};
+	
+	
+	-- Level 2
+	if _G["UIDROPDOWNMENU_MENU_LEVEL"] == 2 then
+	
+		-- RealID Menu
+		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "RealID" then
+			TitanPanelRightClickMenu_AddTitle("RealID Friends", _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+
+			-- Show RealID Friends
+				local temptable = {TITAN_SOCIAL_ID, "ShowRealID"};
+				info = {};
+				info.text = "Show RealID Friends";
+				info.value = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID");
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+			
+			-- Show RealID Broadcasts
+				local temptable = {TITAN_SOCIAL_ID, "ShowRealIDBroadcasts"};
+				info = {};
+				info.text = "Show RealID Broadcasts";
+				info.value = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDBroadcasts");
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+		end
+		
+		-- Friends Menu
+		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "Friends" then
+			TitanPanelRightClickMenu_AddTitle("Friends", _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+
+			-- Show Friends
+				local temptable = {TITAN_SOCIAL_ID, "ShowFriends"};
+				info = {};
+				info.text = "Show Friends";
+				info.value = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends");
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+				
+			-- Show Friend Notes
+			local temptable = {TITAN_SOCIAL_ID, "ShowFriendsNote"};
+				info = {};
+				info.text = "Show Friends Note";
+				info.value = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote");
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+		end
+		
+		-- Guild Menu
+		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "Guild" then
+			TitanPanelRightClickMenu_AddTitle("Guild Options", _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+
+			-- Show Guild Members
+				local temptable = {TITAN_SOCIAL_ID, "ShowGuild"};
+				info = {};
+				info.text = "Show Guild Members";
+				info.value = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild");
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+				
+			-- Show Guild Name as Label
+				local temptable = {TITAN_SOCIAL_ID, "ShowGuildLabel"};
+				info = {};
+				info.text = "Show Guild Label";
+				info.value = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildLabel");
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+				
+			-- Show Guild Note
+				local temptable = {TITAN_SOCIAL_ID, "ShowGuildNote"};
+				info = {};
+				info.text = "Show Guild Note";
+				info.value = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildNote");
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+				
+			-- Show Officer Note
+				local temptable = {TITAN_SOCIAL_ID, "ShowGuildONote"};
+				info = {};
+				info.text = "Show Officer Note";
+				info.value = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildONote");
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+		end
+		
+		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "Options" then
+			TitanPanelRightClickMenu_AddTitle("Options", _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+		end
+		
+		return
+	end
   
-    local info = {};  
-    TitanPanelRightClickMenu_AddTitle(TitanPlugins[TITAN_SOCIAL_ID].menuText);
-    TitanPanelRightClickMenu_AddToggleVar("Show RealID Friends", TITAN_SOCIAL_ID, "ShowRealID");
-	TitanPanelRightClickMenu_AddToggleVar("Show Friends", TITAN_SOCIAL_ID, "ShowFriends");
-	TitanPanelRightClickMenu_AddToggleVar("Show Guild Members", TITAN_SOCIAL_ID, "ShowGuild");
-    TitanPanelRightClickMenu_AddSpacer();
-    TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID);
+  
+	-- Level 1
+	
+	TitanPanelRightClickMenu_AddTitle(TitanPlugins[TITAN_SOCIAL_ID].menuText);
+	
+	-- RealID Menu
+		info={};
+		info.text = "RealID";
+		info.value = "RealID";
+		info.hasArrow = 1;
+		UIDropDownMenu_AddButton(info);
+	
+	-- Friends Menu
+		info = {};
+		info.text = "Friends";
+		info.value = "Friends";
+		info.hasArrow = 1;
+		UIDropDownMenu_AddButton(info);
+		
+	-- Guild Menu
+		info = {};
+		info.text = "Guild";
+		info.value = "Guild";
+		info.hasArrow = 1;
+		UIDropDownMenu_AddButton(info);
+	
+	--TitanPanelRightClickMenu_AddToggleVar("Show RealID Friends", TITAN_SOCIAL_ID, "ShowRealID");
+	--TitanPanelRightClickMenu_AddToggleVar("Show Friends", TITAN_SOCIAL_ID, "ShowFriends");
+	--TitanPanelRightClickMenu_AddToggleVar("Show Guild Members", TITAN_SOCIAL_ID, "ShowGuild");
+	TitanPanelRightClickMenu_AddSpacer();
+	TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID);
 	TitanPanelRightClickMenu_AddToggleVar("Show Label", TITAN_SOCIAL_ID, "ShowLabel");
+	--TitanPanelRightClickMenu_AddToggleLabelText(TITAN_SOCIAL_ID);
 	TitanPanelRightClickMenu_AddToggleVar("Show Memory Usage", TITAN_SOCIAL_ID, "ShowMem");
-    TitanPanelRightClickMenu_AddSpacer();
-    TitanPanelRightClickMenu_AddCommand("Hide", TITAN_SOCIAL_ID, TITAN_PANEL_MENU_FUNC_HIDE);
-  
+	TitanPanelRightClickMenu_AddSpacer();
+	TitanPanelRightClickMenu_AddCommand("Hide", TITAN_SOCIAL_ID, TITAN_PANEL_MENU_FUNC_HIDE);
+
+
+
 end
 
 ----------------------------------------------------------------------
@@ -249,9 +415,15 @@ function TitanPanelSocialButton_GetButtonText(id)
 	end
 	
 	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowLabel") ~= nil) then
-		TITAN_SOCIAL_BUTTON_LABEL = "Social: ";
+		if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildLabel") ~= nil) and (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) and (IsInGuild()) then
+			guildname, rank, rankindex = GetGuildInfo("player");
+			--tGuildName = "|cff00FF00"..guildname.."|r: ";
+			TITAN_SOCIAL_BUTTON_LABEL = guildname..": ";
+		else
+			TITAN_SOCIAL_BUTTON_LABEL = "Social: ";
+		end
 	else
-		TITAN_SOCIAL_BUTTON_LABEL = " ";
+		TITAN_SOCIAL_BUTTON_LABEL = "";
 	end
 	
 	--
@@ -352,20 +524,6 @@ function TitanPanelSocialButton_GetTooltipText()
 					clientName = "??"
 				end
 			
-			-- Class Colors
-			--	if (class == "Druid") then				classColor = "|cffff7d0a";
-			--	elseif (class == "Hunter") then			classColor = "|cffabd473";
-			--	elseif (class == "Mage") then			classColor = "|cff69ccf0";
-			--	elseif (class == "Paladin") then		classColor = "|cfff58cba";
-			--	elseif (class == "Priest") then			classColor = "|cffffffff";
-			--	elseif (class == "Rogue") then			classColor = "|cfffff569";
-			--	elseif (class == "Shaman") then			classColor = "|cff2459ff";
-			--	elseif (class == "Warlock") then		classColor = "|cff9482ca";
-			--	elseif (class == "Warrior") then		classColor = "|cffc79c6e";
-			--	elseif (class == "Death Knight") then	classColor = "|cffc41f3b";
-			--	else									classColor = "|cffCCCCCC";
-			--	end
-			
 			-- Stan Smith {SC2} ToonName 80 <AFK/DND>\t Location
 			-- Stan Smith Toonname 80 (SC2)
 			
@@ -416,22 +574,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		
 			name, level, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
 
-			-- Class Colors
-			--	if (class == "Druid") then				classColor = "|cffff7d0a";
-			--	elseif (class == "Hunter") then			classColor = "|cffabd473";
-			--	elseif (class == "Mage") then			classColor = "|cff69ccf0";
-			--	elseif (class == "Paladin") then		classColor = "|cfff58cba";
-			--	elseif (class == "Priest") then			classColor = "|cffffffff";
-			--	elseif (class == "Rogue") then			classColor = "|cfffff569";
-			--	elseif (class == "Shaman") then			classColor = "|cff2459ff";
-			--	elseif (class == "Warlock") then		classColor = "|cff9482ca";
-			--	elseif (class == "Warrior") then		classColor = "|cffc79c6e";
-			--	elseif (class == "Death Knight") then	classColor = "|cffc41f3b";
-			--	else									classColor = "|cffCCCCCC";
-			--	end
-			
 			-- Level
-			--tToolTipRichText = tTooltipRichText.."|cffFFFFFF##"..level.."|r  ";
 			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  ";
 			
 			-- Name
@@ -443,9 +586,11 @@ function TitanPanelSocialButton_GetTooltipText()
 			end
 			
 			-- Notes
-			--if(playerNote ~= "") then
-			--	tTooltipRichText = tTooltipRichText..playerNote;
-			--end
+			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote") ~= nil) then
+				if(playerNote ~= nil) then
+					tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..playerNote.."|r ";
+				end
+			end
 			
 			-- Location
 			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..area.."|r\n";
@@ -471,20 +616,6 @@ function TitanPanelSocialButton_GetTooltipText()
 		
 			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName = GetGuildRosterInfo(guildIndex);
 			
-			-- Class Colors
-			--	if (class == "Druid") then				classColor = "|cffff7d0a";
-			--	elseif (class == "Hunter") then			classColor = "|cffabd473";
-			--	elseif (class == "Mage") then			classColor = "|cff69ccf0";
-			--	elseif (class == "Paladin") then		classColor = "|cfff58cba";
-			--	elseif (class == "Priest") then			classColor = "|cffffffff";
-			--	elseif (class == "Rogue") then			classColor = "|cfffff569";
-			--	elseif (class == "Shaman") then			classColor = "|cff2459ff";
-			--	elseif (class == "Warlock") then		classColor = "|cff9482ca";
-			--	elseif (class == "Warrior") then		classColor = "|cffc79c6e";
-			--	elseif (class == "Death Knight") then	classColor = "|cffc41f3b";
-			--	else									classColor = "|cffCCCCCC";
-			--	end
-		
 			-- 80 {color=class::Playername} {<AFK>} Rank Note ONote\t Location
 			
 			-- Level
@@ -497,12 +628,17 @@ function TitanPanelSocialButton_GetTooltipText()
 			end
 			-- Rank
 			tTooltipRichText = tTooltipRichText..rank.."  ";
+			
 			-- Notes
-			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..note.."|r  "
+			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildNote") ~= nil) then
+				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..note.."|r  "
+			end
 			
 			-- Officer Notes
-			if(CanViewOfficerNote()) then
-				tTooltipRichText = tTooltipRichText.."|cffAAFFAA"..officernote.."|r  "
+			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildONote") ~= nil) then
+				if(CanViewOfficerNote()) then
+					tTooltipRichText = tTooltipRichText.."|cffAAFFAA"..officernote.."|r  "
+				end
 			end
 			
 			-- Location
