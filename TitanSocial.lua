@@ -74,7 +74,8 @@ function TitanPanelSocialButton_OnLoad(self)
 			tooltipTitle = TITAN_SOCIAL_TOOLTIP,
 			tooltipTextFunction = "TitanPanelSocialButton_GetTooltipText",
 			iconWidth = 16,
-			icon = "Interface\\FriendsFrame\\BroadcastIcon";
+			icon = "Interface\\FriendsFrame\\BroadcastIcon",
+			category = "Information",
 			controlVariables = {
 				ShowIcon = true,
 				--ShowLabelText = true,
@@ -419,7 +420,11 @@ function TitanPanelSocialButton_GetButtonText(id)
 		if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildLabel") ~= nil) and (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) and (IsInGuild()) then
 			guildname, rank, rankindex = GetGuildInfo("player");
 			--tGuildName = "|cff00FF00"..guildname.."|r: ";
-			TITAN_SOCIAL_BUTTON_LABEL = guildname..": ";
+			if(guildname ~= nil) then
+				TITAN_SOCIAL_BUTTON_LABEL = guildname..": ";
+			else
+				TITAN_SOCIAL_BUTTON_LABEL = "Loading...: ";
+			end
 		else
 			TITAN_SOCIAL_BUTTON_LABEL = "Social: ";
 		end
