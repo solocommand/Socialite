@@ -2,28 +2,36 @@
 
 TITAN_SOCIAL_MENU_TEXT = "TitanSocial"
 TITAN_SOCIAL_BUTTON_LABEL = "Social: "
-TITAN_SOCIAL_BUTTON_TEXT = "Social: "
-
 
 -- default (enUS)
 
-TITAN_SOCIAL_TOOLTIP = "Social Information"
-TITAN_SOCIAL_TOOLTIP_REALID = "RealID Friends";
-TITAN_SOCIAL_TOOLTIP_FRIENDS = "Friends";
-TITAN_SOCIAL_TOOLTIP_GUILD = "Guild Members";
+TITAN_SOCIAL_BUTTON_TITLE = "Social: "
+
+TITAN_SOCIAL_TOOLTIP = "Social"
+TITAN_SOCIAL_TOOLTIP_REALID = "RealID Friends Online:";
+TITAN_SOCIAL_TOOLTIP_FRIENDS = "Friends Online:";
+TITAN_SOCIAL_TOOLTIP_GUILD = "Guild Members Online:";
+TITAN_SOCIAL_TOOLTIP_MEM = "Memory Utilization:";
+TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Kb";
+
 TITAN_SOCIAL_MENU_REALID = "RealID";
 TITAN_SOCIAL_MENU_REALID_FRIENDS = "Show RealID Friends";
 TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Show RealID Broadcasts";
+
 TITAN_SOCIAL_MENU_FRIENDS = "Friends";
+TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Show Friends";
 TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Show Friends Note";
+
 TITAN_SOCIAL_MENU_GUILD = "Guild";
 TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Show Guild Members";
 TITAN_SOCIAL_MENU_GUILD_LABEL = "Show Guild Label";
 TITAN_SOCIAL_MENU_GUILD_NOTE = "Show Guild Note";
 TITAN_SOCIAL_MENU_GUILD_ONOTE = "Show Officer Note";
+
 TITAN_SOCIAL_MENU_LABEL = "Show Label";
 TITAN_SOCIAL_MENU_MEM = "Show Memory Usage";
 TITAN_SOCIAL_MENU_HIDE = "Hide";
+TITAN_SOCIAL_MENU_OPTIONS = "Options";
 
 
 -- frFR
@@ -32,26 +40,33 @@ if (GetLocale() == "frFR") then
 
 -- Last Update by Sasmira: 10/29/2010
 
-	TITAN_SOCIAL_MENU_TEXT = "Titan Social"  -- Work in french
-	TITAN_SOCIAL_BUTTON_LABEL = "Social: " -- dunno
-	TITAN_SOCIAL_BUTTON_TEXT = "Social: " -- dunno
+	TITAN_SOCIAL_BUTTON_TITLE = "Social: "
+
 	TITAN_SOCIAL_TOOLTIP = "Social"; -- Work  in french
-	TITAN_SOCIAL_TOOLTIP_REALID = "Amis R\195\169els"; -- Don't Work in french
-	TITAN_SOCIAL_TOOLTIP_FRIENDS = "Contacts"; -- Don't Work in french
-	TITAN_SOCIAL_TOOLTIP_GUILD = "Membres de la guilde"; -- Don't Work in french
+	TITAN_SOCIAL_TOOLTIP_REALID = "Amis R\195\169els:"; -- Don't Work in french
+	TITAN_SOCIAL_TOOLTIP_FRIENDS = "Contacts:"; -- Don't Work in french
+	TITAN_SOCIAL_TOOLTIP_GUILD = "Membres de la guilde:"; -- Don't Work in french
+	TITAN_SOCIAL_TOOLTIP_MEM = "Mémoire Utilis\195\169e:";
+	TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Ko";
+	
 	TITAN_SOCIAL_MENU_REALID = "Amis R\195\169els"; -- Don't Work in french
 	TITAN_SOCIAL_MENU_REALID_FRIENDS = "Afficher: Amis R\195\169els"; -- Don't Work in french
 	TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Afficher: Nombre d'Amis R\195\169els"; -- Don't Work in french
+	
 	TITAN_SOCIAL_MENU_FRIENDS = "Contacts"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Afficher: Contacts";
 	TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Afficher: Notes Contacts"; -- Don't Work in french
+		
 	TITAN_SOCIAL_MENU_GUILD = "Guilde"; -- Don't Work in french
 	TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Afficher: Membres de Guilde"; -- Don't Work in french
 	TITAN_SOCIAL_MENU_GUILD_LABEL = "Afficher: Nom de Guilde"; -- Don't Work in french
 	TITAN_SOCIAL_MENU_GUILD_NOTE = "Afficher: Notes de Guilde"; -- Don't Work in french
 	TITAN_SOCIAL_MENU_GUILD_ONOTE = "Afficher: Notes d'Officier"; -- Don't Work in french
+	
 	TITAN_SOCIAL_MENU_LABEL = "Afficher l'\195\169tiquette"; -- Don't Work in french
 	TITAN_SOCIAL_MENU_MEM = "Afficher: Mémoire utilis\195\169e"; -- Don't Work in french
 	TITAN_SOCIAL_MENU_HIDE = "Cacher"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_OPTIONS = "";
 	
 end
 
@@ -60,17 +75,7 @@ end
 
 if (GetLocale() == "deDE") then
 
-	--TITAN_SOCIAL_TOOLTIP = "";
-	--TITAN_SOCIAL_TOOLTIP_REALID = "";
-	--TITAN_SOCIAL_TOOLTIP_FRIENDS = "";
-	--TITAN_SOCIAL_TOOLTIP_GUILD = "";
-	--TITAN_SOCIAL_MENU_REALID = "";
-	--TITAN_SOCIAL_MENU_FRIENDS = "";
-	--TITAN_SOCIAL_MENU_GUILD = "";
-	--TITAN_SOCIAL_MENU_ICON = "";
-	--TITAN_SOCIAL_MENU_LABEL = "";
-	--TITAN_SOCIAL_MENU_MEM = "";
-	--TITAN_SOCIAL_MENU_HIDE = "Hide";
+	--
 	
 end
 
@@ -79,17 +84,7 @@ end
 
 if (GetLocale() == "esES") then
 
-	--TITAN_SOCIAL_TOOLTIP = "";
-	--TITAN_SOCIAL_TOOLTIP_REALID = "";
-	--TITAN_SOCIAL_TOOLTIP_FRIENDS = "";
-	--TITAN_SOCIAL_TOOLTIP_GUILD = "";
-	--TITAN_SOCIAL_MENU_REALID = "";
-	--TITAN_SOCIAL_MENU_FRIENDS = "";
-	--TITAN_SOCIAL_MENU_GUILD = "";
-	--TITAN_SOCIAL_MENU_ICON = "";
-	--TITAN_SOCIAL_MENU_LABEL = "";
-	--TITAN_SOCIAL_MENU_MEM = "";
-	--TITAN_SOCIAL_MENU_HIDE = "Hide";
+	--
 	
 end
 
@@ -98,17 +93,7 @@ end
 
 if (GetLocale() == "ruRU") then
 
-	--TITAN_SOCIAL_TOOLTIP = "";
-	--TITAN_SOCIAL_TOOLTIP_REALID = "";
-	--TITAN_SOCIAL_TOOLTIP_FRIENDS = "";
-	--TITAN_SOCIAL_TOOLTIP_GUILD = "";
-	--TITAN_SOCIAL_MENU_REALID = "";
-	--TITAN_SOCIAL_MENU_FRIENDS = "";
-	--TITAN_SOCIAL_MENU_GUILD = "";
-	--TITAN_SOCIAL_MENU_ICON = "";
-	--TITAN_SOCIAL_MENU_LABEL = "";
-	--TITAN_SOCIAL_MENU_MEM = "";
-	--TITAN_SOCIAL_MENU_HIDE = "Hide";
+	--
 	
 end
 
