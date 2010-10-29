@@ -30,17 +30,28 @@ TITAN_SOCIAL_MENU_HIDE = "Hide";
 
 if (GetLocale() == "frFR") then
 
-	TITAN_SOCIAL_TOOLTIP = "Information Sociale";
-	TITAN_SOCIAL_TOOLTIP_REALID = "Amis RealID";
-	TITAN_SOCIAL_TOOLTIP_FRIENDS = "Amis";
-	TITAN_SOCIAL_TOOLTIP_GUILD = "Membres de la guilde";
-	TITAN_SOCIAL_MENU_REALID = "Montrer les amis RealID";
-	TITAN_SOCIAL_MENU_FRIENDS = "Montrer les amis";
-	TITAN_SOCIAL_MENU_GUILD = "Montrer les membres de la guilde";
-	--TITAN_SOCIAL_MENU_ICON = "";
-	--TITAN_SOCIAL_MENU_LABEL = "";
-	--TITAN_SOCIAL_MENU_MEM = "";
-	--TITAN_SOCIAL_MENU_HIDE = "Hide";
+-- Last Update by Sasmira: 10/29/2010
+
+	TITAN_SOCIAL_MENU_TEXT = "Titan Social"  -- Work in french
+	TITAN_SOCIAL_BUTTON_LABEL = "Social: " -- dunno
+	TITAN_SOCIAL_BUTTON_TEXT = "Social: " -- dunno
+	TITAN_SOCIAL_TOOLTIP = "Social"; -- Work  in french
+	TITAN_SOCIAL_TOOLTIP_REALID = "Amis R\195\169els"; -- Don't Work in french
+	TITAN_SOCIAL_TOOLTIP_FRIENDS = "Contacts"; -- Don't Work in french
+	TITAN_SOCIAL_TOOLTIP_GUILD = "Membres de la guilde"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_REALID = "Amis R\195\169els"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_REALID_FRIENDS = "Afficher: Amis R\195\169els"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Afficher: Nombre d'Amis R\195\169els"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_FRIENDS = "Contacts"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Afficher: Notes Contacts"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_GUILD = "Guilde"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Afficher: Membres de Guilde"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_GUILD_LABEL = "Afficher: Nom de Guilde"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_GUILD_NOTE = "Afficher: Notes de Guilde"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_GUILD_ONOTE = "Afficher: Notes d'Officier"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_LABEL = "Afficher l'\195\169tiquette"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_MEM = "Afficher: Mémoire utilis\195\169e"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_HIDE = "Cacher"; -- Don't Work in french
 	
 end
 
