@@ -226,12 +226,12 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 	
 		-- RealID Menu
 		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "RealID" then
-			TitanPanelRightClickMenu_AddTitle("RealID Friends", _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_REALID, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
 
 			-- Show RealID Friends
 				local temptable = {TITAN_SOCIAL_ID, "ShowRealID"};
 				info = {};
-				info.text = "Show RealID Friends";
+				info.text = TITAN_SOCIAL_MENU_REALID_FRIENDS;
 				info.value = temptable;
 				info.func = function()
 					TitanPanelRightClickMenu_ToggleVar(temptable);
@@ -243,7 +243,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 			-- Show RealID Broadcasts
 				local temptable = {TITAN_SOCIAL_ID, "ShowRealIDBroadcasts"};
 				info = {};
-				info.text = "Show RealID Broadcasts";
+				info.text = TITAN_SOCIAL_MENU_REALID_BROADCASTS;
 				info.value = temptable;
 				info.func = function()
 					TitanPanelRightClickMenu_ToggleVar(temptable);
@@ -255,12 +255,12 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 		
 		-- Friends Menu
 		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "Friends" then
-			TitanPanelRightClickMenu_AddTitle("Friends", _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_FRIENDS, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
 
 			-- Show Friends
 				local temptable = {TITAN_SOCIAL_ID, "ShowFriends"};
 				info = {};
-				info.text = "Show Friends";
+				info.text = TITAN_SOCIAL_MENU_FRIENDS_SHOW;
 				info.value = temptable;
 				info.func = function()
 					TitanPanelRightClickMenu_ToggleVar(temptable);
@@ -272,7 +272,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 			-- Show Friend Notes
 			local temptable = {TITAN_SOCIAL_ID, "ShowFriendsNote"};
 				info = {};
-				info.text = "Show Friends Note";
+				info.text = TITAN_SOCIAL_MENU_FRIENDS_NOTE;
 				info.value = temptable;
 				info.func = function()
 					TitanPanelRightClickMenu_ToggleVar(temptable);
@@ -284,12 +284,12 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 		
 		-- Guild Menu
 		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "Guild" then
-			TitanPanelRightClickMenu_AddTitle("Guild Options", _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_GUILD, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
 
 			-- Show Guild Members
 				local temptable = {TITAN_SOCIAL_ID, "ShowGuild"};
 				info = {};
-				info.text = "Show Guild Members";
+				info.text = TITAN_SOCIAL_MENU_GUILD_MEMBERS;
 				info.value = temptable;
 				info.func = function()
 					TitanPanelRightClickMenu_ToggleVar(temptable);
@@ -301,7 +301,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 			-- Show Guild Name as Label
 				local temptable = {TITAN_SOCIAL_ID, "ShowGuildLabel"};
 				info = {};
-				info.text = "Show Guild Label";
+				info.text = TITAN_SOCIAL_MENU_GUILD_LABEL;
 				info.value = temptable;
 				info.func = function()
 					TitanPanelRightClickMenu_ToggleVar(temptable);
@@ -313,7 +313,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 			-- Show Guild Note
 				local temptable = {TITAN_SOCIAL_ID, "ShowGuildNote"};
 				info = {};
-				info.text = "Show Guild Note";
+				info.text = TITAN_SOCIAL_MENU_GUILD_NOTE;
 				info.value = temptable;
 				info.func = function()
 					TitanPanelRightClickMenu_ToggleVar(temptable);
@@ -325,7 +325,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 			-- Show Officer Note
 				local temptable = {TITAN_SOCIAL_ID, "ShowGuildONote"};
 				info = {};
-				info.text = "Show Officer Note";
+				info.text = TITAN_SOCIAL_MENU_GUILD_ONOTE;
 				info.value = temptable;
 				info.func = function()
 					TitanPanelRightClickMenu_ToggleVar(temptable);
@@ -336,7 +336,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 		end
 		
 		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "Options" then
-			TitanPanelRightClickMenu_AddTitle("Options", _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_OPTIONS, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
 		end
 		
 		return
@@ -349,35 +349,31 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 	
 	-- RealID Menu
 		info={};
-		info.text = "RealID";
+		info.text = TITAN_SOCIAL_MENU_REALID;
 		info.value = "RealID";
 		info.hasArrow = 1;
 		UIDropDownMenu_AddButton(info);
 	
 	-- Friends Menu
 		info = {};
-		info.text = "Friends";
+		info.text = TITAN_SOCIAL_MENU_FRIENDS;
 		info.value = "Friends";
 		info.hasArrow = 1;
 		UIDropDownMenu_AddButton(info);
 		
 	-- Guild Menu
 		info = {};
-		info.text = "Guild";
+		info.text = TITAN_SOCIAL_MENU_GUILD;
 		info.value = "Guild";
 		info.hasArrow = 1;
 		UIDropDownMenu_AddButton(info);
 	
-	--TitanPanelRightClickMenu_AddToggleVar("Show RealID Friends", TITAN_SOCIAL_ID, "ShowRealID");
-	--TitanPanelRightClickMenu_AddToggleVar("Show Friends", TITAN_SOCIAL_ID, "ShowFriends");
-	--TitanPanelRightClickMenu_AddToggleVar("Show Guild Members", TITAN_SOCIAL_ID, "ShowGuild");
 	TitanPanelRightClickMenu_AddSpacer();
 	TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID);
-	TitanPanelRightClickMenu_AddToggleVar("Show Label", TITAN_SOCIAL_ID, "ShowLabel");
-	--TitanPanelRightClickMenu_AddToggleLabelText(TITAN_SOCIAL_ID);
-	TitanPanelRightClickMenu_AddToggleVar("Show Memory Usage", TITAN_SOCIAL_ID, "ShowMem");
+	TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_LABEL, TITAN_SOCIAL_ID, "ShowLabel");
+	TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_MEM, TITAN_SOCIAL_ID, "ShowMem");
 	TitanPanelRightClickMenu_AddSpacer();
-	TitanPanelRightClickMenu_AddCommand("Hide", TITAN_SOCIAL_ID, TITAN_PANEL_MENU_FUNC_HIDE);
+	TitanPanelRightClickMenu_AddCommand(TITAN_SOCIAL_MENU_HIDE, TITAN_SOCIAL_ID, TITAN_PANEL_MENU_FUNC_HIDE);
 
 
 
@@ -423,13 +419,13 @@ function TitanPanelSocialButton_GetButtonText(id)
 			if(guildname ~= nil) then
 				TITAN_SOCIAL_BUTTON_LABEL = guildname..": ";
 			else
-				TITAN_SOCIAL_BUTTON_LABEL = "Loading...: ";
+				TITAN_SOCIAL_BUTTON_LABEL = "...: ";
 			end
 		else
-			TITAN_SOCIAL_BUTTON_LABEL = "Social: ";
+			TITAN_SOCIAL_BUTTON_LABEL = TITAN_SOCIAL_BUTTON_TITLE;
 		end
 	else
-		TITAN_SOCIAL_BUTTON_LABEL = "";
+		TITAN_SOCIAL_BUTTON_LABEL = " ";
 	end
 	
 	--
@@ -505,7 +501,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		iRealIDTotal, iRealIDOnline = BNGetNumFriends();
 		--iRealIDOnline  = "|cff00A2E8"..iRealIDOnline.."|r";
 
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("RealID Friends Online:").."\t".."|cff00A2E8"..iRealIDOnline.."|r"..TitanUtils_GetNormalText("/"..iRealIDTotal).."\n"
+		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REALID).."\t".."|cff00A2E8"..iRealIDOnline.."|r"..TitanUtils_GetNormalText("/"..iRealIDTotal).."\n"
 		
 		for friendIndex=1, iRealIDOnline do
 
@@ -576,7 +572,7 @@ function TitanPanelSocialButton_GetTooltipText()
 	
 		iFriendsTotal, iFriendsOnline = GetNumFriends();
 	
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("Friends Online:").."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
+		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_FRIENDS).."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
 		
 		for friendIndex=1, iFriendsOnline do
 		
@@ -621,7 +617,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		iGuildTotal, iGuildOnline = GetNumGuildMembers();
 		--iGuildOnline   = "|cff00FF00"..iGuildOnline.."|r";
 		
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText("Guild Members Online:").."\t".."|cff00FF00"..iGuildOnline.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"
+		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_GUILD).."\t".."|cff00FF00"..iGuildOnline.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"
 		
 		for guildIndex=1, iGuildOnline do
 		
@@ -667,7 +663,7 @@ function TitanPanelSocialButton_GetTooltipText()
 	end
 	
 	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowMem") ~=nil) then
-		tTooltipRichText = tTooltipRichText.." \nTitanSocial Memory Utilization:\t|cff00FF00"..floor(GetAddOnMemoryUsage( "TitanSocial")).." Kb|r";
+		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_MEM).."\t|cff00FF00"..floor(GetAddOnMemoryUsage("TitanSocial")).." "..TITAN_SOCIAL_TOOLTIP_MEM_UNIT.."|r";
 	end
 	
 	return tTooltipRichText;
