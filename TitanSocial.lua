@@ -11,7 +11,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1b3";
+	TITAN_SOCIAL_VERSION = "4.0.1r4";
 	TITAN_NIL = false;
 	
 -- Update frequency
@@ -601,7 +601,10 @@ function TitanPanelSocialButton_GetTooltipText()
 			end
 			
 			-- Location
-			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..area.."|r\n";
+			--tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..area.."|r\n";
+			if (area ~= nil) then 
+				tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..area.."|r\n" 
+			end 
 		
 		end
 	end
@@ -650,7 +653,9 @@ function TitanPanelSocialButton_GetTooltipText()
 			end
 			
 			-- Location
-			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..zone.."|r\n"			
+			if (zone ~= nil) then 
+				tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..zone.."|r\n"			
+			end
 			
 		end
 		
