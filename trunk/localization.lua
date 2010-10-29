@@ -75,7 +75,35 @@ end
 
 if (GetLocale() == "deDE") then
 
-	--
+-- Last Update by solocommand: 10/29/2010
+
+	--TITAN_SOCIAL_BUTTON_TITLE = "";
+
+	--TITAN_SOCIAL_TOOLTIP = "";
+	TITAN_SOCIAL_TOOLTIP_REALID = "Kontakte Freundschaftssystem:";
+	TITAN_SOCIAL_TOOLTIP_FRIENDS = "Kontakte:";
+	--TITAN_SOCIAL_TOOLTIP_GUILD = "Gilde Members:";
+	TITAN_SOCIAL_TOOLTIP_MEM = "Speicher Verbrauch:";
+	TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "KB";
+	
+	TITAN_SOCIAL_MENU_REALID = "Freundschaftssystem";
+	TITAN_SOCIAL_MENU_REALID_FRIENDS = "Ziege Kontakte Freundschaftssystem";
+	TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Ziege Kontakte Statusmeldungen";
+	
+	TITAN_SOCIAL_MENU_FRIENDS = "Kontakte";
+	TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Zeige Kontakte";
+	TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Zeige Notiz Kontakte";
+	
+	TITAN_SOCIAL_MENU_GUILD = "Gilde";
+	--TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Zeige Members Gilde";
+	TITAN_SOCIAL_MENU_GUILD_LABEL = "Ziege Gildename";
+	--TITAN_SOCIAL_MENU_GUILD_NOTE = "Ziege Member Notiz";
+	--TITAN_SOCIAL_MENU_GUILD_ONOTE = "Ziege Officer Notiz";
+	
+	--TITAN_SOCIAL_MENU_LABEL = "Ziege Label";
+	TITAN_SOCIAL_MENU_MEM = "Zeige Speicher Verbrauch";
+	TITAN_SOCIAL_MENU_HIDE = "Ausblenden";
+	TITAN_SOCIAL_MENU_OPTIONS = "Optionen";
 	
 end
 
