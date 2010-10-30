@@ -38,35 +38,35 @@ TITAN_SOCIAL_MENU_OPTIONS = "Options";
 
 if (GetLocale() == "frFR") then
 
--- Last Update by Sasmira: 10/29/2010
+-- Last Update by Sasmira: 10/30/2010
 
 	TITAN_SOCIAL_BUTTON_TITLE = "Social: "
 
-	TITAN_SOCIAL_TOOLTIP = "Social"; -- Work  in french
-	TITAN_SOCIAL_TOOLTIP_REALID = "Amis R\195\169els:"; -- Don't Work in french
-	TITAN_SOCIAL_TOOLTIP_FRIENDS = "Contacts:"; -- Don't Work in french
-	TITAN_SOCIAL_TOOLTIP_GUILD = "Membres de la guilde:"; -- Don't Work in french
+	TITAN_SOCIAL_TOOLTIP = "Social";
+	TITAN_SOCIAL_TOOLTIP_REALID = "Amis R\195\169els:";
+	TITAN_SOCIAL_TOOLTIP_FRIENDS = "Contacts:";
+	TITAN_SOCIAL_TOOLTIP_GUILD = "Membres de la guilde:";
 	TITAN_SOCIAL_TOOLTIP_MEM = "Mémoire Utilis\195\169e:";
 	TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Ko";
 	
-	TITAN_SOCIAL_MENU_REALID = "Amis R\195\169els"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_REALID_FRIENDS = "Afficher: Amis R\195\169els"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Afficher: Nombre d'Amis R\195\169els"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_REALID = "Amis R\195\169els";
+	TITAN_SOCIAL_MENU_REALID_FRIENDS = "Afficher: Amis R\195\169els";
+	TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Afficher: Nombre d'Amis R\195\169els";
 	
-	TITAN_SOCIAL_MENU_FRIENDS = "Contacts"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_FRIENDS = "Contacts";
 	TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Afficher: Contacts";
-	TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Afficher: Notes Contacts"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Afficher: Notes Contacts";
 		
-	TITAN_SOCIAL_MENU_GUILD = "Guilde"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Afficher: Membres de Guilde"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_GUILD_LABEL = "Afficher: Nom de Guilde"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_GUILD_NOTE = "Afficher: Notes de Guilde"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_GUILD_ONOTE = "Afficher: Notes d'Officier"; -- Don't Work in french
+	TITAN_SOCIAL_MENU_GUILD = "Guilde";
+	TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Afficher: Membres de Guilde";
+	TITAN_SOCIAL_MENU_GUILD_LABEL = "Afficher: Nom de Guilde";
+	TITAN_SOCIAL_MENU_GUILD_NOTE = "Afficher: Notes de Guilde";
+	TITAN_SOCIAL_MENU_GUILD_ONOTE = "Afficher: Notes d'Officier";
 	
-	TITAN_SOCIAL_MENU_LABEL = "Afficher l'\195\169tiquette"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_MEM = "Afficher: Mémoire utilis\195\169e"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_HIDE = "Cacher"; -- Don't Work in french
-	TITAN_SOCIAL_MENU_OPTIONS = "";
+	TITAN_SOCIAL_MENU_LABEL = "Afficher le titre";
+	TITAN_SOCIAL_MENU_MEM = "Afficher: Mémoire utilis\195\169e";
+	TITAN_SOCIAL_MENU_HIDE = "Cacher";
+	TITAN_SOCIAL_MENU_OPTIONS = "Options";
 	
 end
 
