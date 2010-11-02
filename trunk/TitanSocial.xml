@@ -18,7 +18,7 @@
 						TitanPanelSocialButton_OnUpdate(self, elapsed);
 					</OnUpdate>
 					<OnEnter>
-						TitanPanelSocialButton_OnEnter();
+						TitanPanelSocialButton_OnEnter(self);
 						TitanPanelButton_OnEnter(self);
 					</OnEnter>	
 					<OnClick>
