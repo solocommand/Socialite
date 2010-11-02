@@ -11,7 +11,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1r4";
+	TITAN_SOCIAL_VERSION = "4.0.1r5";
 	TITAN_NIL = false;
 	
 -- Update frequency
@@ -151,10 +151,10 @@ function TitanPanelSocialButton_OnEvent(self, event, ...)
 end
 
 ----------------------------------------------------------------------
--- TitanPanelSocialButton_OnEnter()
+-- TitanPanelSocialButton_OnEnter(self)
 ----------------------------------------------------------------------
 
-function TitanPanelSocialButton_OnEnter()
+function TitanPanelSocialButton_OnEnter(self)
 
 	-- If in a guild, steal roster update. If not, ignore and update anyway
 	if (IsInGuild()) then	
@@ -165,7 +165,7 @@ function TitanPanelSocialButton_OnEnter()
 
 	-- Update Titan button label and tooltip
 	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID);	
-	TitanPanelButton_UpdateTooltip(this);
+	TitanPanelButton_UpdateTooltip(self);
 end
 
 ----------------------------------------------------------------------
