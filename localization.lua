@@ -108,6 +108,40 @@ if (GetLocale() == "deDE") then
 end
 
 
+-- zhTW
+
+if (GetLocale() == "zhTW") then
+
+--TITAN_SOCIAL_BUTTON_TITLE = "Social: "
+
+--TITAN_SOCIAL_TOOLTIP = "Social"
+TITAN_SOCIAL_TOOLTIP_REALID = "在線RealID:";
+TITAN_SOCIAL_TOOLTIP_FRIENDS = "在線好友:";
+TITAN_SOCIAL_TOOLTIP_GUILD = "在線公會成員:";
+TITAN_SOCIAL_TOOLTIP_MEM = "記憶體使用:";
+--TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Kb";
+
+TITAN_SOCIAL_MENU_REALID = "RealID";
+TITAN_SOCIAL_MENU_REALID_FRIENDS = "顯示RealID";
+TITAN_SOCIAL_MENU_REALID_BROADCASTS = "顯示RealID廣播";
+
+TITAN_SOCIAL_MENU_FRIENDS = "好友";
+TITAN_SOCIAL_MENU_FRIENDS_SHOW = "顯示好友";
+TITAN_SOCIAL_MENU_FRIENDS_NOTE = "顯示好友註記";
+
+TITAN_SOCIAL_MENU_GUILD = "公會";
+TITAN_SOCIAL_MENU_GUILD_MEMBERS = "顯示公會成員";
+TITAN_SOCIAL_MENU_GUILD_LABEL = "顯示公會會階";
+TITAN_SOCIAL_MENU_GUILD_NOTE = "顯示公會註記";
+TITAN_SOCIAL_MENU_GUILD_ONOTE = "顯示公會幹部註記";
+
+TITAN_SOCIAL_MENU_LABEL = "顯示標籤";
+TITAN_SOCIAL_MENU_MEM = "顯示記憶體使用";
+TITAN_SOCIAL_MENU_HIDE = "隱藏";
+TITAN_SOCIAL_MENU_OPTIONS = "選項";
+
+end
+
 -- esES
 
 if (GetLocale() == "esES") then
@@ -211,4 +245,17 @@ TITAN_SOCIAL_CLASSINDEX = {
 	["Чернокнижница"] = 8,
 	["Воин"] = 9,
 	["Рыцарь смерти"] = 10,
+	
+	-- zhTW
+    ["德魯伊"] = 1,
+    ["獵人"] = 2,
+    ["法師"] = 3,
+    ["聖騎士"] = 4,
+    ["牧師"] = 5,
+    ["盜賊"] = 6,
+    ["薩滿"] = 7,
+    ["術士"] = 8,
+    ["戰士"] = 9,
+    ["死亡騎士"] = 10,
+	
 };
