@@ -11,7 +11,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.1r5";
+	TITAN_SOCIAL_VERSION = "4.0.3b10";
 	TITAN_NIL = false;
 	
 -- Update frequency
@@ -35,7 +35,7 @@
 -- TitanPanelSocial_ColorText(text, className)
 ----------------------------------------------------------------------
 
-function TitanPanelGuildButton_ColorText(text, className)
+function TitanPanelSocialButton_ColorText(text, className)
 	
 	-- Class color index for localization.
 	local TITAN_SOCIAL_CLASSCOLORINDEX = {
@@ -51,7 +51,10 @@ function TitanPanelGuildButton_ColorText(text, className)
 		[10] = "|cffc41f3b",
 	}
 	local index = TITAN_SOCIAL_CLASSINDEX[className];
-	local coloredText = TITAN_SOCIAL_CLASSCOLORINDEX[index]..text.."|r";
+	if(className ~= "") then
+		local coloredText = TITAN_SOCIAL_CLASSCOLORINDEX[index]..text.."|r";
+	else
+		local coloredText = "|cffCCCCCC"..text.."|r"
 	return coloredText;
 
 end
@@ -537,11 +540,11 @@ function TitanPanelSocialButton_GetTooltipText()
 				-- Character Level
 				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
 				-- Character
-				tTooltipRichText = tTooltipRichText..TitanPanelGuildButton_ColorText(toonName, className).." ";
+				tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(toonName, className).." ";
 			end
 			
 			-- Character
-			--tTooltipRichText = tTooltipRichText..TitanPanelGuildButton_ColorText(toonName, className).." ";
+			--tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(toonName, className).." ";
 			
 			-- Full Name
 			tTooltipRichText = tTooltipRichText.."[|cff00A2E8"..givenName.." "..surname.."|r]  "
@@ -582,7 +585,7 @@ function TitanPanelSocialButton_GetTooltipText()
 			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  ";
 			
 			-- Name
-			tTooltipRichText = tTooltipRichText..TitanPanelGuildButton_ColorText(name, class).." ";
+			tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(name, class).." ";
 
 			-- Status
 			if (playerStatus ~= "") then
@@ -628,7 +631,7 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- Level
 			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
 			-- Name
-			tTooltipRichText = tTooltipRichText..TitanPanelGuildButton_ColorText(name, class).." ";
+			tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(name, class).." ";
 			-- Status
 			if (playerStatus ~= "") then
 				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..playerStatus.."|r  ";
