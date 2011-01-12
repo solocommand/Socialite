@@ -55,6 +55,7 @@ function TitanPanelSocialButton_ColorText(text, className)
 		local coloredText = TITAN_SOCIAL_CLASSCOLORINDEX[index]..text.."|r";
 	else
 		local coloredText = "|cffCCCCCC"..text.."|r"
+	end
 	return coloredText;
 
 end
@@ -88,17 +89,17 @@ function TitanPanelSocialButton_OnLoad(self)
 			},
 			savedVariables = {       
 				ShowRealID = 1,
-				ShowRealIDBroadcasts = 0,
+				ShowRealIDBroadcasts = false,
 				ShowFriends = 1,
 				ShowFriendsNote = 1,
 				ShowGuild = 1,
-				ShowGuildLabel = 0,
+				ShowGuildLabel = false,
 				ShowGuildNote = 1,
 				ShowGuildONote = 1,
 				ShowIcon = 1,
 				ShowLabel = 1,
 				ShowTooltipTotals = 1,
-				ShowMem = 0,
+				ShowMem = false,
 			  }
 		};
 
