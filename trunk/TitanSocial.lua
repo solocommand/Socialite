@@ -36,10 +36,11 @@
 ----------------------------------------------------------------------
 
 function TitanPanelSocialButton_ColorText(text, className)
-	local index, coloredText=nil
+	local classIndex, coloredText=nil
 	
 	-- Class color index for localization.
 	local TITAN_SOCIAL_CLASSCOLORINDEX = {
+		[0] = "|cffcccccc",
 		[1] = "|cffff7d0a",
 		[2] = "|cffabd473",
 		[3] = "|cff69ccf0",
@@ -51,12 +52,18 @@ function TitanPanelSocialButton_ColorText(text, className)
 		[9] = "|cffc79c6e",
 		[10] = "|cffc41f3b",
 	}
-
-	-- Get index value for localized class name
-	index = TITAN_SOCIAL_CLASSINDEX[className]
 	
-	-- return fancy colored text
-	return TITAN_SOCIAL_CLASSCOLORINDEX[index]..text.."|r"
+	if(className=="") then
+		-- No class name (how is this possible D:)
+		classIndex = 0
+	else
+		-- Get index value for localized class name
+		classIndex = TITAN_SOCIAL_CLASSINDEX[className]
+	end
+	
+	coloredText = TITAN_SOCIAL_CLASSCOLORINDEX[classIndex]..text.."|r"
+	
+	return coloredText
 	
 end
 
