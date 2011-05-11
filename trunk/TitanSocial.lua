@@ -632,7 +632,12 @@ function TitanPanelSocialButton_GetTooltipText()
 		
 		for guildIndex=1, iGuildOnline do
 		
-			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName = GetGuildRosterInfo(guildIndex);
+			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(guildIndex);
+			
+			if isMobile then
+				zone = REMOTE_CHAT
+				name = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:14:14:0:0:16:16:0:16:0:16:73:177:73a|t"..name
+			end
 			
 			-- 80 {color=class::Playername} {<AFK>} Rank Note ONote\t Location
 			
