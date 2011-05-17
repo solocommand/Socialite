@@ -11,7 +11,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.0.3r5";
+	TITAN_SOCIAL_VERSION = "4.1.0b11";
 	TITAN_NIL = false;
 	
 -- Update frequency

@@ -6,7 +6,7 @@ TITAN_SOCIAL_BUTTON_LABEL = "Social: "
 -- default (enUS)
 
 TITAN_SOCIAL_BUTTON_TITLE = "Social: "
-	REMOTE_CHAT = "Remote Chat"
+REMOTE_CHAT = "Remote Chat"
 
 TITAN_SOCIAL_TOOLTIP = "Social"
 TITAN_SOCIAL_TOOLTIP_REALID = "RealID Friends Online:";
