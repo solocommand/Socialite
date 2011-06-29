@@ -11,7 +11,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.1.0r6";
+	TITAN_SOCIAL_VERSION = "4.2.0r8";
 	TITAN_NIL = false;
 	
 -- Update frequency
@@ -517,7 +517,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		for friendIndex=1, iRealIDOnline do
 
 			presenceID, givenName, surname, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isFriend, unknown = BNGetFriendInfo(friendIndex)
-			unknowntoon, toonName, client, realmName, faction, race, className, unknown, zoneName, level, gameText, broadcastText, broadcastTime = BNGetToonInfo(presenceID)
+			unknowntoon, toonName, client, realmName, realmID, faction, race, className, unknown, zoneName, level, gameText, broadcastText, broadcastTime = BNGetToonInfo(presenceID)
 
 			-- playerStatus
 				if (isAFK) then
@@ -588,7 +588,12 @@ function TitanPanelSocialButton_GetTooltipText()
 		for friendIndex=1, iFriendsOnline do
 		
 			name, level, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
-
+			
+			-- toonName Fix
+				if (name == "") then
+					name = "Unknown"
+				end
+			
 			-- Level
 			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  ";
 			
@@ -633,6 +638,11 @@ function TitanPanelSocialButton_GetTooltipText()
 		for guildIndex=1, iGuildOnline do
 		
 			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(guildIndex);
+			
+			-- toonName Fix
+				if (name=="") then
+					name = "Unknown"
+				end
 			
 			if isMobile then
 				zone = REMOTE_CHAT
