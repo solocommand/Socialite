@@ -561,8 +561,6 @@ function TitanPanelSocialButton_GetTooltipText()
 			if (playerStatus ~= 0) then
                   if (playerStatus == 1) then
                     tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<AFK>".."|r  ";
-                  else
-                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<DND>".."|r  ";
                   end
 	           end
 			
@@ -608,8 +606,6 @@ function TitanPanelSocialButton_GetTooltipText()
 			if (playerStatus ~= 0) then
                   if (playerStatus == 1) then
                     tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<AFK>".."|r  ";
-                  else
-                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<DND>".."|r  ";
                   end
 	           end
 			
