@@ -558,9 +558,13 @@ function TitanPanelSocialButton_GetTooltipText()
 			tTooltipRichText = tTooltipRichText.."[|cff00A2E8"..givenName.." "..surname.."|r]  "
 			
 			-- Status
-			if (playerStatus ~= "") then
-				tTooltipRichText = tTooltipRichText.."<"..playerStatus..">"
-			end
+			if (playerStatus ~= 0) then
+                  if (playerStatus == 1) then
+                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<AFK>".."|r  ";
+                  else
+                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<DND>".."|r  ";
+                  end
+	           end
 			
 			-- Broadcast
 			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDBroadcasts") ~= nil) then
@@ -601,9 +605,13 @@ function TitanPanelSocialButton_GetTooltipText()
 			tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(name, class).." ";
 
 			-- Status
-			if (playerStatus ~= "") then
-				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..playerStatus.."|r ";
-			end
+			if (playerStatus ~= 0) then
+                  if (playerStatus == 1) then
+                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<AFK>".."|r  ";
+                  else
+                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<DND>".."|r  ";
+                  end
+	           end
 			
 			-- Notes
 			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote") ~= nil) then
@@ -655,10 +663,16 @@ function TitanPanelSocialButton_GetTooltipText()
 			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
 			-- Name
 			tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(name, class).." ";
+
 			-- Status
-			if (playerStatus ~= "") then
-				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..playerStatus.."|r  ";
-			end
+			if (playerStatus ~= 0) then
+                  if (playerStatus == 1) then
+                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<AFK>".."|r  ";
+                  else
+                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<DND>".."|r  ";
+                  end
+	           end
+
 			-- Rank
 			tTooltipRichText = tTooltipRichText..rank.."  ";
 			
