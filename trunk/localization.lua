@@ -88,8 +88,8 @@ if (GetLocale() == "deDE") then
 	TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "KB";
 	
 	TITAN_SOCIAL_MENU_REALID = "Freundschaftssystem";
-	TITAN_SOCIAL_MENU_REALID_FRIENDS = "Ziege Kontakte Freundschaftssystem";
-	TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Ziege Kontakte Statusmeldungen";
+	TITAN_SOCIAL_MENU_REALID_FRIENDS = "Zeige Kontakte Freundschaftssystem";
+	TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Zeige Kontakte Statusmeldungen";
 	
 	TITAN_SOCIAL_MENU_FRIENDS = "Kontakte";
 	TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Zeige Kontakte";
@@ -97,11 +97,11 @@ if (GetLocale() == "deDE") then
 	
 	TITAN_SOCIAL_MENU_GUILD = "Gilde";
 	--TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Zeige Members Gilde";
-	TITAN_SOCIAL_MENU_GUILD_LABEL = "Ziege Gildename";
-	--TITAN_SOCIAL_MENU_GUILD_NOTE = "Ziege Member Notiz";
-	--TITAN_SOCIAL_MENU_GUILD_ONOTE = "Ziege Officer Notiz";
+	TITAN_SOCIAL_MENU_GUILD_LABEL = "Zeige Gildename";
+	--TITAN_SOCIAL_MENU_GUILD_NOTE = "Zeige Member Notiz";
+	--TITAN_SOCIAL_MENU_GUILD_ONOTE = "Zeige Officer Notiz";
 	
-	--TITAN_SOCIAL_MENU_LABEL = "Ziege Label";
+	--TITAN_SOCIAL_MENU_LABEL = "Zeige Label";
 	TITAN_SOCIAL_MENU_MEM = "Zeige Speicher Verbrauch";
 	TITAN_SOCIAL_MENU_HIDE = "Ausblenden";
 	TITAN_SOCIAL_MENU_OPTIONS = "Optionen";
