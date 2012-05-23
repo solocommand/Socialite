@@ -686,7 +686,9 @@ function TitanPanelSocialButton_GetTooltipText()
 			
 			-- Location
 			if (zone ~= nil) then 
-				tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..zone.."|r\n"			
+				tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..zone.."|r\n"
+			else
+				tTooltipRichText = "\n"
 			end
 			
 		end
