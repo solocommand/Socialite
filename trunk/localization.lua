@@ -156,7 +156,35 @@ end
 
 if (GetLocale() == "ruRU") then
 
-	--
+  --ruRU by Вишмастер@Термоштепсель 26.06.12
+
+  TITAN_SOCIAL_BUTTON_TITLE = "Social: "
+
+  TITAN_SOCIAL_TOOLTIP = "Social"
+  TITAN_SOCIAL_TOOLTIP_REALID = "RealID друзья онлайн:";
+  TITAN_SOCIAL_TOOLTIP_FRIENDS = "Друзья онлайн:";
+  TITAN_SOCIAL_TOOLTIP_GUILD = "Члены гильдии онлайн:";
+  TITAN_SOCIAL_TOOLTIP_MEM = "Использование памяти:";
+  TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "кб";
+
+  TITAN_SOCIAL_MENU_REALID = "RealID";
+  TITAN_SOCIAL_MENU_REALID_FRIENDS = "Показывать RealID друзей";
+  TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Показывать RealID уведомления";
+
+  TITAN_SOCIAL_MENU_FRIENDS = "Друзья";
+  TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Показывать друзей";
+  TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Показывать заметки друзей";
+
+  TITAN_SOCIAL_MENU_GUILD = "Гильдия";
+  TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Показывать членов гильдии";
+  TITAN_SOCIAL_MENU_GUILD_LABEL = "Показывать название гильдии";
+  TITAN_SOCIAL_MENU_GUILD_NOTE = "Показывать гильдийские заметки";
+  TITAN_SOCIAL_MENU_GUILD_ONOTE = "Показывать офицерские заметки";
+
+  TITAN_SOCIAL_MENU_LABEL = "Текст ярлыка";
+  TITAN_SOCIAL_MENU_MEM = "Показывать исп. памяти";
+  TITAN_SOCIAL_MENU_HIDE = "Скрыть";
+  TITAN_SOCIAL_MENU_OPTIONS = "Опции";
 	
 end
 
