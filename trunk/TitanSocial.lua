@@ -11,7 +11,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "4.3.4r11";
+	TITAN_SOCIAL_VERSION = "5.0.4r11";
 	TITAN_NIL = false;
 	
 -- Update frequency
@@ -516,7 +516,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		
 		for friendIndex=1, iRealIDOnline do
 
-			presenceID, givenName, surname, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isFriend, unknown = BNGetFriendInfo(friendIndex)
+			presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isFriend, unknown = BNGetFriendInfo(friendIndex)
 			unknowntoon, toonName, client, realmName, realmID, faction, race, className, unknown, zoneName, level, gameText, broadcastText, broadcastTime = BNGetToonInfo(presenceID)
 
 			-- playerStatus
@@ -555,7 +555,13 @@ function TitanPanelSocialButton_GetTooltipText()
 			--tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(toonName, className).." ";
 			
 			-- Full Name
-			tTooltipRichText = tTooltipRichText.."[|cff00A2E8"..givenName.." "..surname.."|r]  "
+			local fullName
+			if isBattleTagPresence then
+				fullName = battleTag
+			else
+				fullName = presenceName
+			end
+			tTooltipRichText = tTooltipRichText.."[|cff00A2E8"..fullName.."|r]  "
 			
 			-- Status
 			if (playerStatus ~= 0) then
