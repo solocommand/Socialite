@@ -188,6 +188,42 @@ if (GetLocale() == "ruRU") then
 	
 end
 
+
+-- ptBR
+
+if (GetLocale() == "ptBR") then
+
+  TITAN_SOCIAL_BUTTON_TITLE = "Social: "
+
+  TITAN_SOCIAL_TOOLTIP = "Social";
+  TITAN_SOCIAL_TOOLTIP_REALID = "Amigos com RealID Online:";
+  TITAN_SOCIAL_TOOLTIP_FRIENDS = "Amigos Online:";
+  TITAN_SOCIAL_TOOLTIP_GUILD = "Membros da Guilda Online:";
+  TITAN_SOCIAL_TOOLTIP_MEM = "Utilização de Memória:";
+  TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Kb";
+    
+  TITAN_SOCIAL_MENU_REALID = "RealID";
+  TITAN_SOCIAL_MENU_REALID_FRIENDS = "Mostrar Amigos com RealID";
+  TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Mostrar Transmissões de RealID";
+    
+  TITAN_SOCIAL_MENU_FRIENDS = "Amigos";
+  TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Mostrar Amigos";
+  TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Mostrar Anotação dos Amigos";
+        
+  TITAN_SOCIAL_MENU_GUILD = "Guilda";
+  TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Mostrar Membros da Guilda";
+  TITAN_SOCIAL_MENU_GUILD_LABEL = "Mostrar Nome da Guilda";
+  TITAN_SOCIAL_MENU_GUILD_NOTE = "Mostrar Notas dos Membros da Guilda";
+  TITAN_SOCIAL_MENU_GUILD_ONOTE = "Mostrar Nota Oficial";
+    
+  TITAN_SOCIAL_MENU_LABEL = "Exibir Título";
+  TITAN_SOCIAL_MENU_MEM = "Mostrar Utilização de Memória";
+  TITAN_SOCIAL_MENU_HIDE = "Esconder";
+  TITAN_SOCIAL_MENU_OPTIONS = "Opções";
+    
+end
+
+
 -- CLASSINDEX via TitanGuild
 TITAN_SOCIAL_CLASSINDEX = {
 	--enUS
@@ -276,15 +312,36 @@ TITAN_SOCIAL_CLASSINDEX = {
 	["Рыцарь смерти"] = 10,
 	
 	-- zhTW
-    ["德魯伊"] = 1,
-    ["獵人"] = 2,
-    ["法師"] = 3,
-    ["聖騎士"] = 4,
-    ["牧師"] = 5,
-    ["盜賊"] = 6,
-    ["薩滿"] = 7,
-    ["術士"] = 8,
-    ["戰士"] = 9,
-    ["死亡騎士"] = 10,
+  ["德魯伊"] = 1,
+  ["獵人"] = 2,
+  ["法師"] = 3,
+  ["聖騎士"] = 4,
+  ["牧師"] = 5,
+  ["盜賊"] = 6,
+  ["薩滿"] = 7,
+  ["術士"] = 8,
+  ["戰士"] = 9,
+  ["死亡騎士"] = 10,
+
+  -- ptBR
+  ["Druida"]              = 1,
+  ["Druidesa"]            = 1,
+  ["Caçador"]             = 2,
+  ["Caçadora"]            = 2,
+  ["Mago"]                = 3,
+  ["Maga"]                = 3,
+  ["Paladino"]            = 4,
+  ["Paladina"]            = 4,
+  ["Sacerdote"]           = 5,
+  ["Sacerdotisa"]         = 5,
+  ["Ladino"]              = 6,
+  ["Ladina"]              = 6,
+  ["Xamã"]                = 7,
+  ["Bruxo"]               = 8,
+  ["Bruxa"]               = 8,
+  ["Guerreiro"]           = 9,
+  ["Guerreira"]           = 9,
+  ["Cavaleiro da Morte"]  = 10,
+  ["Cavaleira da Morte"]  = 10,
 	
 };
