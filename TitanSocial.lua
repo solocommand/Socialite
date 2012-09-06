@@ -11,7 +11,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "5.0.4r11";
+	TITAN_SOCIAL_VERSION = "5.0r12";
 	TITAN_NIL = false;
 	
 -- Update frequency
@@ -102,6 +102,7 @@ function TitanPanelSocialButton_OnLoad(self)
 				ShowGuild = 1,
 				ShowGuildLabel = false,
 				ShowGuildNote = 1,
+				ShowSplitRemoteChat = 1,
 				ShowGuildONote = 1,
 				ShowIcon = 1,
 				ShowLabel = 1,
@@ -250,7 +251,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID");
 				info.keepShowOnClick = 1;
 				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
-			
+				
 			-- Show RealID Broadcasts
 				local temptable = {TITAN_SOCIAL_ID, "ShowRealIDBroadcasts"};
 				info = {};
@@ -344,6 +345,19 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildONote");
 				info.keepShowOnClick = 1;
 				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+				
+      -- Show Separate Remote Chat
+				local temptable = {TITAN_SOCIAL_ID, "ShowSplitRemoteChat"};
+				info = {};
+				info.text = TITAN_SOCIAL_MENU_GUILD_REMOTE_CHAT;
+				info.valeu = temptable;
+				info.func = function()
+					TitanPanelRightClickMenu_ToggleVar(temptable);
+					end
+				info.checked = TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat")
+				info.keepShowOnClick = 1;
+				UIDropDownMenu_AddButton(info, _G["UIDROPDOWNMENU_MENU_LEVEL"]);
+				
 		end
 		
 		if _G["UIDROPDOWNMENU_MENU_VALUE"] == "Options" then
@@ -643,11 +657,18 @@ function TitanPanelSocialButton_GetTooltipText()
 		iGuildTotal, iGuildOnline = GetNumGuildMembers();
 		--iGuildOnline   = "|cff00FF00"..iGuildOnline.."|r";
 		
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_GUILD).."\t".."|cff00FF00"..iGuildOnline.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"
+    local remoteChatText = nil
+		local numGuild, numRemoteChat = 0, 0
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat") ~= nil then
+			remoteChatText = ""
+		end
+		local guildText = ""
 		
 		for guildIndex=1, iGuildOnline do
 		
 			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(guildIndex);
+			
+			local currentText = ""
 			
 			-- toonName Fix
 				if (name=="") then
@@ -662,39 +683,48 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- 80 {color=class::Playername} {<AFK>} Rank Note ONote\t Location
 			
 			-- Level
-			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
+			currentText = currentText.."|cffFFFFFF"..level.."|r  "
+
 			-- Name
-			tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(name, class).." ";
+			currentText = currentText..TitanPanelSocialButton_ColorText(name, class).." ";
 
 			-- Status
 			if (playerStatus ~= 0) then
                   if (playerStatus == 1) then
-                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<AFK>".."|r  ";
+                    currentText = currentText.."|cffFFFFFF".."<AFK>".."|r  ";
                   else
-                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<DND>".."|r  ";
+                    currentText = currentText.."|cffFFFFFF".."<DND>".."|r  ";
                   end
 	           end
 
 			-- Rank
-			tTooltipRichText = tTooltipRichText..rank.."  ";
+			currentText = currentText..rank.."  ";
 			
 			-- Notes
 			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildNote") ~= nil) then
-				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..note.."|r  "
+				currentText = currentText.."|cffFFFFFF"..note.."|r  "
 			end
 			
 			-- Officer Notes
 			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildONote") ~= nil) then
 				if(CanViewOfficerNote()) then
-					tTooltipRichText = tTooltipRichText.."|cffAAFFAA"..officernote.."|r  "
+					currentText = currentText.."|cffAAFFAA"..officernote.."|r  "
 				end
 			end
 			
 			-- Location
 			if (zone ~= nil) then 
-				tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..zone.."|r\n"
+				currentText = currentText.."\t|cffFFFFFF"..zone.."|r\n"
 			else
-				tTooltipRichText = tTooltipRichText.."\n"
+				currentText = currentText.."\n"
+			end
+			
+			if isMobile and remoteChatText ~= nil then
+				remoteChatText = remoteChatText..currentText
+				numRemoteChat = numRemoteChat + 1
+			else
+				guildText = guildText..currentText
+				numGuild = numGuild + 1
 			end
 			
 		end
@@ -702,6 +732,12 @@ function TitanPanelSocialButton_GetTooltipText()
 		-- Reset ShowOffline Guild Members to original value
 		if (bGuildOffline) then
 			SetGuildRosterShowOffline(true);
+		end
+		
+		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_GUILD).."\t".."|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"..guildText
+
+		if remoteChatText ~= nil then
+			tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT).."\t".."|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"..remoteChatText
 		end
 	
 	end
