@@ -26,6 +26,9 @@
 -- Counters for Titan Bar Display
 	local iRealIDOnline, iFriendsOnline, iGuildOnline = 0;
 
+	local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t";
+	local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t";
+
 ----------------------------------------------------------------------
 --  Global variables
 ----------------------------------------------------------------------
@@ -677,7 +680,13 @@ function TitanPanelSocialButton_GetTooltipText()
 			
 			if isMobile then
 				zone = REMOTE_CHAT
-				name = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:14:14:0:0:16:16:0:16:0:16:73:177:73a|t"..name
+				if playerStatus == 2 then
+					name = MOBILE_BUSY_ICON..name
+				elseif playerStatus == 1 then
+					name = MOBILE_AWAY_ICON..name
+				else
+					name = ChatFrame_GetMobileEmbeddedTexture(73/255, 177/255, 73/255)..name
+				end
 			end
 			
 			-- 80 {color=class::Playername} {<AFK>} Rank Note ONote\t Location
