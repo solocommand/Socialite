@@ -396,13 +396,12 @@ TITAN_SOCIAL_CLASSINDEX = {
   ["Sacerdotessa"]          = 5,
   ["Ladro"]                 = 6,
   ["Ladra"]                 = 6,
-  ["Siamano"]               = 7,
-  ["Siamana"]               = 7,
+  ["Sciamano"]              = 7,
+  ["Sciamana"]              = 7,
   ["Stregone"]              = 8,
   ["Strega"]                = 8,
   ["Guerriero"]             = 9,
   ["Guerriera"]             = 9,
   ["Cavaliere della Morte"] = 10,
-  ["Cavaliera della Morte"] = 10,
 	
 };
