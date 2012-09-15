@@ -225,6 +225,43 @@ if (GetLocale() == "ptBR") then
     
 end
 
+--itIT by itMax86 15.09.2012
+
+if (GetLocale() == "itIT") then
+    
+  TITAN_SOCIAL_BUTTON_TITLE = "Social: "
+  REMOTE_CHAT = "Chat Remota"
+
+  TITAN_SOCIAL_TOOLTIP = "Social"
+  TITAN_SOCIAL_TOOLTIP_REALID = "Amici RealID Collegati:";
+  TITAN_SOCIAL_TOOLTIP_FRIENDS = "Amici Collegati:";
+  TITAN_SOCIAL_TOOLTIP_GUILD = "Membri di Gilda Collegati:";
+  TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT = "Chat Remota:";
+  TITAN_SOCIAL_TOOLTIP_MEM = "Utilizzo Memoria:";
+  TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Kb";
+
+  TITAN_SOCIAL_MENU_REALID = "RealID";
+  TITAN_SOCIAL_MENU_REALID_FRIENDS = "Mostra Amici RealID";
+  TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Mostra Messaggio RealID";
+
+  TITAN_SOCIAL_MENU_FRIENDS = "Amici";
+  TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Mostra Amici";
+  TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Mostra Nota Amici";
+
+  TITAN_SOCIAL_MENU_GUILD = "Gilda";
+  TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Mostra Membri di Gilda";
+  TITAN_SOCIAL_MENU_GUILD_LABEL = "Mostra Nome della Gilda";
+  TITAN_SOCIAL_MENU_GUILD_NOTE = "Mostra Nota di Gilda";
+  TITAN_SOCIAL_MENU_GUILD_ONOTE = "Mostra Nota degli Ufficiali";
+  TITAN_SOCIAL_MENU_GUILD_REMOTE_CHAT = "Remote Chat Separata";
+
+  TITAN_SOCIAL_MENU_LABEL = "Mostra Ettichetta";
+  TITAN_SOCIAL_MENU_MEM = "Mostra Memoria Utilizzata";
+  TITAN_SOCIAL_MENU_HIDE = "Nascondi";
+  TITAN_SOCIAL_MENU_OPTIONS = "Opzioni";
+      
+end
+
 
 -- CLASSINDEX via TitanGuild
 TITAN_SOCIAL_CLASSINDEX = {
@@ -345,5 +382,27 @@ TITAN_SOCIAL_CLASSINDEX = {
   ["Guerreira"]           = 9,
   ["Cavaleiro da Morte"]  = 10,
   ["Cavaleira da Morte"]  = 10,
+  
+  -- itIT
+  ["Druido"]                = 1,
+  ["Druida"]                = 1,
+  ["Cacciatore"]            = 2,
+  ["Cacciatrice"]           = 2,
+  ["Mago"]                  = 3,
+  ["Maga"]                  = 3,
+  ["Paladino"]              = 4,
+  ["Paladina"]              = 4,
+  ["Sacerdote"]             = 5,
+  ["Sacerdotessa"]          = 5,
+  ["Ladro"]                 = 6,
+  ["Ladra"]                 = 6,
+  ["Siamano"]               = 7,
+  ["Siamana"]               = 7,
+  ["Stregone"]              = 8,
+  ["Strega"]                = 8,
+  ["Guerriero"]             = 9,
+  ["Guerriera"]             = 9,
+  ["Cavaliere della Morte"] = 10,
+  ["Cavaliera della Morte"] = 10,
 	
 };
