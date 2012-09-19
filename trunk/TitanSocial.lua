@@ -212,17 +212,16 @@ function TitanPanelSocialButton_OnClick(self, button)
 
 	-- Detect mouse clicks
 	if (button == "LeftButton") then
-		-- Left button only, right is for menu
-		if (not FriendsFrame:IsVisible()) then
-			-- If the friends frame is hidden, show friend and guild frame.
-			ToggleFriendsFrame(iFriendsTab);
-			FriendsFrame_Update();
-			ToggleGuildFrame(iGuildTab);
-		elseif (FriendsFrame:IsVisible()) then
-			-- Otherwise, hide them both
-			ToggleFriendsFrame(iFriendsTab);
-			ToggleGuildFrame(iGuildTab);
-		end
+
+		if (TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil) then
+      ToggleFriendsFrame(iFriendsTab);
+      FriendsFrame_Update();
+    end
+    
+    if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
+      ToggleGuildFrame(iGuildTab);
+    end
+    
 	end
 	
 end
