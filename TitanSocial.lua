@@ -29,6 +29,9 @@
 	local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t";
 	local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t";
 
+-- Class support
+	local TitanSocial_ClassMap -- maps localized name to generic name
+
 ----------------------------------------------------------------------
 --  Global variables
 ----------------------------------------------------------------------
@@ -40,34 +43,15 @@
 
 function TitanPanelSocialButton_ColorText(text, className)
 	local classIndex, coloredText=nil
-	
-	-- Class color index for localization.
-	local TITAN_SOCIAL_CLASSCOLORINDEX = {
-		[0] = "|cffcccccc",
-		[1] = "|cffff7d0a",
-		[2] = "|cffabd473",
-		[3] = "|cff69ccf0",
-		[4] = "|cfff58cba",
-		[5] = "|cffffffff",
-		[6] = "|cfffff569",	
-		[7] = "|cff2459ff",
-		[8] = "|cff9482ca",
-		[9] = "|cffc79c6e",
-		[10] = "|cffc41f3b",
-	}
-	
-	if(className=="") then
-		-- No class name (how is this possible D:)
-		classIndex = 0
+
+	local class = TitanSocial_ClassMap[className]
+	local color
+	if class == "" then
+		color = "ffcccccc"
 	else
-		-- Get index value for localized class name
-		classIndex = TITAN_SOCIAL_CLASSINDEX[className]
+		color = RAID_CLASS_COLORS[class].colorStr
 	end
-	
-	coloredText = TITAN_SOCIAL_CLASSCOLORINDEX[classIndex]..text.."|r"
-	
-	return coloredText
-	
+	return "|c"..color..text.."|r"
 end
 
 ----------------------------------------------------------------------
@@ -75,6 +59,13 @@ end
 ----------------------------------------------------------------------
 
 function TitanPanelSocialButton_OnLoad(self)
+
+	-- Build the class map
+	TitanSocial_ClassMap = {}
+	for i = 1, GetNumClasses() do
+		local name, className, classId = GetClassInfo(i)
+		TitanSocial_ClassMap[name] = className
+	end
 
 	--
 	-- LOCAL REGISTRY --
