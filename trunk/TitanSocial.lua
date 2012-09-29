@@ -46,7 +46,7 @@ function TitanPanelSocialButton_ColorText(text, className)
 
 	local class = TitanSocial_ClassMap[className]
 	local color
-	if class == "" then
+	if class == nil then
 		color = "ffcccccc"
 	else
 		color = RAID_CLASS_COLORS[class].colorStr
