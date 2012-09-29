@@ -11,7 +11,7 @@
 
 -- Required Titan variables
 	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "5.0r12";
+	TITAN_SOCIAL_VERSION = "5.0r14";
 	TITAN_NIL = false;
 	
 -- Update frequency
@@ -30,7 +30,15 @@
 	local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t";
 
 -- Class support
-	local TitanSocial_ClassMap -- maps localized name to generic name
+	local TitanSocial_ClassMap = {}
+	
+-- Build the class map
+	
+	for i = 1, GetNumClasses() do
+		local name, className, classId = GetClassInfo(i)
+    TitanSocial_ClassMap[LOCALIZED_CLASS_NAMES_MALE[className]] = className
+    TitanSocial_ClassMap[LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+	end
 
 ----------------------------------------------------------------------
 --  Global variables
@@ -42,10 +50,11 @@
 ----------------------------------------------------------------------
 
 function TitanPanelSocialButton_ColorText(text, className)
+
 	local classIndex, coloredText=nil
 
 	local class = TitanSocial_ClassMap[className]
-	local color
+  local color = nil
 	if class == nil then
 		color = "ffcccccc"
 	else
@@ -60,12 +69,6 @@ end
 
 function TitanPanelSocialButton_OnLoad(self)
 
-	-- Build the class map
-	TitanSocial_ClassMap = {}
-	for i = 1, GetNumClasses() do
-		local name, className, classId = GetClassInfo(i)
-		TitanSocial_ClassMap[name] = className
-	end
 
 	--
 	-- LOCAL REGISTRY --
