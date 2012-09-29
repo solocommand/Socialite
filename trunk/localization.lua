@@ -5,36 +5,36 @@ TITAN_SOCIAL_BUTTON_LABEL = "Social: "
 
 -- default (enUS)
 
-TITAN_SOCIAL_BUTTON_TITLE = "Social: "
-REMOTE_CHAT = "Remote Chat"
+  TITAN_SOCIAL_BUTTON_TITLE = "Social: "
+  REMOTE_CHAT = "Remote Chat"
 
-TITAN_SOCIAL_TOOLTIP = "Social"
-TITAN_SOCIAL_TOOLTIP_REALID = "RealID Friends Online:";
-TITAN_SOCIAL_TOOLTIP_FRIENDS = "Friends Online:";
-TITAN_SOCIAL_TOOLTIP_GUILD = "Guild Members Online:";
-TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT = "Remote Chat:";
-TITAN_SOCIAL_TOOLTIP_MEM = "Memory Utilization:";
-TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Kb";
+  TITAN_SOCIAL_TOOLTIP = "Social"
+  TITAN_SOCIAL_TOOLTIP_REALID = "RealID Friends Online:";
+  TITAN_SOCIAL_TOOLTIP_FRIENDS = "Friends Online:";
+  TITAN_SOCIAL_TOOLTIP_GUILD = "Guild Members Online:";
+  TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT = "Remote Chat:";
+  TITAN_SOCIAL_TOOLTIP_MEM = "Memory Utilization:";
+  TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Kb";
 
-TITAN_SOCIAL_MENU_REALID = "RealID";
-TITAN_SOCIAL_MENU_REALID_FRIENDS = "Show RealID Friends";
-TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Show RealID Broadcasts";
+  TITAN_SOCIAL_MENU_REALID = "RealID";
+  TITAN_SOCIAL_MENU_REALID_FRIENDS = "Show RealID Friends";
+  TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Show RealID Broadcasts";
 
-TITAN_SOCIAL_MENU_FRIENDS = "Friends";
-TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Show Friends";
-TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Show Friends Note";
+  TITAN_SOCIAL_MENU_FRIENDS = "Friends";
+  TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Show Friends";
+  TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Show Friends Note";
 
-TITAN_SOCIAL_MENU_GUILD = "Guild";
-TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Show Guild Members";
-TITAN_SOCIAL_MENU_GUILD_LABEL = "Show Guild Label";
-TITAN_SOCIAL_MENU_GUILD_NOTE = "Show Guild Note";
-TITAN_SOCIAL_MENU_GUILD_ONOTE = "Show Officer Note";
-TITAN_SOCIAL_MENU_GUILD_REMOTE_CHAT = "Separate Remote Chat";
+  TITAN_SOCIAL_MENU_GUILD = "Guild";
+  TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Show Guild Members";
+  TITAN_SOCIAL_MENU_GUILD_LABEL = "Show Guild Label";
+  TITAN_SOCIAL_MENU_GUILD_NOTE = "Show Guild Note";
+  TITAN_SOCIAL_MENU_GUILD_ONOTE = "Show Officer Note";
+  TITAN_SOCIAL_MENU_GUILD_REMOTE_CHAT = "Separate Remote Chat";
 
-TITAN_SOCIAL_MENU_LABEL = "Show Label";
-TITAN_SOCIAL_MENU_MEM = "Show Memory Usage";
-TITAN_SOCIAL_MENU_HIDE = "Hide";
-TITAN_SOCIAL_MENU_OPTIONS = "Options";
+  TITAN_SOCIAL_MENU_LABEL = "Show Label";
+  TITAN_SOCIAL_MENU_MEM = "Show Memory Usage";
+  TITAN_SOCIAL_MENU_HIDE = "Hide";
+  TITAN_SOCIAL_MENU_OPTIONS = "Options";
 
 
 -- frFR
@@ -149,7 +149,38 @@ end
 
 if (GetLocale() == "esES") then
 
-	--
+	--esES by Golpeadornat (Jsr1976)
+	
+  TITAN_SOCIAL_BUTTON_TITLE = "Social: "
+  REMOTE_CHAT = "Chat Remoto"
+  
+  TITAN_SOCIAL_TOOLTIP = "Social"
+  TITAN_SOCIAL_TOOLTIP_REALID = "Amigos conectados con RealID:";
+  TITAN_SOCIAL_TOOLTIP_FRIENDS = "Amigos conectados:";
+  TITAN_SOCIAL_TOOLTIP_GUILD = "Miembros Hermandad conectados:";
+  TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT = "Chat Remoto:";
+  TITAN_SOCIAL_TOOLTIP_MEM = "Utilizacion de memoria:";
+  TITAN_SOCIAL_TOOLTIP_MEM_UNIT = "Kb";
+
+  TITAN_SOCIAL_MENU_REALID = "RealID";
+  TITAN_SOCIAL_MENU_REALID_FRIENDS = "Muestra Amigos con RealID";
+  TITAN_SOCIAL_MENU_REALID_BROADCASTS = "Muestra Transmisiones RealID";
+
+  TITAN_SOCIAL_MENU_FRIENDS = "Amigos";
+  TITAN_SOCIAL_MENU_FRIENDS_SHOW = "Muestra Amigos";
+  TITAN_SOCIAL_MENU_FRIENDS_NOTE = "Muestra Notas de Amigos";
+
+  TITAN_SOCIAL_MENU_GUILD = "Hermandad";
+  TITAN_SOCIAL_MENU_GUILD_MEMBERS = "Muestra Miembros de Hermandad";
+  TITAN_SOCIAL_MENU_GUILD_LABEL = "Muestra Etiqueta de Hermandad";
+  TITAN_SOCIAL_MENU_GUILD_NOTE = "Muestra Nota de Hermandad";
+  TITAN_SOCIAL_MENU_GUILD_ONOTE = "Muestra Nota del Oficial";
+  TITAN_SOCIAL_MENU_GUILD_REMOTE_CHAT = "Separa el Chat Remoto";
+  
+  TITAN_SOCIAL_MENU_LABEL = "Muestra Etiqueta";
+  TITAN_SOCIAL_MENU_MEM = "Muestra Uso de Memoria";
+  TITAN_SOCIAL_MENU_HIDE = "Oculta";
+  TITAN_SOCIAL_MENU_OPTIONS = "Opciones";
 	
 end
 
