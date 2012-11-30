@@ -405,101 +405,45 @@ end
 ----------------------------------------------------------------------
 
 function TitanPanelSocialButton_GetButtonText(id)
-	local id = TitanUtils_GetButton(id);
-	local iRealIDTotal, iRealIDOnline = 0;
-	local iFriendsTotal, iFriendsOnline = 0;
-	local iGuildTotal, iGuildOnline = 0;
-	local tButtonRichText = "";
-	
-	local tButtonTemplate1 = "%s";
-	local tButtonTemplate2 = "%s |cffffd200/|r %s";
-	local tButtonTemplate3 = "%s |cffffd200/|r %s |cffffd200/|r %s";
-
-	--
-	-- SavedVars//Colors
-	--
-	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil) then
-		iRealIDTotal, iRealIDOnline = BNGetNumFriends();
-		iRealIDOnline  = "|cff00A2E8"..iRealIDOnline.."|r";
-	end
-	
-	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") ~= nil) then
-		iFriendsTotal, iFriendsOnline = GetNumFriends();
-		iFriendsOnline = "|cffFFFFFF"..iFriendsOnline.."|r";
-	end
-	
-	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
-		iGuildTotal, iGuildOnline = GetNumGuildMembers();
-		iGuildOnline   = "|cff00FF00"..iGuildOnline.."|r";
-	end
-	
-	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowLabel") ~= nil) then
-		if(TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildLabel") ~= nil) and (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) and (IsInGuild()) then
-			guildname, rank, rankindex = GetGuildInfo("player");
-			--tGuildName = "|cff00FF00"..guildname.."|r: ";
-			if(guildname ~= nil) then
-				TITAN_SOCIAL_BUTTON_LABEL = guildname..": ";
+	local label = " "
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowLabel") then
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildLabel") and TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") and IsInGuild() then
+			local guildName = GetGuildInfo("player")
+			if guildName then
+				label = guildName..": "
 			else
-				TITAN_SOCIAL_BUTTON_LABEL = "...: ";
+				label = "...: "
 			end
 		else
-			TITAN_SOCIAL_BUTTON_LABEL = TITAN_SOCIAL_BUTTON_TITLE;
-		end
-	else
-		TITAN_SOCIAL_BUTTON_LABEL = " ";
-	end
-	
-	--
-	-- Custom Labels --
-	--
-	
-	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil) then
-		if (TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") ~= nil) then
-			if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
-				-- ## / ## / ## Ok
-				TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL..tButtonTemplate3;
-				tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, iRealIDOnline, iFriendsOnline, iGuildOnline);
-			else
-				-- ## / ## / XX Ok
-				TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL..tButtonTemplate2;
-				tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, iRealIDOnline, iFriendsOnline);
-			end
-		else
-			if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
-				-- ## / XX / ## Ok
-				TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL..tButtonTemplate2;
-				tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, iRealIDOnline, iGuildOnline);
-			else
-				-- ## / XX / XX Ok
-				TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL..tButtonTemplate1;
-				tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, iRealIDOnline);
-			end
-		end
-	else
-		if (TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") ~= nil) then
-			if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
-				-- XX / ## / ## Ok
-				TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL..tButtonTemplate2;
-				tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, iFriendsOnline, iGuildOnline);
-			else
-				-- XX / ## / XX
-				TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL..tButtonTemplate1;
-				tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, iFriendsOnline);
-			end
-		else
-			if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
-				-- XX / XX / ##
-				TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL..tButtonTemplate1;
-				tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, iGuildOnline);
-			else
-				-- XX / XX / XX
-				TITAN_SOCIAL_BUTTON_TEXT = TITAN_SOCIAL_BUTTON_LABEL..tButtonTemplate1;
-				tButtonRichText = format(TITAN_SOCIAL_BUTTON_TEXT, "Disabled");
-			end
+			label = TITAN_SOCIAL_BUTTON_TITLE
 		end
 	end
 
-	return TITAN_SOCIAL_BUTTON_LABEL, tButtonRichText;
+	local comps = {}
+
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
+		table.insert(comps, "|cff00A2E8"..select(2, BNGetNumFriends()).."|r")
+	end
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
+		table.insert(comps, "|cffFFFFFF"..select(2,GetNumFriends()).."|r")
+	end
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
+		local online, remote = select(2, GetNumGuildMembers())
+		local _, online, remote = GetNumGuildMembers()
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat") then
+			remote = remote - online
+		else
+			online, remote = remote, nil
+		end
+		table.insert(comps, "|cff00FF00"..online.."|r")
+		if remote ~= nil then
+			table.insert(comps, "|cff00BB00"..remote.."|r")
+		end
+	end
+
+	label = label .. table.concat(comps, " |cffffd200/|r ")
+
+	return TITAN_SOCIAL_BUTTON_TITLE, label;
 end
 
 ----------------------------------------------------------------------

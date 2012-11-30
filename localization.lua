@@ -1,7 +1,6 @@
 ﻿local L = LibStub("AceLocale-3.0"):GetLocale("Titan", true)
 
 TITAN_SOCIAL_MENU_TEXT = "TitanSocial"
-TITAN_SOCIAL_BUTTON_LABEL = "Social: "
 
 -- default (enUS)
 
