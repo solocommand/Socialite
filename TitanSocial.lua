@@ -650,17 +650,18 @@ function TitanPanelSocialButton_GetTooltipText()
 		-- Turn off showoffline for tooltip
 		SetGuildRosterShowOffline(false);
 		
-		iGuildTotal, iGuildOnline = GetNumGuildMembers();
+		iGuildTotal, iGuildOnline, iGuildRemote = GetNumGuildMembers();
 		--iGuildOnline   = "|cff00FF00"..iGuildOnline.."|r";
 		
-    local remoteChatText = nil
-		local numGuild, numRemoteChat = 0, 0
+		local remoteChatText = nil
+		local numGuild = iGuildRemote
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat") ~= nil then
 			remoteChatText = ""
+			numGuild = iGuildOnline
 		end
 		local guildText = ""
 		
-		for guildIndex=1, iGuildOnline do
+		for guildIndex=1, iGuildRemote do
 		
 			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(guildIndex);
 			
@@ -671,8 +672,9 @@ function TitanPanelSocialButton_GetTooltipText()
 					name = "Unknown"
 				end
 			
+			local isRemote = (guildIndex > iGuildOnline)
 			if isMobile then
-				zone = REMOTE_CHAT
+				if isRemote then zone = REMOTE_CHAT end
 				if playerStatus == 2 then
 					name = MOBILE_BUSY_ICON..name
 				elseif playerStatus == 1 then
@@ -721,12 +723,10 @@ function TitanPanelSocialButton_GetTooltipText()
 				currentText = currentText.."\n"
 			end
 			
-			if isMobile and remoteChatText ~= nil then
+			if isRemote and remoteChatText ~= nil then
 				remoteChatText = remoteChatText..currentText
-				numRemoteChat = numRemoteChat + 1
 			else
 				guildText = guildText..currentText
-				numGuild = numGuild + 1
 			end
 			
 		end
@@ -739,6 +739,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_GUILD).."\t".."|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"..guildText
 
 		if remoteChatText ~= nil then
+			local numRemoteChat = iGuildRemote - iGuildOnline
 			tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT).."\t".."|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..iGuildTotal).."\n"..remoteChatText
 		end
 	
