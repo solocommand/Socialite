@@ -527,7 +527,11 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- Broadcast
 			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDBroadcasts") ~= nil) then
 				if (broadcastText ~= nil) then
-				tTooltipRichText = tTooltipRichText.."|cff00A2E8"..broadcastText.."|r ";
+				-- it seems as though newlines in broadcastText reset the coloration
+				-- Also try to nudge subsequent lines over a bit
+				local color = "|cff00A2E8"
+				broadcastText = broadcastText:gsub("\n", "|r".."\n        "..color)
+				tTooltipRichText = tTooltipRichText..color..broadcastText.."|r ";
 				end
 			end
 			
