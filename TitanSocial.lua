@@ -511,12 +511,11 @@ function TitanPanelSocialButton_GetTooltipText()
 			do
 				if knownLocalRealmID == nil then
 					-- find our local realm ID
-					-- It seems BNGetToonInfo(1) returns ourselves
-					knownLocalRealmID = select(5, BNGetToonInfo(1))
+					knownLocalRealmID = select(5, BNGetToonInfo(select(3,BNGetInfo())))
 				end
 				-- is this friend playing WoW on our server?
 				local name = ""
-				if client == "WoW" and realmID == knownLocalRealmID then
+				if client == BNET_CLIENT_WOW and realmID == knownLocalRealmID then
 					name = toonName
 				end
 				tTooltipRichText = tTooltipRichText..getGroupIndicator(name)
@@ -532,9 +531,9 @@ function TitanPanelSocialButton_GetTooltipText()
 				end
 				
 			-- Client Information
-				if (client == "S2") then
+				if (client == BNET_CLIENT_SC2) then
 					clientName = "S2"
-				elseif (client == "D3") then
+				elseif (client == BNET_CLIENT_D3) then
 					clientName = "D3"
 				else
 					clientName = "??"
@@ -543,7 +542,7 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- Stan Smith {SC2} ToonName 80 <AFK/DND>\t Location
 			-- Stan Smith Toonname 80 (SC2)
 			
-			if(client ~= "WoW") then
+			if(client ~= BNET_CLIENT_WOW) then
 				-- Client Name
 				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..clientName.."|r  "
 				tTooltipRichText = tTooltipRichText.."|cffCCCCCC"..toonName.."|r ";
