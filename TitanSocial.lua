@@ -503,9 +503,8 @@ function TitanPanelSocialButton_GetTooltipText()
 		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REALID).."\t".."|cff00A2E8"..iRealIDOnline.."|r"..TitanUtils_GetNormalText("/"..iRealIDTotal).."\n"
 		
 		for friendIndex=1, iRealIDOnline do
-
-			presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isFriend, unknown = BNGetFriendInfo(friendIndex)
-			unknowntoon, toonName, client, realmName, realmID, faction, race, className, unknown, zoneName, level, gameText, broadcastText, broadcastTime = BNGetToonInfo(presenceID)
+			local presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isFriend, unknown = BNGetFriendInfo(friendIndex)
+			local hasFocus, toonName, client, realmName, realmID, faction, race, className, _, zoneName, level, gameText, broadcastText, broadcastTime = BNGetToonInfo(presenceID)
 
 			-- group member indicator
 			do
@@ -515,8 +514,13 @@ function TitanPanelSocialButton_GetTooltipText()
 				end
 				-- is this friend playing WoW on our server?
 				local name = ""
-				if client == BNET_CLIENT_WOW and realmID == knownLocalRealmID then
-					name = toonName
+				if client == BNET_CLIENT_WOW then
+					if realmID == knownLocalRealmID then
+						name = toonName
+					else
+						-- how about a different server? Cross-realm exists
+						name = toonName.."-"..realmName
+					end
 				end
 				tTooltipRichText = tTooltipRichText..getGroupIndicator(name)
 			end
