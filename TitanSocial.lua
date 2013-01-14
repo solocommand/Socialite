@@ -101,6 +101,7 @@ function TitanPanelSocialButton_OnLoad(self)
 				ShowGuildNote = 1,
 				ShowSplitRemoteChat = 1,
 				ShowGuildONote = 1,
+				ShowGroupMembers = 1,
 				ShowIcon = 1,
 				ShowLabel = 1,
 				ShowTooltipTotals = 1,
@@ -390,6 +391,9 @@ function TitanPanelRightClickMenu_PrepareSocialMenu()
 		UIDropDownMenu_AddButton(info);
 	
 	TitanPanelRightClickMenu_AddSpacer();
+	TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_SHOW_GROUP_MEMBERS, TITAN_SOCIAL_ID, "ShowGroupMembers");
+	
+	TitanPanelRightClickMenu_AddSpacer();
 	TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID);
 	TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_LABEL, TITAN_SOCIAL_ID, "ShowLabel");
 	TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_MEM, TITAN_SOCIAL_ID, "ShowMem");
@@ -450,6 +454,20 @@ end
 -- TitanPanelSocialButton_GetTooltipText()
 ----------------------------------------------------------------------
 
+local function getGroupIndicator(name)
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGroupMembers") then
+		if IsInGroup() and name ~= "" then -- don't check self if we're not in a group
+			if UnitInParty(name) or UnitInRaid(name) then
+				return "|TInterface\\Buttons\\UI-CheckBox-Check:0:0|t" -- checkmark
+			end
+		end
+		return "|T:0:0|t" -- square spacer
+	end
+	return ""
+end
+
+local knownLocalRealmID = nil
+
 function TitanPanelSocialButton_GetTooltipText()
 
 	local iRealIDTotal, iRealIDOnline = 0;
@@ -472,6 +490,21 @@ function TitanPanelSocialButton_GetTooltipText()
 
 			presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isFriend, unknown = BNGetFriendInfo(friendIndex)
 			unknowntoon, toonName, client, realmName, realmID, faction, race, className, unknown, zoneName, level, gameText, broadcastText, broadcastTime = BNGetToonInfo(presenceID)
+
+			-- group member indicator
+			do
+				if knownLocalRealmID == nil then
+					-- find our local realm ID
+					-- It seems BNGetToonInfo(1) returns ourselves
+					knownLocalRealmID = select(5, BNGetToonInfo(1))
+				end
+				-- is this friend playing WoW on our server?
+				local name = ""
+				if client == "WoW" and realmID == knownLocalRealmID then
+					name = toonName
+				end
+				tTooltipRichText = tTooltipRichText..getGroupIndicator(name)
+			end
 
 			-- playerStatus
 				if (isAFK) then
@@ -555,6 +588,8 @@ function TitanPanelSocialButton_GetTooltipText()
 		
 			name, level, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
 			
+			tTooltipRichText = tTooltipRichText..getGroupIndicator(name)
+
 			-- toonName Fix
 				if (name == "") then
 					name = "Unknown"
@@ -614,11 +649,13 @@ function TitanPanelSocialButton_GetTooltipText()
 			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(guildIndex);
 			
 			local currentText = ""
+
+			currentText = currentText..getGroupIndicator(name)
 			
 			-- toonName Fix
-				if (name=="") then
-					name = "Unknown"
-				end
+			if name=="" then
+				name = "Unknown"
+			end
 			
 			local isRemote = (guildIndex > iGuildOnline)
 			if isMobile then
