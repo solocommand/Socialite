@@ -1,4 +1,4 @@
-﻿local L = LibStub("AceLocale-3.0"):GetLocale("Titan", true)
+local L = LibStub("AceLocale-3.0"):GetLocale("Titan", true)
 
 TITAN_SOCIAL_MENU_TEXT = "TitanSocial"
 
@@ -29,6 +29,8 @@ TITAN_SOCIAL_MENU_TEXT = "TitanSocial"
   TITAN_SOCIAL_MENU_GUILD_NOTE = "Show Guild Note";
   TITAN_SOCIAL_MENU_GUILD_ONOTE = "Show Officer Note";
   TITAN_SOCIAL_MENU_GUILD_REMOTE_CHAT = "Separate Remote Chat";
+
+  TITAN_SOCIAL_MENU_SHOW_GROUP_MEMBERS = "Show Group Members";
 
   TITAN_SOCIAL_MENU_LABEL = "Show Label";
   TITAN_SOCIAL_MENU_MEM = "Show Memory Usage";
