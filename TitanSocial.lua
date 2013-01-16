@@ -29,6 +29,10 @@
 	local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t";
 	local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t";
 
+	local STATUS_ICON = "icon"
+	local STATUS_TEXT = "text"
+	local STATUS_NONE = "none"
+
 -- Class support
 	local TitanSocial_ClassMap = {}
 	
@@ -105,6 +109,7 @@ function TitanPanelSocialButton_OnLoad(self)
 				SortGuild = false,
 				GuildSortKey = "rank",
 				GuildSortAscending = true,
+				ShowStatus = STATUS_ICON,
 				ShowIcon = 1,
 				ShowLabel = 1,
 				ShowTooltipTotals = 1,
@@ -238,11 +243,16 @@ local function addSubmenu(text, value, level)
 	UIDropDownMenu_AddButton(info, level)
 end
 
-local function setGuildSortOption(info, key, value)
+local function setTitanSocialOption(info, key, value)
 	TitanSetVar(TITAN_SOCIAL_ID, key, value)
 end
 
-local function sortCheckedFunc(button)
+local function setTitanSocialOptionRefresh(info, key, value)
+	TitanSetVar(TITAN_SOCIAL_ID, key, value)
+	UIDropDownMenu_Refresh(UIDropDownMenu_GetCurrentDropDown())
+end
+
+local function optionDropdownCheckedFunc(button)
 	local current = TitanGetVar(TITAN_SOCIAL_ID, button.arg1)
 	return (current or false) == button.arg2
 end
@@ -250,12 +260,23 @@ end
 local function addSortOption(text, key, value, level)
 	local info = UIDropDownMenu_CreateInfo()
 	info.text = text
-	info.func = setGuildSortOption
+	info.func = setTitanSocialOption
 	info.arg1 = key
 	info.arg2 = value
 	info.keepShownOnClick = false -- can't update the menu while visible
-	info.checked = sortCheckedFunc
+	info.checked = optionDropdownCheckedFunc
 	info.disabled = not TitanGetVar(TITAN_SOCIAL_ID, "SortGuild")
+	UIDropDownMenu_AddButton(info, level)
+end
+
+local function addRadioRefresh(text, key, value, level)
+	local info = UIDropDownMenu_CreateInfo()
+	info.text = text
+	info.func = setTitanSocialOptionRefresh
+	info.arg1 = key
+	info.arg2 = value
+	info.keepShownOnClick = true
+	info.checked = optionDropdownCheckedFunc
 	UIDropDownMenu_AddButton(info, level)
 end
 
@@ -274,6 +295,9 @@ function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 		
 		TitanPanelRightClickMenu_AddSpacer(level);
 		TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_SHOW_GROUP_MEMBERS, TITAN_SOCIAL_ID, "ShowGroupMembers", nil, level)
+
+		-- Status menu
+		addSubmenu(TITAN_SOCIAL_MENU_STATUS, "Status", level)
 		
 		TitanPanelRightClickMenu_AddSpacer(level)
 		TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID, level)
@@ -307,6 +331,13 @@ function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			
 			TitanPanelRightClickMenu_AddSpacer(level)
 			addSubmenu(TITAN_SOCIAL_MENU_GUILD_SORT, "GuildSort", level)
+		end
+
+		-- Status Menu
+		if menuList == "Status" then
+			addRadioRefresh(TITAN_SOCIAL_MENU_STATUS_ICON, "ShowStatus", STATUS_ICON, level)
+			addRadioRefresh(TITAN_SOCIAL_MENU_STATUS_TEXT, "ShowStatus", STATUS_TEXT, level)
+			addRadioRefresh(TITAN_SOCIAL_MENU_STATUS_NONE, "ShowStatus", STATUS_NONE, level)
 		end
 		
 		if menuList == "Options" then
@@ -486,19 +517,35 @@ end
 
 local knownLocalRealmID = nil
 
-function TitanPanelSocialButton_GetTooltipText()
+local function getStatusIcon(status)
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowStatus") == STATUS_ICON then
+		if status == CHAT_FLAG_AFK then
+			return "|T"..FRIENDS_TEXTURE_AFK..":0|t"
+		elseif status == CHAT_FLAG_DND then
+			return "|T"..FRIENDS_TEXTURE_DND..":0|t"
+		end
+	end
+	return ""
+end
 
-	local iRealIDTotal, iRealIDOnline = 0;
-	local iFriendsTotal, iFriendsOnline = 0;
-	local tTooltipRichText, playerStatus, clientName = "";
+local function getStatusText(status)
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowStatus") == STATUS_TEXT then
+		if status ~= "" then
+			return "|cffFFFFFF"..status.."|r "
+		end
+	end
+	return ""
+end
+
+function TitanPanelSocialButton_GetTooltipText()
+	local tTooltipRichText = ""
 	
 	--
 	--	RealID Friends
 	--
 	
-	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~=nil) then
-		iRealIDTotal, iRealIDOnline = BNGetNumFriends();
-		--iRealIDOnline  = "|cff00A2E8"..iRealIDOnline.."|r";
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~=nil then
+		local iRealIDTotal, iRealIDOnline = BNGetNumFriends();
 
 		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REALID).."\t".."|cff00A2E8"..iRealIDOnline.."|r"..TitanUtils_GetNormalText("/"..iRealIDTotal).."\n"
 		
@@ -526,39 +573,27 @@ function TitanPanelSocialButton_GetTooltipText()
 			end
 
 			-- playerStatus
-				if (isAFK) then
-					playerStatus = "AFK"
-				elseif (isDND) then
-					playerStatus = "DND"
-				else
-					playerStatus = ""
-				end
-				
-			-- Client Information
-				if (client == BNET_CLIENT_SC2) then
-					clientName = "S2"
-				elseif (client == BNET_CLIENT_D3) then
-					clientName = "D3"
-				else
-					clientName = "??"
-				end
-			
-			-- Stan Smith {SC2} ToonName 80 <AFK/DND>\t Location
-			-- Stan Smith Toonname 80 (SC2)
-			
-			if(client ~= BNET_CLIENT_WOW) then
-				-- Client Name
-				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..clientName.."|r  "
-				tTooltipRichText = tTooltipRichText.."|cffCCCCCC"..toonName.."|r ";
-			else
-				-- Character Level
-				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  "
-				-- Character
-				tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(toonName, className).." ";
+			local playerStatus = ""
+			if isAFK then
+				playerStatus = CHAT_FLAG_AFK
+			elseif isDND then
+				playerStatus = CHAT_FLAG_DND
 			end
 			
 			-- Character
-			--tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(toonName, className).." ";
+			do
+				local first, second
+				if client == BNET_CLIENT_WOW then
+					first = level
+					second = TitanPanelSocialButton_ColorText(toonName, className)
+				else
+					first = client
+					second = "|cffCCCCCC"..toonName.."|r"
+				end
+				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..first.."|r  "
+				tTooltipRichText = tTooltipRichText..getStatusIcon(playerStatus)
+				tTooltipRichText = tTooltipRichText..second.." "
+			end
 			
 			-- Full Name
 			local fullName
@@ -570,11 +605,7 @@ function TitanPanelSocialButton_GetTooltipText()
 			tTooltipRichText = tTooltipRichText.."[|cff00A2E8"..fullName.."|r]  "
 			
 			-- Status
-			if (playerStatus ~= 0) then
-                  if (playerStatus == 1) then
-                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<AFK>".."|r  ";
-                  end
-	           end
+			tTooltipRichText = tTooltipRichText..getStatusText(playerStatus)
 			
 			-- Broadcast
 			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDBroadcasts") ~= nil) then
@@ -597,15 +628,15 @@ function TitanPanelSocialButton_GetTooltipText()
 	-- Friends
 	--
 	
-	if(TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") ~=nil) then
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") ~=nil then
 	
-		iFriendsTotal, iFriendsOnline = GetNumFriends();
+		local iFriendsTotal, iFriendsOnline = GetNumFriends();
 	
 		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_FRIENDS).."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
 		
 		for friendIndex=1, iFriendsOnline do
 		
-			name, level, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
+			local name, level, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
 			
 			tTooltipRichText = tTooltipRichText..getGroupIndicator(name)
 
@@ -616,16 +647,15 @@ function TitanPanelSocialButton_GetTooltipText()
 			
 			-- Level
 			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  ";
+
+			-- Status icon
+			tTooltipRichText = tTooltipRichText..getStatusIcon(playerStatus)
 			
 			-- Name
 			tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(name, class).." ";
 
 			-- Status
-			if (playerStatus ~= 0) then
-                  if (playerStatus == 1) then
-                    tTooltipRichText = tTooltipRichText.."|cffFFFFFF".."<AFK>".."|r  ";
-                  end
-	           end
+			tTooltipRichText = tTooltipRichText..getStatusText(playerStatus)
 			
 			-- Notes
 			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote") ~= nil) then
@@ -664,7 +694,7 @@ function TitanPanelSocialButton_GetTooltipText()
 		local guildText = ""
 		
 		for _, guildIndex in ipairs(roster) do
-			name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(guildIndex)
+			local name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(guildIndex)
 			
 			local currentText = ""
 
@@ -673,6 +703,15 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- toonName Fix
 			if name=="" then
 				name = "Unknown"
+			end
+
+			-- playerStatus fix
+			if playerStatus == 1 then
+				playerStatus = CHAT_FLAG_AFK
+			elseif playerStatus == 2 then
+				playerStatus = CHAT_FLAG_DND
+			else
+				playerStatus = ""
 			end
 			
 			local isRemote = guildIndex > guildOnline
@@ -692,17 +731,15 @@ function TitanPanelSocialButton_GetTooltipText()
 			-- Level
 			currentText = currentText.."|cffFFFFFF"..level.."|r  "
 
+
+			-- Status icon
+			currentText = currentText..getStatusIcon(playerStatus)
+
 			-- Name
 			currentText = currentText..TitanPanelSocialButton_ColorText(name, class).." ";
 
 			-- Status
-			if playerStatus ~= 0 then
-				if playerStatus == 1 then
-					currentText = currentText.."|cffFFFFFF".."<AFK>".."|r  ";
-				else
-					currentText = currentText.."|cffFFFFFF".."<DND>".."|r  ";
-				end
-			end
+			currentText = currentText..getStatusText(playerStatus)
 
 			-- Rank
 			currentText = currentText..rank.."  ";
