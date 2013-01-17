@@ -1,56 +1,76 @@
+local addonName, addonTable = ...
+local L = addonTable.L
+
+----------------------------------------------------------------------
+--  Global variables
+----------------------------------------------------------------------
+
+local _G = _G
+local RAID_CLASS_COLORS = _G.RAID_CLASS_COLORS
+local IsInGuild, IsInGroup = _G.IsInGuild, _G.IsInGroup
+local UnitInParty, UnitInRaid = _G.UnitInParty, _G.UnitInRaid
+local GuildRoster = _G.GuildRoster
+local GetGuildInfo, GetGuildRosterInfo, GetNumGuildMembers = _G.GetGuildInfo, _G.GetGuildRosterInfo, _G.GetNumGuildMembers
+local GetGuildRosterShowOffline, SetGuildRosterShowOffline = _G.GetGuildRosterShowOffline, _G.SetGuildRosterShowOffline
+local GetNumFriends, GetFriendInfo = _G.GetNumFriends, _G.GetFriendInfo
+local ToggleFriendsFrame, ToggleGuildFrame = _G.ToggleFriendsFrame, _G.ToggleGuildFrame
+local FriendsFrame_Update = _G.FriendsFrame_Update
+local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetInfo = _G.BNGetNumFriends, _G.BNGetFriendInfo, _G.BNGetToonInfo, _G.BNGetInfo
+local UIDropDownMenu_CreateInfo = _G.UIDropDownMenu_CreateInfo
+local UIDropDownMenu_Refresh = _G.UIDropDownMenu_Refresh
+local UIDropDownMenu_GetCurrentDropDown = _G.UIDropDownMenu_GetCurrentDropDown
+local UIDropDownMenu_AddButton = _G.UIDropDownMenu_AddButton
+local ChatFrame_GetMobileEmbeddedTexture = _G.ChatFrame_GetMobileEmbeddedTexture
+local CanViewOfficerNote = _G.CanViewOfficerNote
+local UpdateAddOnMemoryUsage, GetAddOnMemoryUsage = _G.UpdateAddOnMemoryUsage, _G.GetAddOnMemoryUsage
+
+local BNET_CLIENT_WOW = _G.BNET_CLIENT_WOW
+local REMOTE_CHAT = _G.REMOTE_CHAT
+local CHAT_FLAG_AFK, CHAT_FLAG_DND = _G.CHAT_FLAG_AFK, _G.CHAT_FLAG_DND
+local FRIENDS_TEXTURE_AFK, FRIENDS_TEXTURE_DND = _G.FRIENDS_TEXTURE_AFK, _G.FRIENDS_TEXTURE_DND
+local HIGHLIGHT_FONT_COLOR = _G.HIGHLIGHT_FONT_COLOR
+
+local TitanPanelButton_UpdateButton = _G.TitanPanelButton_UpdateButton
+local TitanPanelButton_UpdateTooltip = _G.TitanPanelButton_UpdateTooltip
+local TitanGetVar, TitanSetVar, TitanToggleVar = _G.TitanGetVar, _G.TitanSetVar, _G.TitanToggleVar
+local TitanUtils_GetNormalText = _G.TitanUtils_GetNormalText
+local TitanUtils_GetPlugin = _G.TitanUtils_GetPlugin
+local TitanPanelRightClickMenu_AddTitle = _G.TitanPanelRightClickMenu_AddTitle
+local TitanPanelRightClickMenu_AddSpacer = _G.TitanPanelRightClickMenu_AddSpacer
+local TitanPanelRightClickMenu_AddToggleVar = _G.TitanPanelRightClickMenu_AddToggleVar
+local TitanPanelRightClickMenu_AddCommand = _G.TitanPanelRightClickMenu_AddCommand
+local TitanPanelRightClickMenu_AddToggleIcon = _G.TitanPanelRightClickMenu_AddToggleIcon
 
 ----------------------------------------------------------------------
 --  Local variables
 ----------------------------------------------------------------------
 
 -- Debugging Mode
-	local bDebugMode = false;
-	
--- Localization
-	--local L = LibStub("AceLocale-3.0"):GetLocale("Titan", true)
+local bDebugMode = false
 
 -- Required Titan variables
-	TITAN_SOCIAL_ID = "Social";
-	TITAN_SOCIAL_VERSION = "5.1r18";
-	TITAN_NIL = false;
-	
--- Update frequency
-	TITAN_SOCIAL_UPDATE = 15.0;	-- Update every 15 seconds to avoid roster update nastiness
+local TITAN_SOCIAL_ID = "Social"
+local TITAN_SOCIAL_VERSION = "5.1r18"
 
--- Friend-specific variables
-	local iFriendsTab = 1;
--- RealID-specific variables
--- Guild-specific variables
-	local iGuildTab = 1;
+local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t"
+local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t"
 
--- Counters for Titan Bar Display
-	local iRealIDOnline, iFriendsOnline, iGuildOnline = 0;
-
-	local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t";
-	local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t";
-
-	local STATUS_ICON = "icon"
-	local STATUS_TEXT = "text"
-	local STATUS_NONE = "none"
+local STATUS_ICON = "icon"
+local STATUS_TEXT = "text"
+local STATUS_NONE = "none"
 
 -- Class support
-	local TitanSocial_ClassMap = {}
-	
+local TitanSocial_ClassMap = {}
+
 -- Build the class map
-	
-	for i = 1, GetNumClasses() do
-		local name, className, classId = GetClassInfo(i)
-    TitanSocial_ClassMap[LOCALIZED_CLASS_NAMES_MALE[className]] = className
-    TitanSocial_ClassMap[LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
-	end
+for i = 1, _G.GetNumClasses() do
+	local name, className, classId = _G.GetClassInfo(i)
+	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
+	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+end
 
 ----------------------------------------------------------------------
---  Global variables
-----------------------------------------------------------------------
-
-
-----------------------------------------------------------------------
--- colorText(text, className)
+-- Code
 ----------------------------------------------------------------------
 
 local function colorText(text, className)
@@ -66,150 +86,48 @@ local function colorText(text, className)
 	return "|c"..color..text.."|r"
 end
 
-----------------------------------------------------------------------
---  TitanPanelSocialButton_OnLoad(self)
-----------------------------------------------------------------------
-
-function TitanPanelSocialButton_OnLoad(self)
-
-
-	--
-	-- LOCAL REGISTRY --
-	--
-	
-		self.registry = { 
-			id = TITAN_SOCIAL_ID,
-			version = TITAN_SOCIAL_VERSION,
-			menuText = TITAN_SOCIAL_MENU_TEXT, 
-			buttonTextFunction = "TitanPanelSocialButton_GetButtonText",
-			tooltipCustomFunction = TitanPanelSocialButton_SetTooltip,
-			iconWidth = 16,
-			icon = "Interface\\FriendsFrame\\BroadcastIcon",
-			category = "Information",
-			controlVariables = {
-				ShowIcon = true,
-				--ShowLabelText = true,
-				DisplayOnRightSide = false
-				--ShowRegularText = false,
-				--ShowColoredText = true,
-			},
-			savedVariables = {
-				ShowRealID = 1,
-				ShowRealIDBroadcasts = false,
-				ShowRealIDNotes = true,
-				ShowFriends = 1,
-				ShowFriendsNote = 1,
-				ShowGuild = 1,
-				ShowGuildLabel = false,
-				ShowGuildNote = 1,
-				ShowSplitRemoteChat = 1,
-				ShowGuildONote = 1,
-				ShowGroupMembers = 1,
-				SortGuild = false,
-				GuildSortKey = "rank",
-				GuildSortAscending = true,
-				ShowStatus = STATUS_ICON,
-				ShowIcon = 1,
-				ShowLabel = 1,
-				ShowTooltipTotals = 1,
-				ShowMem = false,
-			  }
-		};
-
-	--
-	-- CONFIGURATION --
-	--
-	
-		-- Load these settings from SavedVariables/&Set Defaults
-		
-		-- Dynamic Settings
-
-
-	--
-	-- EVENT CATCHING --
-	--
-	
-		-- General Events
-		self:RegisterEvent("PLAYER_ENTERING_WORLD");
-		
-		-- RealID Events
-		self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE");
-		self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE");
-		self:RegisterEvent("BN_FRIEND_TOON_OFFLINE");
-		self:RegisterEvent("BN_FRIEND_TOON_ONLINE");
-		self:RegisterEvent("BN_TOON_NAME_UPDATED");
-		
-		-- Friend Events
-		self:RegisterEvent("FRIENDLIST_UPDATE");
-		
-		-- Guild Events
-		self:RegisterEvent("GUILD_ROSTER_UPDATE");
-		
-end
-
-----------------------------------------------------------------------
---  TitanPanelSocialButton_OnEvent(self, event, ...)
-----------------------------------------------------------------------
-
-function TitanPanelSocialButton_OnEvent(self, event, ...)
-
+function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
 	-- Debugging. Pay no attention to the man behind the curtain.
-	if(bDebugMode) then
-		DEFAULT_CHAT_FRAME:AddMessage("Social: OnEvent");
-		if(event == "PLAYER_ENTERING_WORLD") then
-			DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.");
+	if bDebugMode then
+		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: OnEvent")
+		if event == "PLAYER_ENTERING_WORLD" then
+			_G.DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.")
 		end
-		DEFAULT_CHAT_FRAME:AddMessage("Social: Caught Event "..event);
+		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: Caught Event "..event)
 	end
 
 	-- Update button label
-	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID);
-
+	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID)
 end
 
-----------------------------------------------------------------------
--- TitanPanelSocialButton_OnEnter(self)
-----------------------------------------------------------------------
-
-function TitanPanelSocialButton_OnEnter(self)
-
+function _G.TitanPanelSocialButton_OnEnter(self)
 	-- If in a guild, steal roster update. If not, ignore and update anyway
-	if (IsInGuild()) then	
-		FriendsFrame:UnregisterEvent("GUILD_ROSTER_UPDATE");
-		GuildRoster();
-		FriendsFrame:RegisterEvent("GUILD_ROSTER_UPDATE");
+	if IsInGuild() then
+		_G.FriendsFrame:UnregisterEvent("GUILD_ROSTER_UPDATE")
+		GuildRoster()
+		_G.FriendsFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
 	end
 
 	-- Update Titan button label and tooltip
-	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID);	
-	TitanPanelButton_UpdateTooltip(self);
+	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID)
+	TitanPanelButton_UpdateTooltip(self)
 end
 
-----------------------------------------------------------------------
---  TitanPanelSocialButton_OnClick(self, button)
-----------------------------------------------------------------------
-
-function TitanPanelSocialButton_OnClick(self, button)
-
+function _G.TitanPanelSocialButton_OnClick(self, button)
 	-- Detect mouse clicks
-	if (button == "LeftButton") then
+	if button == "LeftButton" then
 
-		if (TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~= nil) then
-      ToggleFriendsFrame(iFriendsTab);
-      FriendsFrame_Update();
-    end
-    
-    if (TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") ~= nil) then
-      ToggleGuildFrame(iGuildTab);
-    end
-    
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
+			ToggleFriendsFrame(1); -- friends tab
+			FriendsFrame_Update()
+		end
+
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
+			ToggleGuildFrame(1); -- guild tab
+		end
+
 	end
-	
 end
-
-----------------------------------------------------------------------
---  TitanPanelRightClickMenu_PrepareSocialMenu()
-----------------------------------------------------------------------
 
 local function addSubmenu(text, value, level)
 	local info = UIDropDownMenu_CreateInfo()
@@ -258,69 +176,70 @@ local function addRadioRefresh(text, key, value, level)
 	UIDropDownMenu_AddButton(info, level)
 end
 
-function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
+-- TitanPanelRightClickMenu_PrepareSocialMenu() must be global for TitanPanel to find it
+function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 	if level == 1 then
-		TitanPanelRightClickMenu_AddTitle(TitanPlugins[TITAN_SOCIAL_ID].menuText, level);
+		TitanPanelRightClickMenu_AddTitle(TitanUtils_GetPlugin(TITAN_SOCIAL_ID).menuText, level)
 		
 		-- RealID Menu
-		addSubmenu(TITAN_SOCIAL_MENU_REALID, "RealID", level)
+		addSubmenu(L.MENU_REALID, "RealID", level)
 		
 		-- Friends Menu
-		addSubmenu(TITAN_SOCIAL_MENU_FRIENDS, "Friends", level)
+		addSubmenu(L.MENU_FRIENDS, "Friends", level)
 		
 		-- Guild Menu
-		addSubmenu(TITAN_SOCIAL_MENU_GUILD, "Guild", level)
+		addSubmenu(L.MENU_GUILD, "Guild", level)
 		
-		TitanPanelRightClickMenu_AddSpacer(level);
-		TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_SHOW_GROUP_MEMBERS, TITAN_SOCIAL_ID, "ShowGroupMembers", nil, level)
+		TitanPanelRightClickMenu_AddSpacer(level)
+		TitanPanelRightClickMenu_AddToggleVar(L.MENU_SHOW_GROUP_MEMBERS, TITAN_SOCIAL_ID, "ShowGroupMembers", nil, level)
 
 		-- Status menu
-		addSubmenu(TITAN_SOCIAL_MENU_STATUS, "Status", level)
+		addSubmenu(L.MENU_STATUS, "Status", level)
 		
 		TitanPanelRightClickMenu_AddSpacer(level)
 		TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID, level)
-		TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_LABEL, TITAN_SOCIAL_ID, "ShowLabel", nil, level)
-		TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_MEM, TITAN_SOCIAL_ID, "ShowMem", nil, level)
+		TitanPanelRightClickMenu_AddToggleVar(L.MENU_LABEL, TITAN_SOCIAL_ID, "ShowLabel", nil, level)
+		TitanPanelRightClickMenu_AddToggleVar(L.MENU_MEM, TITAN_SOCIAL_ID, "ShowMem", nil, level)
 		TitanPanelRightClickMenu_AddSpacer(level)
-		TitanPanelRightClickMenu_AddCommand(TITAN_SOCIAL_MENU_HIDE, TITAN_SOCIAL_ID, TITAN_PANEL_MENU_FUNC_HIDE, level)
+		TitanPanelRightClickMenu_AddCommand(L.MENU_HIDE, TITAN_SOCIAL_ID, _G.TITAN_PANEL_MENU_FUNC_HIDE, level)
 	elseif level == 2 then
 		-- RealID Menu
 		if menuList == "RealID" then
-			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_REALID, level);
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_REALID_FRIENDS, TITAN_SOCIAL_ID, "ShowRealID", nil, level)
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_REALID_BROADCASTS, TITAN_SOCIAL_ID, "ShowRealIDBroadcasts", nil, level)
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_REALID_NOTE, TITAN_SOCIAL_ID, "ShowRealIDNotes", nil, level)
+			TitanPanelRightClickMenu_AddTitle(L.MENU_REALID, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_FRIENDS, TITAN_SOCIAL_ID, "ShowRealID", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_BROADCASTS, TITAN_SOCIAL_ID, "ShowRealIDBroadcasts", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_NOTE, TITAN_SOCIAL_ID, "ShowRealIDNotes", nil, level)
 		end
 		
 		-- Friends Menu
 		if menuList == "Friends" then
-			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_FRIENDS, level);
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_FRIENDS_SHOW, TITAN_SOCIAL_ID, "ShowFriends", nil, level)
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_FRIENDS_NOTE, TITAN_SOCIAL_ID, "ShowFriendsNote", nil, level)
+			TitanPanelRightClickMenu_AddTitle(L.MENU_FRIENDS, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_FRIENDS_SHOW, TITAN_SOCIAL_ID, "ShowFriends", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_FRIENDS_NOTE, TITAN_SOCIAL_ID, "ShowFriendsNote", nil, level)
 		end
 		
 		-- Guild Menu
 		if menuList == "Guild" then
-			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_GUILD, level);
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_GUILD_MEMBERS, TITAN_SOCIAL_ID, "ShowGuild", nil, level)
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_GUILD_LABEL, TITAN_SOCIAL_ID, "ShowGuildLabel", nil, level)
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_GUILD_NOTE, TITAN_SOCIAL_ID, "ShowGuildNote", nil, level)
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_GUILD_ONOTE, TITAN_SOCIAL_ID, "ShowGuildONote", nil, level)
-			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_GUILD_REMOTE_CHAT, TITAN_SOCIAL_ID, "ShowSplitRemoteChat", nil, level)
+			TitanPanelRightClickMenu_AddTitle(L.MENU_GUILD, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_MEMBERS, TITAN_SOCIAL_ID, "ShowGuild", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_LABEL, TITAN_SOCIAL_ID, "ShowGuildLabel", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_NOTE, TITAN_SOCIAL_ID, "ShowGuildNote", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_ONOTE, TITAN_SOCIAL_ID, "ShowGuildONote", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_REMOTE_CHAT, TITAN_SOCIAL_ID, "ShowSplitRemoteChat", nil, level)
 			
 			TitanPanelRightClickMenu_AddSpacer(level)
-			addSubmenu(TITAN_SOCIAL_MENU_GUILD_SORT, "GuildSort", level)
+			addSubmenu(L.MENU_GUILD_SORT, "GuildSort", level)
 		end
 
 		-- Status Menu
 		if menuList == "Status" then
-			addRadioRefresh(TITAN_SOCIAL_MENU_STATUS_ICON, "ShowStatus", STATUS_ICON, level)
-			addRadioRefresh(TITAN_SOCIAL_MENU_STATUS_TEXT, "ShowStatus", STATUS_TEXT, level)
-			addRadioRefresh(TITAN_SOCIAL_MENU_STATUS_NONE, "ShowStatus", STATUS_NONE, level)
+			addRadioRefresh(L.MENU_STATUS_ICON, "ShowStatus", STATUS_ICON, level)
+			addRadioRefresh(L.MENU_STATUS_TEXT, "ShowStatus", STATUS_TEXT, level)
+			addRadioRefresh(L.MENU_STATUS_NONE, "ShowStatus", STATUS_NONE, level)
 		end
 		
 		if menuList == "Options" then
-			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_OPTIONS, level);
+			TitanPanelRightClickMenu_AddTitle(L.MENU_OPTIONS, level)
 		end
 	elseif level == 3 then
 		-- Guild Sorting
@@ -328,7 +247,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			-- we'd like to use AddToggleVar() but we can't keep the menu open
 			do
 				local info = UIDropDownMenu_CreateInfo()
-				info.text = TITAN_SOCIAL_MENU_GUILD_SORT_DEFAULT
+				info.text = L.MENU_GUILD_SORT_DEFAULT
 				info.func = function ()
 					TitanToggleVar(TITAN_SOCIAL_ID, "SortGuild")
 				end
@@ -337,23 +256,20 @@ function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 				UIDropDownMenu_AddButton(info, level)
 			end
 			TitanPanelRightClickMenu_AddSpacer(level)
-			addSortOption(TITAN_SOCIAL_MENU_GUILD_SORT_NAME, "GuildSortKey", "name", level)
-			addSortOption(TITAN_SOCIAL_MENU_GUILD_SORT_RANK, "GuildSortKey", "rank", level)
-			addSortOption(TITAN_SOCIAL_MENU_GUILD_SORT_CLASS, "GuildSortKey", "class", level)
-			addSortOption(TITAN_SOCIAL_MENU_GUILD_SORT_LEVEL, "GuildSortKey", "level", level)
-			addSortOption(TITAN_SOCIAL_MENU_GUILD_SORT_ZONE, "GuildSortKey", "zone", level)
+			addSortOption(L.MENU_GUILD_SORT_NAME, "GuildSortKey", "name", level)
+			addSortOption(L.MENU_GUILD_SORT_RANK, "GuildSortKey", "rank", level)
+			addSortOption(L.MENU_GUILD_SORT_CLASS, "GuildSortKey", "class", level)
+			addSortOption(L.MENU_GUILD_SORT_LEVEL, "GuildSortKey", "level", level)
+			addSortOption(L.MENU_GUILD_SORT_ZONE, "GuildSortKey", "zone", level)
 			TitanPanelRightClickMenu_AddSpacer(level)
-			addSortOption(TITAN_SOCIAL_MENU_GUILD_SORT_ASCENDING, "GuildSortAscending", true, level)
-			addSortOption(TITAN_SOCIAL_MENU_GUILD_SORT_DESCENDING, "GuildSortAscending", false, level)
+			addSortOption(L.MENU_GUILD_SORT_ASCENDING, "GuildSortAscending", true, level)
+			addSortOption(L.MENU_GUILD_SORT_DESCENDING, "GuildSortAscending", false, level)
 		end
 	end
 end
 
-----------------------------------------------------------------------
--- TitanPanelSocialButton_GetButtonText(id)
-----------------------------------------------------------------------
-
-function TitanPanelSocialButton_GetButtonText(id)
+-- TitanPanelSocialButton_GetButtonText() must be global so TitanPanel can see it
+function _G.TitanPanelSocialButton_GetButtonText(id)
 	local label = " "
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowLabel") then
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildLabel") and TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") and IsInGuild() then
@@ -364,7 +280,7 @@ function TitanPanelSocialButton_GetButtonText(id)
 				label = "...: "
 			end
 		else
-			label = TITAN_SOCIAL_BUTTON_TITLE
+			label = L.BUTTON_TITLE
 		end
 	end
 
@@ -392,12 +308,8 @@ function TitanPanelSocialButton_GetButtonText(id)
 
 	label = label .. table.concat(comps, " |cffffd200/|r ")
 
-	return TITAN_SOCIAL_BUTTON_TITLE, label;
+	return L.BUTTON_TITLE, label
 end
-
-----------------------------------------------------------------------
--- TitanPanelSocialButton_SetTooltip()
-----------------------------------------------------------------------
 
 local function ternary(cond, a, b)
 	if cond then
@@ -407,6 +319,7 @@ local function ternary(cond, a, b)
 	end
 end
 
+-- collectGuildRosterInfo(split, sortKey, sortAscending)
 -- collects and sorts the guild roster
 -- PARAMETERS:
 --   split - boolean - whether to split the remote chat
@@ -483,6 +396,7 @@ local function collectGuildRosterInfo(split, sortKey, sortAscending)
 end
 
 -- spacer(width, count)
+-- PARAMETERS:
 --   width - number - width of the space. Defaults to TextHeight
 --   count - number - number of spacers. Defaults to 1
 -- RETURNS:
@@ -537,7 +451,7 @@ end
 local function addRealID(tooltip, digitWidth)
 	local numTotal, numOnline = BNGetNumFriends()
 
-	tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	for i=1, numOnline do
 		local left = ""
@@ -639,7 +553,7 @@ end
 local function addFriends(tooltip, digitWidth)
 	local numTotal, numOnline = GetNumFriends()
 
-	tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_FRIENDS), "|cffFFFFFF"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_FRIENDS), "|cffFFFFFF"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	for i=1, numOnline do
 		local left = ""
@@ -672,6 +586,7 @@ local function addFriends(tooltip, digitWidth)
 				left = left.."|cffFFFFFF"..playerNote.."|r "
 			end
 		end
+		local right = ""
 		if area ~= nil then
 			right = "|cffFFFFFF"..area.."|r"
 		end
@@ -765,7 +680,7 @@ local function addGuild(tooltip, digitWidth)
 
 	local numGuild = split and numOnline or numRemote
 
-	tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_GUILD), "|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_GUILD), "|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	for i, guildIndex in ipairs(roster) do
 		local isRemote = guildIndex > numOnline
@@ -775,7 +690,7 @@ local function addGuild(tooltip, digitWidth)
 			-- add header for Remote Chat
 			local numRemoteChat = numRemote - numOnline
 			tooltip:AddLine(" ")
-			tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT), "|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+			tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_REMOTE_CHAT), "|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 		end
 	end
 
@@ -783,7 +698,7 @@ local function addGuild(tooltip, digitWidth)
 end
 
 local function buildTooltip(tooltip, digitWidth)
-	tooltip:SetText(TITAN_SOCIAL_TOOLTIP, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+	tooltip:SetText(L.TOOLTIP, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
 
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
 		tooltip:AddLine(" ")
@@ -803,23 +718,88 @@ local function buildTooltip(tooltip, digitWidth)
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowMem") then
 		UpdateAddOnMemoryUsage()
 		tooltip:AddLine(" ")
-		tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_MEM), "|cff00FF00"..floor(GetAddOnMemoryUsage("TitanSocial")).." "..TITAN_SOCIAL_TOOLTIP_MEM_UNIT.."|r")
+		tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_MEM), "|cff00FF00"..math.floor(GetAddOnMemoryUsage("TitanSocial")).." "..L.TOOLTIP_MEM_UNIT.."|r")
 	end
 end
 
-function TitanPanelSocialButton_SetTooltip()
-	local tooltip = GameTooltip
+local function setTooltip()
+	local tooltip = _G.GameTooltip
 
 	-- Calculate the width of 1 digit
 	-- We're assuming that all digits in a font have the same width, since that seems to be the case
 	-- Set up the tooltip with a title and one line of body text, then measure the body text
 	tooltip:SetText("title")
 	tooltip:AddLine("0")
-	local digitWidth = GameTooltipTextLeft2:GetStringWidth()
+	local digitWidth = _G.GameTooltipTextLeft2:GetStringWidth()
 
 	local ok, message = pcall(buildTooltip, tooltip, digitWidth)
 	if not ok then
 		print("|cffFF0000TitanSocial error: " .. message .. "|r")
 		error(message, 0)
 	end
+end
+
+function _G.TitanPanelSocialButton_OnLoad(self)
+	--
+	-- LOCAL REGISTRY --
+	--
+
+	self.registry = {
+		id = TITAN_SOCIAL_ID,
+		version = TITAN_SOCIAL_VERSION,
+		menuText = L.MENU_TEXT,
+		buttonTextFunction = "TitanPanelSocialButton_GetButtonText",
+		tooltipCustomFunction = setTooltip,
+		iconWidth = 16,
+		icon = "Interface\\FriendsFrame\\BroadcastIcon",
+		category = "Information",
+		controlVariables = {
+			ShowIcon = true,
+			--ShowLabelText = true,
+			DisplayOnRightSide = false
+			--ShowRegularText = false,
+			--ShowColoredText = true,
+		},
+		savedVariables = {
+			ShowRealID = 1,
+			ShowRealIDBroadcasts = false,
+			ShowRealIDNotes = true,
+			ShowFriends = 1,
+			ShowFriendsNote = 1,
+			ShowGuild = 1,
+			ShowGuildLabel = false,
+			ShowGuildNote = 1,
+			ShowSplitRemoteChat = 1,
+			ShowGuildONote = 1,
+			ShowGroupMembers = 1,
+			SortGuild = false,
+			GuildSortKey = "rank",
+			GuildSortAscending = true,
+			ShowStatus = STATUS_ICON,
+			ShowIcon = 1,
+			ShowLabel = 1,
+			ShowTooltipTotals = 1,
+			ShowMem = false,
+		}
+	}
+
+	--
+	-- EVENT CATCHING --
+	--
+
+	-- General Events
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+	-- RealID Events
+	self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
+	self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
+	self:RegisterEvent("BN_FRIEND_TOON_OFFLINE")
+	self:RegisterEvent("BN_FRIEND_TOON_ONLINE")
+	self:RegisterEvent("BN_TOON_NAME_UPDATED")
+
+	-- Friend Events
+	self:RegisterEvent("FRIENDLIST_UPDATE")
+
+	-- Guild Events
+	self:RegisterEvent("GUILD_ROSTER_UPDATE")
 end
