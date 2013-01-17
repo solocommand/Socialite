@@ -822,6 +822,7 @@ local function buildTooltip(tooltip, digitWidth)
 	end
 	
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowMem") then
+		UpdateAddOnMemoryUsage()
 		tooltip:AddLine(" ")
 		tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_MEM), "|cff00FF00"..floor(GetAddOnMemoryUsage("TitanSocial")).." "..TITAN_SOCIAL_TOOLTIP_MEM_UNIT.."|r")
 	end
