@@ -14,9 +14,6 @@
 					<OnEvent>
 						TitanPanelSocialButton_OnEvent(self, event, ...);
 					</OnEvent>
-					<OnUpdate>
-						TitanPanelSocialButton_OnUpdate(self, elapsed);
-					</OnUpdate>
 					<OnEnter>
 						TitanPanelSocialButton_OnEnter(self);
 						TitanPanelButton_OnEnter(self);
