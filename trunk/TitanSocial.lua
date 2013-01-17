@@ -50,15 +50,14 @@
 
 
 ----------------------------------------------------------------------
--- TitanPanelSocial_ColorText(text, className)
+-- colorText(text, className)
 ----------------------------------------------------------------------
 
-function TitanPanelSocialButton_ColorText(text, className)
-
+local function colorText(text, className)
 	local classIndex, coloredText=nil
 
 	local class = TitanSocial_ClassMap[className]
-  local color = nil
+	local color = nil
 	if class == nil then
 		color = "ffcccccc"
 	else
@@ -83,8 +82,7 @@ function TitanPanelSocialButton_OnLoad(self)
 			version = TITAN_SOCIAL_VERSION,
 			menuText = TITAN_SOCIAL_MENU_TEXT, 
 			buttonTextFunction = "TitanPanelSocialButton_GetButtonText",
-			tooltipTitle = TITAN_SOCIAL_TOOLTIP,
-			tooltipTextFunction = "TitanPanelSocialButton_GetTooltipText",
+			tooltipCustomFunction = TitanPanelSocialButton_SetTooltip,
 			iconWidth = 16,
 			icon = "Interface\\FriendsFrame\\BroadcastIcon",
 			category = "Information",
@@ -98,6 +96,7 @@ function TitanPanelSocialButton_OnLoad(self)
 			savedVariables = {
 				ShowRealID = 1,
 				ShowRealIDBroadcasts = false,
+				ShowRealIDNotes = true,
 				ShowFriends = 1,
 				ShowFriendsNote = 1,
 				ShowGuild = 1,
@@ -311,6 +310,7 @@ function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			TitanPanelRightClickMenu_AddTitle(TITAN_SOCIAL_MENU_REALID, level);
 			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_REALID_FRIENDS, TITAN_SOCIAL_ID, "ShowRealID", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_REALID_BROADCASTS, TITAN_SOCIAL_ID, "ShowRealIDBroadcasts", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(TITAN_SOCIAL_MENU_REALID_NOTE, TITAN_SOCIAL_ID, "ShowRealIDNotes", nil, level)
 		end
 		
 		-- Friends Menu
@@ -417,20 +417,8 @@ function TitanPanelSocialButton_GetButtonText(id)
 end
 
 ----------------------------------------------------------------------
--- TitanPanelSocialButton_GetTooltipText()
+-- TitanPanelSocialButton_SetTooltip()
 ----------------------------------------------------------------------
-
-local function getGroupIndicator(name)
-	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGroupMembers") then
-		if IsInGroup() and name ~= "" then -- don't check self if we're not in a group
-			if UnitInParty(name) or UnitInRaid(name) then
-				return "|TInterface\\Buttons\\UI-CheckBox-Check:0:0|t" -- checkmark
-			end
-		end
-		return "|T:0:0|t" -- square spacer
-	end
-	return ""
-end
 
 local function ternary(cond, a, b)
 	if cond then
@@ -515,7 +503,29 @@ local function collectGuildRosterInfo(split, sortKey, sortAscending)
 	return onlineTable, guildTotal, guildOnline, guildRemote
 end
 
-local knownLocalRealmID = nil
+-- spacer(width, count)
+--   width - number - width of the space. Defaults to TextHeight
+--   count - number - number of spacers. Defaults to 1
+-- RETURNS:
+--   string - the spacer
+local function spacer(width, count)
+	if not width then width = 0 end
+	if not count then count = 1 end
+	local height = (width == 0) and 0 or 1
+	return ("|T:"..height..":"..width.."|t"):rep(count)
+end
+
+local function getGroupIndicator(name)
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGroupMembers") then
+		if IsInGroup() and name ~= "" then -- don't check self if we're not in a group
+			if UnitInParty(name) or UnitInRaid(name) then
+				return "|TInterface\\Buttons\\UI-CheckBox-Check:0:0|t" -- checkmark
+			end
+		end
+		return spacer()
+	end
+	return ""
+end
 
 local function getStatusIcon(status)
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowStatus") == STATUS_ICON then
@@ -537,252 +547,299 @@ local function getStatusText(status)
 	return ""
 end
 
-function TitanPanelSocialButton_GetTooltipText()
-	local tTooltipRichText = ""
-	
-	--
-	--	RealID Friends
-	--
-	
-	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") ~=nil then
-		local iRealIDTotal, iRealIDOnline = BNGetNumFriends();
+local function padLevel(level, digitWidth)
+	level = tostring(tonumber(level) or 0)
+	if #level < 2 then
+		level = spacer(digitWidth)..level
+	end
+	return level
+end
 
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REALID).."\t".."|cff00A2E8"..iRealIDOnline.."|r"..TitanUtils_GetNormalText("/"..iRealIDTotal).."\n"
-		
-		for friendIndex=1, iRealIDOnline do
-			local presenceID, presenceName, battleTag, isBattleTagPresence, toonName, toonID, client, isOnline, lastOnline, isAFK, isDND, messageText, noteText, isFriend, unknown = BNGetFriendInfo(friendIndex)
-			local hasFocus, toonName, client, realmName, realmID, faction, race, className, _, zoneName, level, gameText, broadcastText, broadcastTime = BNGetToonInfo(presenceID)
+local function addRealID(tooltip, digitWidth)
+	local numTotal, numOnline = BNGetNumFriends()
 
-			-- group member indicator
-			do
-				if knownLocalRealmID == nil then
-					-- find our local realm ID
-					knownLocalRealmID = select(5, BNGetToonInfo(select(3,BNGetInfo())))
-				end
-				-- is this friend playing WoW on our server?
-				local name = ""
-				if client == BNET_CLIENT_WOW then
-					if realmID == knownLocalRealmID then
-						name = toonName
-					else
-						-- how about a different server? Cross-realm exists
-						name = toonName.."-"..realmName
-					end
-				end
-				tTooltipRichText = tTooltipRichText..getGroupIndicator(name)
-			end
+	tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
-			-- playerStatus
-			local playerStatus = ""
-			if isAFK then
-				playerStatus = CHAT_FLAG_AFK
-			elseif isDND then
-				playerStatus = CHAT_FLAG_DND
-			end
-			
-			-- Character
-			do
-				local first, second
-				if client == BNET_CLIENT_WOW then
-					first = level
-					second = TitanPanelSocialButton_ColorText(toonName, className)
-				else
-					first = client
-					second = "|cffCCCCCC"..toonName.."|r"
-				end
-				tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..first.."|r  "
-				tTooltipRichText = tTooltipRichText..getStatusIcon(playerStatus)
-				tTooltipRichText = tTooltipRichText..second.." "
-			end
-			
-			-- Full Name
-			local fullName
-			if isBattleTagPresence then
-				fullName = battleTag
+	for i=1, numOnline do
+		local left = ""
+
+		local presenceID, presenceName, battleTag, isBattleTagPresence, _, _, client, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
+		local _, toonName, client, realmName, realmID, faction, _, className, _, _, level, gameText = BNGetToonInfo(presenceID)
+
+		-- group member indicator
+		-- is this friend playing WoW on our server?
+		if client == BNET_CLIENT_WOW then
+			local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
+			local name
+			if realmID == playerRealmID then
+				name = toonName
 			else
-				fullName = presenceName
+				-- Cross-realm?
+				name = toonName.."-"..realmName
 			end
-			tTooltipRichText = tTooltipRichText.."[|cff00A2E8"..fullName.."|r]  "
-			
-			-- Status
-			tTooltipRichText = tTooltipRichText..getStatusText(playerStatus)
-			
-			-- Broadcast
-			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDBroadcasts") ~= nil) then
-				if (broadcastText ~= nil) then
-				-- it seems as though newlines in broadcastText reset the coloration
-				-- Also try to nudge subsequent lines over a bit
+			left = left..getGroupIndicator(name)
+		else
+			left = left..getGroupIndicator("")
+		end
+
+		-- player status
+		local playerStatus = ""
+		if isAFK then
+			playerStatus = CHAT_FLAG_AFK
+		elseif isDND then
+			playerStatus = CHAT_FLAG_DND
+		end
+
+		-- Character
+		do
+			local first, second
+			if client == BNET_CLIENT_WOW then
+				first = padLevel(level, digitWidth)
+				second = colorText(toonName, className)
+			else
+				first = client
+				second = "|cffCCCCCC"..toonName.."|r"
+			end
+			left = left.."|cffFFFFFF"..first.."|r  "
+			left = left..getStatusIcon(playerStatus)
+			left = left..second.." "
+		end
+
+		-- Full name
+		left = left.."[|cff00A2E8"..(isBattleTagPresence and battleTag or presenceName).."|r] "
+
+		-- Status
+		left = left..getStatusText(playerStatus).." "
+
+		-- Note
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDNotes") then
+			if noteText and noteText ~= "" then
+				left = left.."|cffFFFFFF"..noteText.."|r"
+				-- prepend "\n" onto broadcast to put it onto next line
+				if broadcastText and broadcastText ~= "" then
+					broadcastText = "\n"..broadcastText
+				end
+			end
+		end
+
+		-- Broadcast
+		local extraLines
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDBroadcasts") then
+			if broadcastText and broadcastText ~= "" then
+				-- watch out for newlines in the broadcast text
 				local color = "|cff00A2E8"
-				broadcastText = broadcastText:gsub("\n", "|r".."\n        "..color)
-				tTooltipRichText = tTooltipRichText..color..broadcastText.."|r ";
+				local firstLine = broadcastText:match("^([^\n]*)\n")
+				if firstLine then
+					extraLines = {}
+					for line in broadcastText:gmatch("\n([^\n]*)") do
+						extraLines[#extraLines+1] = color..line.."|r"
+					end
+					broadcastText = firstLine
+				end
+				if broadcastText ~= "" then
+					left = left..color..broadcastText.."|r"
 				end
 			end
-			
-			-- Character Location
-			tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..gameText.."|r\n";
-
 		end
-	end
-	
-	--
-	-- Friends
-	--
-	
-	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") ~=nil then
-	
-		local iFriendsTotal, iFriendsOnline = GetNumFriends();
-	
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_FRIENDS).."\t".."|cffFFFFFF"..iFriendsOnline.."|r"..TitanUtils_GetNormalText("/"..iFriendsTotal).."\n"
-		
-		for friendIndex=1, iFriendsOnline do
-		
-			local name, level, class, area, connected, playerStatus, playerNote, RAF = GetFriendInfo(friendIndex);
-			
-			tTooltipRichText = tTooltipRichText..getGroupIndicator(name)
 
-			-- toonName Fix
-				if (name == "") then
-					name = "Unknown"
-				end
-			
-			-- Level
-			tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..level.."|r  ";
+		-- Location
+		local right = "|cffFFFFFF"..gameText.."|r"
 
-			-- Status icon
-			tTooltipRichText = tTooltipRichText..getStatusIcon(playerStatus)
-			
-			-- Name
-			tTooltipRichText = tTooltipRichText..TitanPanelSocialButton_ColorText(name, class).." ";
-
-			-- Status
-			tTooltipRichText = tTooltipRichText..getStatusText(playerStatus)
-			
-			-- Notes
-			if(TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote") ~= nil) then
-				if(playerNote ~= nil) then
-					tTooltipRichText = tTooltipRichText.."|cffFFFFFF"..playerNote.."|r ";
-				end
+		tooltip:AddDoubleLine(left, right)
+		if extraLines then
+			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "
+			for _, line in ipairs(extraLines) do
+				-- indent the line over
+				line = indent..line
+				tooltip:AddLine(line)
 			end
-			
-			-- Location
-			--tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..area.."|r\n";
-			if (area ~= nil) then 
-				tTooltipRichText = tTooltipRichText.."\t|cffFFFFFF"..area.."|r\n" 
-			end 
-		
 		end
 	end
+end
+
+local function addFriends(tooltip, digitWidth)
+	local numTotal, numOnline = GetNumFriends()
+
+	tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_FRIENDS), "|cffFFFFFF"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+
+	for i=1, numOnline do
+		local left = ""
+
+		local name, level, class, area, connected, playerStatus, playerNote, isRAF = GetFriendInfo(i)
+
+		-- Group indicator
+		left = left..getGroupIndicator(name)
+
+		-- fix unknown names - why does this happen?
+		if name == "" then
+			name = "Unknown"
+		end
+
+		-- Level
+		left = left.."|cffFFFFFF"..padLevel(level, digitWidth).."|r  "
+
+		-- Status icon
+		left = left..getStatusIcon(playerStatus)
+
+		-- Name
+		left = left..colorText(name, class).." "
+
+		-- Status
+		left = left..getStatusText(playerStatus).." "
+
+		-- Notes
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote") then
+			if playerNote and playerNote ~= "" then
+				left = left.."|cffFFFFFF"..playerNote.."|r "
+			end
+		end
+		if area ~= nil then
+			right = "|cffFFFFFF"..area.."|r"
+		end
+		
+		tooltip:AddDoubleLine(left, right)
+	end
+end
+
+local function processGuildMember(i, isRemote, tooltip, digitWidth)
+	local left = ""
+
+	local name, rank, rankIndex, level, class, zone, note, officerNote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(i)
+
+	left = left..getGroupIndicator(name)
+
+	-- fix name
+	if name == "" then
+		name = "Unknown"
+	end
+
+	-- fix playerStatus
+	if playerStatus == 1 then
+		playerStatus = CHAT_FLAG_AFK
+	elseif playerStatus == 2 then
+		playerStatus = CHAT_FLAG_DND
+	else
+		playerStatus = ""
+	end
+
+	if isMobile then
+		if isRemote then zone = REMOTE_CHAT end
+		if playerStatus == CHAT_FLAG_DND then
+			name = MOBILE_BUSY_ICON..name
+		elseif playerStatus == CHAT_FLAG_AFK then
+			name = MOBILE_AWAY_ICON..name
+		else
+			name = ChatFrame_GetMobileEmbeddedTexture(73/255, 177/255, 73/255)..name
+		end
+	end
+
+	-- Level
+	left = left.."|cffFFFFFF"..padLevel(level, digitWidth).."|r  "
+
+	-- Status icon
+	if not isMobile then
+		-- Mobile icon already shows status
+		left = left..getStatusIcon(playerStatus)
+	end
+
+	-- Name
+	left = left..colorText(name, class).." "
+
+	-- Status
+	left = left..getStatusText(playerStatus).." "
+
+	-- Rank
+	left = left..rank.."  "
+
+	-- Notes
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildNote") then
+		if note and note ~= "" then
+			left = left.."|cffFFFFFF"..note.."|r  "
+		end
+	end
+
+	-- Officer Notes
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildONote") then
+		if CanViewOfficerNote() then
+			if officerNote and officerNote ~= "" then
+				left = left.."|cffAAFFAA"..officerNote.."|r  "
+			end
+		end
+	end
+
+	-- Location
+	local right = ""
+	if zone and zone ~= "" then
+		right = "|cffFFFFFF"..zone.."|r"
+	end
+
+	tooltip:AddDoubleLine(left, right)
+end
+
+local function addGuild(tooltip, digitWidth)
+	local wasOffline = GetGuildRosterShowOffline()
+	SetGuildRosterShowOffline(false)
+
+	local split = TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat")
+	local sortKey = TitanGetVar(TITAN_SOCIAL_ID, "SortGuild") and TitanGetVar(TITAN_SOCIAL_ID, "GuildSortKey") or nil
+	local roster, numTotal, numOnline, numRemote = collectGuildRosterInfo(split, sortKey, TitanGetVar(TITAN_SOCIAL_ID, "GuildSortAscending") or false)
+
+	local numGuild = split and numOnline or numRemote
+
+	tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_GUILD), "|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+
+	for i, guildIndex in ipairs(roster) do
+		local isRemote = guildIndex > numOnline
+		processGuildMember(guildIndex, isRemote, tooltip, digitWidth)
+
+		if split and i == numOnline then
+			-- add header for Remote Chat
+			local numRemoteChat = numRemote - numOnline
+			tooltip:AddLine(" ")
+			tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT), "|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+		end
+	end
+
+	SetGuildRosterShowOffline(wasOffline)
+end
+
+local function buildTooltip(tooltip, digitWidth)
+	tooltip:SetText(TITAN_SOCIAL_TOOLTIP, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
+		tooltip:AddLine(" ")
+		addRealID(tooltip, digitWidth)
+	end
 	
-	--
-	-- Guild
-	--
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
+		tooltip:AddLine(" ")
+		addFriends(tooltip, digitWidth)
+	end
 	
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
-		local wasOffline = GetGuildRosterShowOffline()
-		SetGuildRosterShowOffline(false)
-
-		local split = TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat")
-		local sortKey = TitanGetVar(TITAN_SOCIAL_ID, "SortGuild") and TitanGetVar(TITAN_SOCIAL_ID, "GuildSortKey") or nil
-		local roster, guildTotal, guildOnline, guildRemote = collectGuildRosterInfo(split, sortKey, TitanGetVar(TITAN_SOCIAL_ID, "GuildSortAscending") or false)
-
-		local remoteChatText = nil
-		local numGuild = guildRemote
-		if split then
-			remoteChatText = ""
-			numGuild = guildOnline
-		end
-		local guildText = ""
-		
-		for _, guildIndex in ipairs(roster) do
-			local name, rank, rankIndex, level, class, zone, note, officernote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(guildIndex)
-			
-			local currentText = ""
-
-			currentText = currentText..getGroupIndicator(name)
-			
-			-- toonName Fix
-			if name=="" then
-				name = "Unknown"
-			end
-
-			-- playerStatus fix
-			if playerStatus == 1 then
-				playerStatus = CHAT_FLAG_AFK
-			elseif playerStatus == 2 then
-				playerStatus = CHAT_FLAG_DND
-			else
-				playerStatus = ""
-			end
-			
-			local isRemote = guildIndex > guildOnline
-			if isMobile then
-				if isRemote then zone = REMOTE_CHAT end
-				if playerStatus == 2 then
-					name = MOBILE_BUSY_ICON..name
-				elseif playerStatus == 1 then
-					name = MOBILE_AWAY_ICON..name
-				else
-					name = ChatFrame_GetMobileEmbeddedTexture(73/255, 177/255, 73/255)..name
-				end
-			end
-			
-			-- 80 {color=class::Playername} {<AFK>} Rank Note ONote\t Location
-			
-			-- Level
-			currentText = currentText.."|cffFFFFFF"..level.."|r  "
-
-
-			-- Status icon
-			currentText = currentText..getStatusIcon(playerStatus)
-
-			-- Name
-			currentText = currentText..TitanPanelSocialButton_ColorText(name, class).." ";
-
-			-- Status
-			currentText = currentText..getStatusText(playerStatus)
-
-			-- Rank
-			currentText = currentText..rank.."  ";
-			
-			-- Notes
-			if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildNote") then
-				currentText = currentText.."|cffFFFFFF"..note.."|r  "
-			end
-			
-			-- Officer Notes
-			if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildONote") then
-				if CanViewOfficerNote() then
-					currentText = currentText.."|cffAAFFAA"..officernote.."|r  "
-				end
-			end
-			
-			-- Location
-			if zone ~= nil then 
-				currentText = currentText.."\t|cffFFFFFF"..zone.."|r\n"
-			else
-				currentText = currentText.."\n"
-			end
-			
-			if isRemote and remoteChatText ~= nil then
-				remoteChatText = remoteChatText..currentText
-			else
-				guildText = guildText..currentText
-			end
-		end
-		
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_GUILD).."\t".."|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..guildTotal).."\n"..guildText
-
-		if remoteChatText ~= nil then
-			local numRemoteChat = guildRemote - guildOnline
-			tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_REMOTE_CHAT).."\t".."|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..guildTotal).."\n"..remoteChatText
-		end
-
-		SetGuildRosterShowOffline(wasOffline)
+		tooltip:AddLine(" ")
+		addGuild(tooltip, digitWidth)
 	end
 	
-	if (TitanGetVar(TITAN_SOCIAL_ID, "ShowMem") ~=nil) then
-		tTooltipRichText = tTooltipRichText.." \n"..TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_MEM).."\t|cff00FF00"..floor(GetAddOnMemoryUsage("TitanSocial")).." "..TITAN_SOCIAL_TOOLTIP_MEM_UNIT.."|r";
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowMem") then
+		tooltip:AddLine(" ")
+		tooltip:AddDoubleLine(TitanUtils_GetNormalText(TITAN_SOCIAL_TOOLTIP_MEM), "|cff00FF00"..floor(GetAddOnMemoryUsage("TitanSocial")).." "..TITAN_SOCIAL_TOOLTIP_MEM_UNIT.."|r")
 	end
-	
-	return tTooltipRichText;
+end
+
+function TitanPanelSocialButton_SetTooltip()
+	local tooltip = GameTooltip
+
+	-- Calculate the width of 1 digit
+	-- We're assuming that all digits in a font have the same width, since that seems to be the case
+	-- Set up the tooltip with a title and one line of body text, then measure the body text
+	tooltip:SetText("title")
+	tooltip:AddLine("0")
+	local digitWidth = GameTooltipTextLeft2:GetStringWidth()
+
+	local ok, message = pcall(buildTooltip, tooltip, digitWidth)
+	if not ok then
+		print("|cffFF0000TitanSocial error: " .. message .. "|r")
+		error(message, 0)
+	end
 end
