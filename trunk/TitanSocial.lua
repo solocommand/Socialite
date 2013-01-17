@@ -186,27 +186,6 @@ function TitanPanelSocialButton_OnEnter(self)
 end
 
 ----------------------------------------------------------------------
---  TitanPanelSocialButton_OnUpdate(self, elapsed)
-----------------------------------------------------------------------
-
-function TitanPanelSocialButton_OnUpdate(self, elapsed)
-	
-	-- From wowwiki, best practices for low-intensity onupdates.
-	-- Run updates every TITAN_SOCIAL_UPDATE to keep resources low
-	-- and avoid 10s timeout/wait from guild_update_roster
-	self.TimeSinceLastUpdate = self.TimeSinceLastUpdate + elapsed;
-	
-	if (self.TimeSinceLastUpdate > TITAN_SOCIAL_UPDATE) then
-		TitanPanelSocialButton_GetButtonText(TitanUtils_GetButton(id));
-		self.TimeSinceLastUpdate = 0;
-		if(bDebugMode) then
-			DEFAULT_CHAT_FRAME:AddMessage("Social: OnUpdate Timer");
-		end
-	end
-
-end
-
-----------------------------------------------------------------------
 --  TitanPanelSocialButton_OnClick(self, button)
 ----------------------------------------------------------------------
 
