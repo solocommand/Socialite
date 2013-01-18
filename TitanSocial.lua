@@ -5,6 +5,8 @@ local L = addonTable.L
 --  Global variables
 ----------------------------------------------------------------------
 
+-- GLOBALS: table math select string tostring tonumber ipairs print pcall select error
+
 local _G = _G
 local RAID_CLASS_COLORS = _G.RAID_CLASS_COLORS
 local IsInGuild, IsInGroup = _G.IsInGuild, _G.IsInGroup
