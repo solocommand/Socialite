@@ -31,6 +31,7 @@ local UIDropDownMenu_AddButton = _G.UIDropDownMenu_AddButton
 local ChatFrame_GetMobileEmbeddedTexture = _G.ChatFrame_GetMobileEmbeddedTexture
 local CanViewOfficerNote = _G.CanViewOfficerNote
 local UpdateAddOnMemoryUsage, GetAddOnMemoryUsage = _G.UpdateAddOnMemoryUsage, _G.GetAddOnMemoryUsage
+local ChatFrame_SendTell, ChatFrame_SendSmartTell = _G.ChatFrame_SendTell, _G.ChatFrame_SendSmartTell
 
 local BNET_CLIENT_WOW = _G.BNET_CLIENT_WOW
 local REMOTE_CHAT = _G.REMOTE_CHAT
@@ -417,6 +418,20 @@ local function padLevel(level, digitWidth)
 	return level
 end
 
+local function clickPlayer(frame, player, button)
+	if player ~= "" then
+		if button == "LeftButton" then
+			ChatFrame_SendTell(player)
+		end
+	end
+end
+
+local function clickRealID(frame, presenceName, button)
+	if button == "LeftButton" then
+		ChatFrame_SendSmartTell(presenceName)
+	end
+end
+
 local function addRealID(tooltip, digitWidth)
 	local numTotal, numOnline = BNGetNumFriends()
 
@@ -507,7 +522,8 @@ local function addRealID(tooltip, digitWidth)
 		-- Location
 		local right = "|cffFFFFFF"..gameText.."|r"
 
-		tooltip:AddLine(left, right)
+		local y = tooltip:AddLine(left, right)
+		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, presenceName)
 		if extraLines then
 			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "
 			for _, line in ipairs(extraLines) do
@@ -534,6 +550,7 @@ local function addFriends(tooltip, digitWidth)
 		left = left..getGroupIndicator(name)
 
 		-- fix unknown names - why does this happen?
+		local origname = name
 		if name == "" then
 			name = "Unknown"
 		end
@@ -561,7 +578,8 @@ local function addFriends(tooltip, digitWidth)
 			right = "|cffFFFFFF"..area.."|r"
 		end
 		
-		tooltip:AddLine(left, right)
+		local y =tooltip:AddLine(left, right)
+		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, origname)
 	end
 end
 
@@ -573,6 +591,7 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 	left = left..getGroupIndicator(name)
 
 	-- fix name
+	local origname = name
 	if name == "" then
 		name = "Unknown"
 	end
@@ -637,7 +656,8 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 		right = "|cffFFFFFF"..zone.."|r"
 	end
 
-	tooltip:AddLine(left, right)
+	local y = tooltip:AddLine(left, right)
+	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, origname)
 end
 
 local function addGuild(tooltip, digitWidth)
