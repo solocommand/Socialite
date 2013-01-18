@@ -32,6 +32,8 @@ local ChatFrame_GetMobileEmbeddedTexture = _G.ChatFrame_GetMobileEmbeddedTexture
 local CanViewOfficerNote = _G.CanViewOfficerNote
 local UpdateAddOnMemoryUsage, GetAddOnMemoryUsage = _G.UpdateAddOnMemoryUsage, _G.GetAddOnMemoryUsage
 local ChatFrame_SendTell, ChatFrame_SendSmartTell = _G.ChatFrame_SendTell, _G.ChatFrame_SendSmartTell
+local InviteUnit = _G.InviteUnit
+local IsAltKeyDown = _G.IsAltKeyDown
 
 local BNET_CLIENT_WOW = _G.BNET_CLIENT_WOW
 local REMOTE_CHAT = _G.REMOTE_CHAT
@@ -418,17 +420,27 @@ local function padLevel(level, digitWidth)
 	return level
 end
 
-local function clickPlayer(frame, player, button)
+local function clickPlayer(frame, info, button)
+	local player, isRemote = unpack(info)
 	if player ~= "" then
 		if button == "LeftButton" then
-			ChatFrame_SendTell(player)
+			if IsAltKeyDown() then
+				if not isRemote then InviteUnit(player) end
+			else
+				ChatFrame_SendTell(player)
+			end
 		end
 	end
 end
 
-local function clickRealID(frame, presenceName, button)
+local function clickRealID(frame, info, button)
+	local presenceName, toonName = unpack(info)
 	if button == "LeftButton" then
-		ChatFrame_SendSmartTell(presenceName)
+		if IsAltKeyDown() then
+			if toonName then InviteUnit(toonName) end
+		else
+			ChatFrame_SendSmartTell(presenceName)
+		end
 	end
 end
 
@@ -523,7 +535,7 @@ local function addRealID(tooltip, digitWidth)
 		local right = "|cffFFFFFF"..gameText.."|r"
 
 		local y = tooltip:AddLine(left, right)
-		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, presenceName)
+		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, client == BNET_CLIENT_WOW and toonName or nil })
 		if extraLines then
 			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "
 			for _, line in ipairs(extraLines) do
@@ -579,7 +591,7 @@ local function addFriends(tooltip, digitWidth)
 		end
 		
 		local y =tooltip:AddLine(left, right)
-		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, origname)
+		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, false })
 	end
 end
 
@@ -657,7 +669,7 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 	end
 
 	local y = tooltip:AddLine(left, right)
-	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, origname)
+	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, isRemote })
 end
 
 local function addGuild(tooltip, digitWidth)
