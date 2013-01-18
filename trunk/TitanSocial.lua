@@ -2,10 +2,16 @@ local addonName, addonTable = ...
 local L = addonTable.L
 
 ----------------------------------------------------------------------
+--  Libraries
+----------------------------------------------------------------------
+
+local LibQTip = _G.LibStub('LibQTip-1.0')
+
+----------------------------------------------------------------------
 --  Global variables
 ----------------------------------------------------------------------
 
--- GLOBALS: table math select string tostring tonumber ipairs print pcall select error
+-- GLOBALS: table math select string tostring tonumber ipairs print pcall select error unpack
 
 local _G = _G
 local RAID_CLASS_COLORS = _G.RAID_CLASS_COLORS
@@ -42,6 +48,7 @@ local TitanPanelRightClickMenu_AddSpacer = _G.TitanPanelRightClickMenu_AddSpacer
 local TitanPanelRightClickMenu_AddToggleVar = _G.TitanPanelRightClickMenu_AddToggleVar
 local TitanPanelRightClickMenu_AddCommand = _G.TitanPanelRightClickMenu_AddCommand
 local TitanPanelRightClickMenu_AddToggleIcon = _G.TitanPanelRightClickMenu_AddToggleIcon
+local TitanPanelRightClickMenu_IsVisible = _G.TitanPanelRightClickMenu_IsVisible
 
 ----------------------------------------------------------------------
 --  Local variables
@@ -53,6 +60,7 @@ local bDebugMode = false
 -- Required Titan variables
 local TITAN_SOCIAL_ID = "Social"
 local TITAN_SOCIAL_VERSION = "5.1r18"
+local TITAN_SOCIAL_TOOLTIP_KEY = "TitanSocialTooltip"
 
 local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t"
 local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t"
@@ -60,6 +68,8 @@ local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMob
 local STATUS_ICON = "icon"
 local STATUS_TEXT = "text"
 local STATUS_NONE = "none"
+
+local shouldIgnoreGuildRosterUpdate = false
 
 -- Class support
 local TitanSocial_ClassMap = {}
@@ -72,7 +82,7 @@ for i = 1, _G.GetNumClasses() do
 end
 
 ----------------------------------------------------------------------
--- Code
+--  Code
 ----------------------------------------------------------------------
 
 local function colorText(text, className)
@@ -86,49 +96,6 @@ local function colorText(text, className)
 		color = RAID_CLASS_COLORS[class].colorStr
 	end
 	return "|c"..color..text.."|r"
-end
-
-function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
-	-- Debugging. Pay no attention to the man behind the curtain.
-	if bDebugMode then
-		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: OnEvent")
-		if event == "PLAYER_ENTERING_WORLD" then
-			_G.DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.")
-		end
-		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: Caught Event "..event)
-	end
-
-	-- Update button label
-	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID)
-end
-
-function _G.TitanPanelSocialButton_OnEnter(self)
-	-- If in a guild, steal roster update. If not, ignore and update anyway
-	if IsInGuild() then
-		_G.FriendsFrame:UnregisterEvent("GUILD_ROSTER_UPDATE")
-		GuildRoster()
-		_G.FriendsFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
-	end
-
-	-- Update Titan button label and tooltip
-	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID)
-	TitanPanelButton_UpdateTooltip(self)
-end
-
-function _G.TitanPanelSocialButton_OnClick(self, button)
-	-- Detect mouse clicks
-	if button == "LeftButton" then
-
-		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
-			ToggleFriendsFrame(1); -- friends tab
-			FriendsFrame_Update()
-		end
-
-		if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
-			ToggleGuildFrame(1); -- guild tab
-		end
-
-	end
 end
 
 local function addSubmenu(text, value, level)
@@ -453,7 +420,7 @@ end
 local function addRealID(tooltip, digitWidth)
 	local numTotal, numOnline = BNGetNumFriends()
 
-	tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	for i=1, numOnline do
 		local left = ""
@@ -540,13 +507,14 @@ local function addRealID(tooltip, digitWidth)
 		-- Location
 		local right = "|cffFFFFFF"..gameText.."|r"
 
-		tooltip:AddDoubleLine(left, right)
+		tooltip:AddLine(left, right)
 		if extraLines then
 			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "
 			for _, line in ipairs(extraLines) do
 				-- indent the line over
 				line = indent..line
-				tooltip:AddLine(line)
+				local y, x = tooltip:AddLine()
+				tooltip:SetCell(y, x, line, nil, nil, 2)
 			end
 		end
 	end
@@ -555,7 +523,7 @@ end
 local function addFriends(tooltip, digitWidth)
 	local numTotal, numOnline = GetNumFriends()
 
-	tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_FRIENDS), "|cffFFFFFF"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_FRIENDS), "|cffFFFFFF"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	for i=1, numOnline do
 		local left = ""
@@ -593,7 +561,7 @@ local function addFriends(tooltip, digitWidth)
 			right = "|cffFFFFFF"..area.."|r"
 		end
 		
-		tooltip:AddDoubleLine(left, right)
+		tooltip:AddLine(left, right)
 	end
 end
 
@@ -669,12 +637,17 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 		right = "|cffFFFFFF"..zone.."|r"
 	end
 
-	tooltip:AddDoubleLine(left, right)
+	tooltip:AddLine(left, right)
 end
 
 local function addGuild(tooltip, digitWidth)
 	local wasOffline = GetGuildRosterShowOffline()
-	SetGuildRosterShowOffline(false)
+	if wasOffline then
+		-- SetGuildRosterShowOffline() seems to sometimes trigger GUILD_ROSTER_UPDATE
+		shouldIgnoreGuildRosterUpdate = true
+		SetGuildRosterShowOffline(false)
+		shouldIgnoreGuildRosterUpdate = false
+	end
 
 	local split = TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat")
 	local sortKey = TitanGetVar(TITAN_SOCIAL_ID, "SortGuild") and TitanGetVar(TITAN_SOCIAL_ID, "GuildSortKey") or nil
@@ -682,7 +655,7 @@ local function addGuild(tooltip, digitWidth)
 
 	local numGuild = split and numOnline or numRemote
 
-	tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_GUILD), "|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_GUILD), "|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	for i, guildIndex in ipairs(roster) do
 		local isRemote = guildIndex > numOnline
@@ -692,15 +665,19 @@ local function addGuild(tooltip, digitWidth)
 			-- add header for Remote Chat
 			local numRemoteChat = numRemote - numOnline
 			tooltip:AddLine(" ")
-			tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_REMOTE_CHAT), "|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+			tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_REMOTE_CHAT), "|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 		end
 	end
 
-	SetGuildRosterShowOffline(wasOffline)
+	if wasOffline then
+		shouldIgnoreGuildRosterUpdate = true
+		SetGuildRosterShowOffline(wasOffline)
+		shouldIgnoreGuildRosterUpdate = false
+	end
 end
 
 local function buildTooltip(tooltip, digitWidth)
-	tooltip:SetText(L.TOOLTIP, HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b)
+	tooltip:AddHeader(_G.HIGHLIGHT_FONT_COLOR_CODE .. L.TOOLTIP .. "|r")
 
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
 		tooltip:AddLine(" ")
@@ -720,19 +697,35 @@ local function buildTooltip(tooltip, digitWidth)
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowMem") then
 		UpdateAddOnMemoryUsage()
 		tooltip:AddLine(" ")
-		tooltip:AddDoubleLine(TitanUtils_GetNormalText(L.TOOLTIP_MEM), "|cff00FF00"..math.floor(GetAddOnMemoryUsage("TitanSocial")).." "..L.TOOLTIP_MEM_UNIT.."|r")
+		tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_MEM), "|cff00FF00"..math.floor(GetAddOnMemoryUsage("TitanSocial")).." "..L.TOOLTIP_MEM_UNIT.."|r")
 	end
 end
 
-local function setTooltip()
-	local tooltip = _G.GameTooltip
+-- getDigitWidth(font)
+-- PARAMETERS:
+--   font - Font - the font we want the width of
+-- RETURNS:
+--   number - the width of a single digit in the specified font
+local getDigitWidthFontString = _G.UIParent:CreateFontString()
+getDigitWidthFontString:Hide()
+local function getDigitWidth(font)
+	getDigitWidthFontString:SetFontObject(font)
+	getDigitWidthFontString:SetText("0")
+	return getDigitWidthFontString:GetStringWidth()
+end
 
+local function updateTooltip(tooltip)
 	-- Calculate the width of 1 digit
 	-- We're assuming that all digits in a font have the same width, since that seems to be the case
-	-- Set up the tooltip with a title and one line of body text, then measure the body text
-	tooltip:SetText("title")
-	tooltip:AddLine("0")
-	local digitWidth = _G.GameTooltipTextLeft2:GetStringWidth()
+	-- Ask the LabelProvider for a cell for our tooltip using the current font
+	--local cell = LibQTip.LabelProvider:AcquireCell(tooltip)
+	--tooltip:SetText("title")
+	--tooltip:AddLine("0")
+	--local digitWidth = _G.GameTooltipTextLeft2:GetStringWidth()
+
+	local digitWidth = getDigitWidth(tooltip:GetFont())
+
+	tooltip:Clear()
 
 	local ok, message = pcall(buildTooltip, tooltip, digitWidth)
 	if not ok then
@@ -740,6 +733,10 @@ local function setTooltip()
 		error(message, 0)
 	end
 end
+
+----------------------------------------------------------------------
+--  Event Handlers
+----------------------------------------------------------------------
 
 function _G.TitanPanelSocialButton_OnLoad(self)
 	--
@@ -751,7 +748,6 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 		version = TITAN_SOCIAL_VERSION,
 		menuText = L.MENU_TEXT,
 		buttonTextFunction = "TitanPanelSocialButton_GetButtonText",
-		tooltipCustomFunction = setTooltip,
 		iconWidth = 16,
 		icon = "Interface\\FriendsFrame\\BroadcastIcon",
 		category = "Information",
@@ -804,4 +800,71 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 
 	-- Guild Events
 	self:RegisterEvent("GUILD_ROSTER_UPDATE")
+end
+
+function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
+	if shouldIgnoreGuildRosterUpdate and event == "GUILD_ROSTER_UPDATE" then return end
+
+	-- Debugging. Pay no attention to the man behind the curtain.
+	if bDebugMode then
+		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: OnEvent")
+		if event == "PLAYER_ENTERING_WORLD" then
+			_G.DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.")
+		end
+		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: Caught Event "..event)
+	end
+
+	-- Update button label
+	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID)
+
+	-- Update tooltip if shown
+	if LibQTip:IsAcquired(TITAN_SOCIAL_TOOLTIP_KEY) then
+		local tooltip = LibQTip:Acquire(TITAN_SOCIAL_TOOLTIP_KEY)
+		if tooltip:IsVisible() then -- we're getting events while the tooltip isn't visible, for some reason
+			updateTooltip(tooltip)
+			tooltip:UpdateScrolling()
+		end
+	end
+end
+
+function _G.TitanPanelSocialButton_OnEnter(self)
+	if TitanPanelRightClickMenu_IsVisible() then return end -- ignore OnEnter when the contextual menu is visible
+
+	-- If in a guild, steal roster update. If not, ignore and update anyway
+	if IsInGuild() then
+		_G.FriendsFrame:UnregisterEvent("GUILD_ROSTER_UPDATE")
+		GuildRoster()
+		_G.FriendsFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+	end
+
+	-- Update Titan button label and tooltip
+	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID)
+
+	local tooltip = LibQTip:Acquire(TITAN_SOCIAL_TOOLTIP_KEY, 2, "LEFT", "RIGHT")
+	tooltip:SetAutoHideDelay(0.2, self)
+	updateTooltip(tooltip)
+	tooltip:SmartAnchorTo(self)
+	tooltip:Show()
+	tooltip:UpdateScrolling()
+end
+
+function _G.TitanPanelSocialButton_OnClick(self, button)
+	-- Detect mouse clicks
+	if button == "LeftButton" then
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
+			ToggleFriendsFrame(1); -- friends tab
+			FriendsFrame_Update()
+		end
+
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
+			ToggleGuildFrame(1); -- guild tab
+		end
+	elseif button == "RightButton" then
+		-- hide the tooltip so the contextual menu will be visible
+		if LibQTip:IsAcquired(TITAN_SOCIAL_TOOLTIP_KEY) then
+			local tooltip = LibQTip:Acquire(TITAN_SOCIAL_TOOLTIP_KEY)
+			tooltip:Hide()
+			tooltip:Release()
+		end
+	end
 end

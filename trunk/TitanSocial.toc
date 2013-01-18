@@ -4,7 +4,7 @@
 ## Author: solocommand
 ## SavedVariables:
 ## SavedVariablesPerCharacter: TitanSocialVars
-## OptionalDeps:
+## OptionalDeps: LibQTip-1.0
 ## Dependencies: Titan
 ## Version: 5.1r18
 TitanSocial.xml
