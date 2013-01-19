@@ -32,7 +32,8 @@ local ChatFrame_GetMobileEmbeddedTexture = _G.ChatFrame_GetMobileEmbeddedTexture
 local CanViewOfficerNote = _G.CanViewOfficerNote
 local UpdateAddOnMemoryUsage, GetAddOnMemoryUsage = _G.UpdateAddOnMemoryUsage, _G.GetAddOnMemoryUsage
 local ChatFrame_SendTell, ChatFrame_SendSmartTell = _G.ChatFrame_SendTell, _G.ChatFrame_SendSmartTell
-local InviteUnit = _G.InviteUnit
+local InviteUnit, BNInviteFriend = _G.InviteUnit, _G.BNInviteFriend
+local CanGroupWithAccount = _G.CanGroupWithAccount
 local IsAltKeyDown = _G.IsAltKeyDown
 
 local BNET_CLIENT_WOW = _G.BNET_CLIENT_WOW
@@ -434,10 +435,12 @@ local function clickPlayer(frame, info, button)
 end
 
 local function clickRealID(frame, info, button)
-	local presenceName, toonName = unpack(info)
+	local presenceName, presenceID, toonID = unpack(info)
 	if button == "LeftButton" then
 		if IsAltKeyDown() then
-			if toonName then InviteUnit(toonName) end
+			if toonID and CanGroupWithAccount(presenceID) then
+				BNInviteFriend(toonID)
+			end
 		else
 			ChatFrame_SendSmartTell(presenceName)
 		end
@@ -453,7 +456,7 @@ local function addRealID(tooltip, digitWidth)
 		local left = ""
 
 		local presenceID, presenceName, battleTag, isBattleTagPresence, _, _, client, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
-		local _, toonName, client, realmName, realmID, faction, _, className, _, _, level, gameText = BNGetToonInfo(presenceID)
+		local _, toonName, client, realmName, realmID, faction, _, className, _, _, level, gameText, _, _, _, toonID = BNGetToonInfo(presenceID)
 
 		-- group member indicator
 		-- is this friend playing WoW on our server?
@@ -535,7 +538,7 @@ local function addRealID(tooltip, digitWidth)
 		local right = "|cffFFFFFF"..gameText.."|r"
 
 		local y = tooltip:AddLine(left, right)
-		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, client == BNET_CLIENT_WOW and toonName or nil })
+		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID, client == BNET_CLIENT_WOW and toonID or nil })
 		if extraLines then
 			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "
 			for _, line in ipairs(extraLines) do
