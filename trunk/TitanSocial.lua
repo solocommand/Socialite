@@ -35,6 +35,9 @@ local ChatFrame_SendTell, ChatFrame_SendSmartTell = _G.ChatFrame_SendTell, _G.Ch
 local InviteUnit, BNInviteFriend = _G.InviteUnit, _G.BNInviteFriend
 local CanGroupWithAccount = _G.CanGroupWithAccount
 local IsAltKeyDown = _G.IsAltKeyDown
+local UnitPopup_ShowMenu = _G.UnitPopup_ShowMenu
+local CreateFrame = _G.CreateFrame
+local ToggleDropDownMenu = _G.ToggleDropDownMenu
 
 local BNET_CLIENT_WOW = _G.BNET_CLIENT_WOW
 local REMOTE_CHAT = _G.REMOTE_CHAT
@@ -421,14 +424,58 @@ local function padLevel(level, digitWidth)
 	return level
 end
 
+local rightClickFrame
+local function getRightClickFrame()
+	if not rightClickFrame then
+		rightClickFrame = CreateFrame("Frame", addonName.."TooltipContextualMenu", _G.UIParent, "UIDropDownMenuTemplate")
+	end
+	return rightClickFrame
+end
+
+local function showGuildRightClick(player, isMobile)
+	local frame = getRightClickFrame()
+	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "GUILD", nil, player) end
+	frame.displayMode = "MENU";
+	frame.friendsList = false
+	frame.presenceID = nil
+	frame.isMobile = isMobile
+	ToggleDropDownMenu(1, nil, frame, "cursor")
+end
+
+local function showFriendRightClick(player)
+	local frame = getRightClickFrame()
+	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end
+	frame.displayMode = "MENU"
+	frame.friendsList = true
+	frame.presenceID = nil
+	frame.isMobile = nil
+	ToggleDropDownMenu(1, nil, frame, "cursor")
+end
+
+local function showRealIDRightClick(presenceName, presenceID)
+	local frame = getRightClickFrame()
+	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "BN_FRIEND", nil, presenceName) end
+	frame.displayMode = "MENU"
+	frame.friendsList = true
+	frame.presenceID = presenceID
+	frame.isMobile = nil
+	ToggleDropDownMenu(1, nil, frame, "cursor")
+end
+
 local function clickPlayer(frame, info, button)
-	local player, isRemote = unpack(info)
+	local player, isGuild, isMobile, isRemote = unpack(info)
 	if player ~= "" then
 		if button == "LeftButton" then
 			if IsAltKeyDown() then
 				if not isRemote then InviteUnit(player) end
 			else
 				ChatFrame_SendTell(player)
+			end
+		elseif button == "RightButton" then
+			if isGuild then
+				showGuildRightClick(player, isRemote)
+			else
+				showFriendRightClick(player)
 			end
 		end
 	end
@@ -444,6 +491,8 @@ local function clickRealID(frame, info, button)
 		else
 			ChatFrame_SendSmartTell(presenceName)
 		end
+	elseif button == "RightButton" then
+		showRealIDRightClick(presenceName, presenceID)
 	end
 end
 
@@ -594,7 +643,7 @@ local function addFriends(tooltip, digitWidth)
 		end
 		
 		local y =tooltip:AddLine(left, right)
-		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, false })
+		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, false, false, false })
 	end
 end
 
@@ -672,7 +721,7 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 	end
 
 	local y = tooltip:AddLine(left, right)
-	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, isRemote })
+	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, true, isMobile, isRemote })
 end
 
 local function addGuild(tooltip, digitWidth)
@@ -879,6 +928,7 @@ function _G.TitanPanelSocialButton_OnEnter(self)
 	tooltip:SetAutoHideDelay(0.2, self)
 	updateTooltip(tooltip)
 	tooltip:SmartAnchorTo(self)
+	tooltip:SetFrameStrata("FULLSCREEN_DIALOG") -- so contextual menu works
 	tooltip:Show()
 	tooltip:UpdateScrolling()
 end
