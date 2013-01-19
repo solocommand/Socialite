@@ -798,6 +798,9 @@ local function getDigitWidth(font)
 	return getDigitWidthFontString:GetStringWidth()
 end
 
+local tooltipFont = CreateFont(addonName.."TooltipFont")
+tooltipFont:SetFontObject(GameTooltipText)
+tooltipFont:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
 local function updateTooltip(tooltip)
 	-- Calculate the width of 1 digit
 	-- We're assuming that all digits in a font have the same width, since that seems to be the case
@@ -810,6 +813,8 @@ local function updateTooltip(tooltip)
 	local digitWidth = getDigitWidth(tooltip:GetFont())
 
 	tooltip:Clear()
+
+	tooltip:SetFont(tooltipFont)
 
 	local ok, message = pcall(buildTooltip, tooltip, digitWidth)
 	if not ok then
