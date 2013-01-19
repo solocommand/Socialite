@@ -66,7 +66,7 @@ local bDebugMode = false
 
 -- Required Titan variables
 local TITAN_SOCIAL_ID = "Social"
-local TITAN_SOCIAL_VERSION = "5.1r18"
+local TITAN_SOCIAL_VERSION = "5.1r19"
 local TITAN_SOCIAL_TOOLTIP_KEY = "TitanSocialTooltip"
 
 local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t"
