@@ -24,7 +24,7 @@ local GetNumFriends, GetFriendInfo = _G.GetNumFriends, _G.GetFriendInfo
 local ToggleFriendsFrame, ToggleGuildFrame = _G.ToggleFriendsFrame, _G.ToggleGuildFrame
 local FriendsFrame_Update = _G.FriendsFrame_Update
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetInfo = _G.BNGetNumFriends, _G.BNGetFriendInfo, _G.BNGetToonInfo, _G.BNGetInfo
-local BNGetFriendIndex, BNGetNumFriendToons = _G.BNGetFriendIndex, _G.BNGetNumFriendToons
+local BNGetFriendIndex, BNGetNumFriendToons, BNGetFriendToonInfo = _G.BNGetFriendIndex, _G.BNGetNumFriendToons, _G.BNGetFriendToonInfo
 local UIDropDownMenu_CreateInfo = _G.UIDropDownMenu_CreateInfo
 local UIDropDownMenu_Refresh = _G.UIDropDownMenu_Refresh
 local UIDropDownMenu_GetCurrentDropDown = _G.UIDropDownMenu_GetCurrentDropDown
@@ -39,6 +39,7 @@ local UnitPopup_ShowMenu = _G.UnitPopup_ShowMenu
 local CreateFrame = _G.CreateFrame
 local ToggleDropDownMenu, CloseDropDownMenus = _G.ToggleDropDownMenu, _G.CloseDropDownMenus
 local PlaySound = _G.PlaySound
+local UnitFactionGroup = _G.UnitFactionGroup
 
 local TravelPassDropDown = _G.TravelPassDropDown
 
@@ -47,6 +48,7 @@ local REMOTE_CHAT = _G.REMOTE_CHAT
 local CHAT_FLAG_AFK, CHAT_FLAG_DND = _G.CHAT_FLAG_AFK, _G.CHAT_FLAG_DND
 local FRIENDS_TEXTURE_AFK, FRIENDS_TEXTURE_DND = _G.FRIENDS_TEXTURE_AFK, _G.FRIENDS_TEXTURE_DND
 local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR = _G.NORMAL_FONT_COLOR, _G.HIGHLIGHT_FONT_COLOR
+local FRIENDS_LIST_PLAYING = _G.FRIENDS_LIST_PLAYING
 
 local TitanPanelButton_UpdateButton = _G.TitanPanelButton_UpdateButton
 local TitanPanelButton_UpdateTooltip = _G.TitanPanelButton_UpdateTooltip
@@ -545,8 +547,8 @@ local function addRealID(tooltip, digitWidth)
 
 		-- group member indicator
 		-- is this friend playing WoW on our server?
+		local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
 		if client == BNET_CLIENT_WOW then
-			local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
 			local name
 			if realmID == playerRealmID then
 				name = toonName
@@ -625,14 +627,35 @@ local function addRealID(tooltip, digitWidth)
 
 		local y = tooltip:AddLine(left, right)
 		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID })
+
+		-- Extra lines
+		local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "..getFactionIndicator("")
 		if extraLines then
-			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "..getFactionIndicator("")
 			for _, line in ipairs(extraLines) do
 				-- indent the line over
 				line = indent..line
 				local y, x = tooltip:AddLine()
 				tooltip:SetCell(y, x, line, nil, nil, 2)
 			end
+		end
+
+		-- Additional toons
+		local playerFactionGroup = UnitFactionGroup("player")
+		for j = 2, BNGetNumFriendToons(i) do
+			local _, toonName, client, _, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(i, j)
+			local left, right
+			if client == BNET_CLIENT_WOW then
+				local cooperateLabel = ""
+				if realmID ~= playerRealmID or faction ~= playerFactionGroup then
+					cooperateLabel = _G.CANNOT_COOPERATE_LABEL
+				end
+				left = _G.FRIENDS_TOOLTIP_WOW_TOON_TEMPLATE:format(toonName..cooperateLabel, level, race, class)
+				right = zoneName
+			else
+				left = toonName
+				right = gameText
+			end
+			tooltip:AddLine(indent.."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..left.."|r", "|cffFFFFFF"..right.."|r")
 		end
 	end
 end
