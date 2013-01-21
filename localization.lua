@@ -14,8 +14,6 @@ L.TOOLTIP_REALID = "RealID Friends Online:"
 L.TOOLTIP_FRIENDS = "Friends Online:"
 L.TOOLTIP_GUILD = "Guild Members Online:"
 L.TOOLTIP_REMOTE_CHAT = "Remote Chat:"
-L.TOOLTIP_MEM = "Memory Utilization:"
-L.TOOLTIP_MEM_UNIT = "Kb"
 
 L.MENU_REALID = "RealID"
 L.MENU_REALID_FRIENDS = "Show RealID Friends"
@@ -52,7 +50,6 @@ L.MENU_STATUS_NONE = "None"
 L.MENU_SHOW_GROUP_MEMBERS = "Show Group Members"
 
 L.MENU_LABEL = "Show Label"
-L.MENU_MEM = "Show Memory Usage"
 L.MENU_HIDE = "Hide"
 L.MENU_OPTIONS = "Options"
 
@@ -68,8 +65,6 @@ if GetLocale() == "frFR" then
 	L.TOOLTIP_REALID = "Amis R\195\169els:"
 	L.TOOLTIP_FRIENDS = "Contacts:"
 	L.TOOLTIP_GUILD = "Membres de la guilde:"
-	L.TOOLTIP_MEM = "Mémoire Utilis\195\169e:"
-	L.TOOLTIP_MEM_UNIT = "Ko"
 
 	L.MENU_REALID = "Amis R\195\169els"
 	L.MENU_REALID_FRIENDS = "Afficher: Amis R\195\169els"
@@ -86,7 +81,6 @@ if GetLocale() == "frFR" then
 	L.MENU_GUILD_ONOTE = "Afficher: Notes d'Officier"
 
 	L.MENU_LABEL = "Afficher le titre"
-	L.MENU_MEM = "Afficher: Mémoire utilis\195\169e"
 	L.MENU_HIDE = "Cacher"
 	L.MENU_OPTIONS = "Options"
 end
@@ -103,8 +97,6 @@ if GetLocale() == "deDE" then
 	L.TOOLTIP_REALID = "Kontakte Freundschaftssystem:"
 	L.TOOLTIP_FRIENDS = "Kontakte:"
 	--L.TOOLTIP_GUILD = "Gilde Members:"
-	L.TOOLTIP_MEM = "Speicher Verbrauch:"
-	L.TOOLTIP_MEM_UNIT = "KB"
 
 	L.MENU_REALID = "Freundschaftssystem"
 	L.MENU_REALID_FRIENDS = "Zeige Kontakte Freundschaftssystem"
@@ -121,7 +113,6 @@ if GetLocale() == "deDE" then
 	--L.MENU_GUILD_ONOTE = "Zeige Officer Notiz"
 
 	--L.MENU_LABEL = "Zeige Label"
-	L.MENU_MEM = "Zeige Speicher Verbrauch"
 	L.MENU_HIDE = "Ausblenden"
 	L.MENU_OPTIONS = "Optionen"
 end
@@ -136,8 +127,6 @@ if GetLocale() == "zhTW" then
 	L.TOOLTIP_REALID = "在線RealID:"
 	L.TOOLTIP_FRIENDS = "在線好友:"
 	L.TOOLTIP_GUILD = "在線公會成員:"
-	L.TOOLTIP_MEM = "記憶體使用:"
-	--L.TOOLTIP_MEM_UNIT = "Kb"
 
 	L.MENU_REALID = "RealID"
 	L.MENU_REALID_FRIENDS = "顯示RealID"
@@ -154,7 +143,6 @@ if GetLocale() == "zhTW" then
 	L.MENU_GUILD_ONOTE = "顯示公會幹部註記"
 
 	L.MENU_LABEL = "顯示標籤"
-	L.MENU_MEM = "顯示記憶體使用"
 	L.MENU_HIDE = "隱藏"
 	L.MENU_OPTIONS = "選項"
 end
@@ -172,8 +160,6 @@ if GetLocale() == "esES" then
 	L.TOOLTIP_FRIENDS = "Amigos conectados:"
 	L.TOOLTIP_GUILD = "Miembros Hermandad conectados:"
 	L.TOOLTIP_REMOTE_CHAT = "Chat Remoto:"
-	L.TOOLTIP_MEM = "Utilizacion de memoria:"
-	L.TOOLTIP_MEM_UNIT = "Kb"
 
 	L.MENU_REALID = "RealID"
 	L.MENU_REALID_FRIENDS = "Muestra Amigos con RealID"
@@ -191,7 +177,6 @@ if GetLocale() == "esES" then
 	L.MENU_GUILD_REMOTE_CHAT = "Separa el Chat Remoto"
 
 	L.MENU_LABEL = "Muestra Etiqueta"
-	L.MENU_MEM = "Muestra Uso de Memoria"
 	L.MENU_HIDE = "Oculta"
 	L.MENU_OPTIONS = "Opciones"
 end
@@ -208,8 +193,6 @@ if GetLocale() == "ruRU" then
 	L.TOOLTIP_REALID = "RealID друзья онлайн:"
 	L.TOOLTIP_FRIENDS = "Друзья онлайн:"
 	L.TOOLTIP_GUILD = "Члены гильдии онлайн:"
-	L.TOOLTIP_MEM = "Использование памяти:"
-	L.TOOLTIP_MEM_UNIT = "кб"
 
 	L.MENU_REALID = "RealID"
 	L.MENU_REALID_FRIENDS = "Показывать RealID друзей"
@@ -226,7 +209,6 @@ if GetLocale() == "ruRU" then
 	L.MENU_GUILD_ONOTE = "Показывать офицерские заметки"
 
 	L.MENU_LABEL = "Текст ярлыка"
-	L.MENU_MEM = "Показывать исп. памяти"
 	L.MENU_HIDE = "Скрыть"
 	L.MENU_OPTIONS = "Опции"
 end
@@ -241,8 +223,6 @@ if GetLocale() == "ptBR" then
 	L.TOOLTIP_REALID = "Amigos com RealID Online:"
 	L.TOOLTIP_FRIENDS = "Amigos Online:"
 	L.TOOLTIP_GUILD = "Membros da Guilda Online:"
-	L.TOOLTIP_MEM = "Utilização de Memória:"
-	L.TOOLTIP_MEM_UNIT = "Kb"
 
 	L.MENU_REALID = "RealID"
 	L.MENU_REALID_FRIENDS = "Mostrar Amigos com RealID"
@@ -259,7 +239,6 @@ if GetLocale() == "ptBR" then
 	L.MENU_GUILD_ONOTE = "Mostrar Nota Oficial"
 
 	L.MENU_LABEL = "Exibir Título"
-	L.MENU_MEM = "Mostrar Utilização de Memória"
 	L.MENU_HIDE = "Esconder"
 	L.MENU_OPTIONS = "Opções"
 end
@@ -275,8 +254,6 @@ if GetLocale() == "itIT" then
 	L.TOOLTIP_FRIENDS = "Amici Collegati:"
 	L.TOOLTIP_GUILD = "Membri di Gilda Collegati:"
 	L.TOOLTIP_REMOTE_CHAT = "Chat Remota:"
-	L.TOOLTIP_MEM = "Utilizzo Memoria:"
-	L.TOOLTIP_MEM_UNIT = "Kb"
 
 	L.MENU_REALID = "RealID"
 	L.MENU_REALID_FRIENDS = "Mostra Amici RealID"
@@ -294,7 +271,6 @@ if GetLocale() == "itIT" then
 	L.MENU_GUILD_REMOTE_CHAT = "Remote Chat Separata"
 
 	L.MENU_LABEL = "Mostra Ettichetta"
-	L.MENU_MEM = "Mostra Memoria Utilizzata"
 	L.MENU_HIDE = "Nascondi"
 	L.MENU_OPTIONS = "Opzioni"
 end
