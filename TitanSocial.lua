@@ -40,6 +40,7 @@ local CreateFrame = _G.CreateFrame
 local ToggleDropDownMenu, CloseDropDownMenus = _G.ToggleDropDownMenu, _G.CloseDropDownMenus
 local PlaySound = _G.PlaySound
 local UnitFactionGroup = _G.UnitFactionGroup
+local BNet_GetClientTexture = _G.BNet_GetClientTexture
 
 local TravelPassDropDown = _G.TravelPassDropDown
 
@@ -403,10 +404,14 @@ local function getGroupIndicator(name)
 	return ""
 end
 
-local function getFactionIndicator(faction)
+local function getFactionIndicator(faction, client)
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDFactions") then
-		if faction == "Horde" or faction == "Alliance" then
-			return "|TInterface\\PVPFrame\\PVP-Currency-"..faction..":0|t"
+		if client == BNET_CLIENT_WOW then
+			if faction == "Horde" or faction == "Alliance" then
+				return "|TInterface\\PVPFrame\\PVP-Currency-"..faction..":0|t"
+			end
+		elseif client and client ~= "" then
+			return "|T"..BNet_GetClientTexture(client)..":0|t"
 		end
 		return spacer()
 	end
@@ -580,7 +585,7 @@ local function addRealID(tooltip, digitWidth)
 				second = "|cffCCCCCC"..toonName.."|r"
 			end
 			left = left.."|cffFFFFFF"..first.."|r  "
-			left = left..getFactionIndicator(faction)
+			left = left..getFactionIndicator(faction, client)
 			left = left..getStatusIcon(playerStatus)
 			left = left..second.." "
 		end
@@ -629,7 +634,7 @@ local function addRealID(tooltip, digitWidth)
 		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID })
 
 		-- Extra lines
-		local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "..getFactionIndicator("")
+		local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "..getFactionIndicator("", "")
 		if extraLines then
 			for _, line in ipairs(extraLines) do
 				-- indent the line over
