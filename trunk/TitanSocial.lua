@@ -30,7 +30,6 @@ local UIDropDownMenu_Refresh = _G.UIDropDownMenu_Refresh
 local UIDropDownMenu_GetCurrentDropDown = _G.UIDropDownMenu_GetCurrentDropDown
 local UIDropDownMenu_AddButton = _G.UIDropDownMenu_AddButton
 local CanViewOfficerNote = _G.CanViewOfficerNote
-local UpdateAddOnMemoryUsage, GetAddOnMemoryUsage = _G.UpdateAddOnMemoryUsage, _G.GetAddOnMemoryUsage
 local ChatFrame_SendTell, ChatFrame_SendSmartTell = _G.ChatFrame_SendTell, _G.ChatFrame_SendSmartTell
 local InviteUnit, BNInviteFriend = _G.InviteUnit, _G.BNInviteFriend
 local CanGroupWithAccount = _G.CanGroupWithAccount
@@ -182,7 +181,6 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 		TitanPanelRightClickMenu_AddSpacer(level)
 		TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID, level)
 		TitanPanelRightClickMenu_AddToggleVar(L.MENU_LABEL, TITAN_SOCIAL_ID, "ShowLabel", nil, level)
-		TitanPanelRightClickMenu_AddToggleVar(L.MENU_MEM, TITAN_SOCIAL_ID, "ShowMem", nil, level)
 		TitanPanelRightClickMenu_AddSpacer(level)
 		TitanPanelRightClickMenu_AddCommand(L.MENU_HIDE, TITAN_SOCIAL_ID, _G.TITAN_PANEL_MENU_FUNC_HIDE, level)
 	elseif level == 2 then
@@ -842,12 +840,6 @@ local function buildTooltip(tooltip, digitWidth)
 		tooltip:AddLine(" ")
 		addGuild(tooltip, digitWidth)
 	end
-	
-	if TitanGetVar(TITAN_SOCIAL_ID, "ShowMem") then
-		UpdateAddOnMemoryUsage()
-		tooltip:AddLine(" ")
-		tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_MEM), "|cff00FF00"..math.floor(GetAddOnMemoryUsage("TitanSocial")).." "..L.TOOLTIP_MEM_UNIT.."|r")
-	end
 end
 
 -- getDigitWidth(font)
@@ -932,7 +924,6 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 			ShowIcon = 1,
 			ShowLabel = 1,
 			ShowTooltipTotals = 1,
-			ShowMem = false,
 		}
 	}
 
