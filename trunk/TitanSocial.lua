@@ -916,7 +916,7 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 			ShowRealID = 1,
 			ShowRealIDBroadcasts = false,
 			ShowRealIDNotes = true,
-			ShowRealIDFactions = false,
+			ShowRealIDFactions = true,
 			ShowFriends = 1,
 			ShowFriendsNote = 1,
 			ShowGuild = 1,
