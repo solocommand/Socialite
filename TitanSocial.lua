@@ -188,6 +188,7 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			TitanPanelRightClickMenu_AddTitle(L.MENU_REALID, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_FRIENDS, TITAN_SOCIAL_ID, "ShowRealID", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_BROADCASTS, TITAN_SOCIAL_ID, "ShowRealIDBroadcasts", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_FACTIONS, TITAN_SOCIAL_ID, "ShowRealIDFactions", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_NOTE, TITAN_SOCIAL_ID, "ShowRealIDNotes", nil, level)
 		end
 		
@@ -400,6 +401,16 @@ local function getGroupIndicator(name)
 	return ""
 end
 
+local function getFactionIndicator(faction)
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDFactions") then
+		if faction == "Horde" or faction == "Alliance" then
+			return "|TInterface\\PVPFrame\\PVP-Currency-"..faction..":0|t"
+		end
+		return spacer()
+	end
+	return ""
+end
+
 local function getStatusIcon(status)
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowStatus") == STATUS_ICON then
 		if status == CHAT_FLAG_AFK then
@@ -556,7 +567,7 @@ local function addRealID(tooltip, digitWidth)
 			playerStatus = CHAT_FLAG_DND
 		end
 
-		-- Character
+		-- Character (and faction)
 		do
 			local first, second
 			if client == BNET_CLIENT_WOW then
@@ -567,6 +578,7 @@ local function addRealID(tooltip, digitWidth)
 				second = "|cffCCCCCC"..toonName.."|r"
 			end
 			left = left.."|cffFFFFFF"..first.."|r  "
+			left = left..getFactionIndicator(faction)
 			left = left..getStatusIcon(playerStatus)
 			left = left..second.." "
 		end
@@ -614,7 +626,7 @@ local function addRealID(tooltip, digitWidth)
 		local y = tooltip:AddLine(left, right)
 		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID })
 		if extraLines then
-			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "
+			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "..getFactionIndicator("")
 			for _, line in ipairs(extraLines) do
 				-- indent the line over
 				line = indent..line
@@ -876,6 +888,7 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 			ShowRealID = 1,
 			ShowRealIDBroadcasts = false,
 			ShowRealIDNotes = true,
+			ShowRealIDFactions = false,
 			ShowFriends = 1,
 			ShowFriendsNote = 1,
 			ShowGuild = 1,

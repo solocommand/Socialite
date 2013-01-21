@@ -20,6 +20,7 @@ L.TOOLTIP_MEM_UNIT = "Kb"
 L.MENU_REALID = "RealID"
 L.MENU_REALID_FRIENDS = "Show RealID Friends"
 L.MENU_REALID_BROADCASTS = "Show RealID Broadcasts"
+L.MENU_REALID_FACTIONS = "Show RealID Factions"
 L.MENU_REALID_NOTE = "Show Notes"
 
 L.MENU_FRIENDS = "Friends"
