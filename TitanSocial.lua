@@ -29,7 +29,6 @@ local UIDropDownMenu_CreateInfo = _G.UIDropDownMenu_CreateInfo
 local UIDropDownMenu_Refresh = _G.UIDropDownMenu_Refresh
 local UIDropDownMenu_GetCurrentDropDown = _G.UIDropDownMenu_GetCurrentDropDown
 local UIDropDownMenu_AddButton = _G.UIDropDownMenu_AddButton
-local ChatFrame_GetMobileEmbeddedTexture = _G.ChatFrame_GetMobileEmbeddedTexture
 local CanViewOfficerNote = _G.CanViewOfficerNote
 local UpdateAddOnMemoryUsage, GetAddOnMemoryUsage = _G.UpdateAddOnMemoryUsage, _G.GetAddOnMemoryUsage
 local ChatFrame_SendTell, ChatFrame_SendSmartTell = _G.ChatFrame_SendTell, _G.ChatFrame_SendSmartTell
@@ -73,8 +72,9 @@ local TITAN_SOCIAL_ID = "Social"
 local TITAN_SOCIAL_VERSION = "5.1r19"
 local TITAN_SOCIAL_TOOLTIP_KEY = "TitanSocialTooltip"
 
-local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:14:14:0:0:16:16:0:16:0:16|t"
-local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:14:14:0:0:16:16:0:16:0:16|t"
+local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0:16:16:0:16:0:16:73:177:73|t"
+local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:0:0:0:0:16:16:0:16:0:16|t"
+local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:0:0:0:0:16:16:0:16:0:16|t"
 
 local STATUS_ICON = "icon"
 local STATUS_TEXT = "text"
@@ -713,7 +713,7 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 		elseif playerStatus == CHAT_FLAG_AFK then
 			name = MOBILE_AWAY_ICON..name
 		else
-			name = ChatFrame_GetMobileEmbeddedTexture(73/255, 177/255, 73/255)..name
+			name = MOBILE_HERE_ICON..name
 		end
 	end
 
