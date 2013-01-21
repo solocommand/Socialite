@@ -24,6 +24,7 @@ local GetNumFriends, GetFriendInfo = _G.GetNumFriends, _G.GetFriendInfo
 local ToggleFriendsFrame, ToggleGuildFrame = _G.ToggleFriendsFrame, _G.ToggleGuildFrame
 local FriendsFrame_Update = _G.FriendsFrame_Update
 local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetInfo = _G.BNGetNumFriends, _G.BNGetFriendInfo, _G.BNGetToonInfo, _G.BNGetInfo
+local BNGetFriendIndex, BNGetNumFriendToons = _G.BNGetFriendIndex, _G.BNGetNumFriendToons
 local UIDropDownMenu_CreateInfo = _G.UIDropDownMenu_CreateInfo
 local UIDropDownMenu_Refresh = _G.UIDropDownMenu_Refresh
 local UIDropDownMenu_GetCurrentDropDown = _G.UIDropDownMenu_GetCurrentDropDown
@@ -37,13 +38,16 @@ local CanGroupWithAccount = _G.CanGroupWithAccount
 local IsAltKeyDown = _G.IsAltKeyDown
 local UnitPopup_ShowMenu = _G.UnitPopup_ShowMenu
 local CreateFrame = _G.CreateFrame
-local ToggleDropDownMenu = _G.ToggleDropDownMenu
+local ToggleDropDownMenu, CloseDropDownMenus = _G.ToggleDropDownMenu, _G.CloseDropDownMenus
+local PlaySound = _G.PlaySound
+
+local TravelPassDropDown = _G.TravelPassDropDown
 
 local BNET_CLIENT_WOW = _G.BNET_CLIENT_WOW
 local REMOTE_CHAT = _G.REMOTE_CHAT
 local CHAT_FLAG_AFK, CHAT_FLAG_DND = _G.CHAT_FLAG_AFK, _G.CHAT_FLAG_DND
 local FRIENDS_TEXTURE_AFK, FRIENDS_TEXTURE_DND = _G.FRIENDS_TEXTURE_AFK, _G.FRIENDS_TEXTURE_DND
-local HIGHLIGHT_FONT_COLOR = _G.HIGHLIGHT_FONT_COLOR
+local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR = _G.NORMAL_FONT_COLOR, _G.HIGHLIGHT_FONT_COLOR
 
 local TitanPanelButton_UpdateButton = _G.TitanPanelButton_UpdateButton
 local TitanPanelButton_UpdateTooltip = _G.TitanPanelButton_UpdateTooltip
@@ -481,12 +485,33 @@ local function clickPlayer(frame, info, button)
 	end
 end
 
+local function sendBattleNetInvite(presenceID)
+	local index = BNGetFriendIndex(presenceID)
+	if index then
+		local numToons = BNGetNumFriendToons(index)
+		if numToons > 1 then
+			PlaySound("igMainMenuOptionCheckBoxOn")
+			local dropDown = TravelPassDropDown
+			if dropDown.index ~= index then
+				CloseDropDownMenus()
+			end
+			dropDown.index = index
+			ToggleDropDownMenu(1, nil, dropDown, "cursor", 1, -1)
+		else
+			local toonID = select(6, BNGetFriendInfo(index))
+			if toonID then
+				BNInviteFriend(toonID)
+			end
+		end
+	end
+end
+
 local function clickRealID(frame, info, button)
-	local presenceName, presenceID, toonID = unpack(info)
+	local presenceName, presenceID = unpack(info)
 	if button == "LeftButton" then
 		if IsAltKeyDown() then
-			if toonID and CanGroupWithAccount(presenceID) then
-				BNInviteFriend(toonID)
+			if CanGroupWithAccount(presenceID) then
+				sendBattleNetInvite(presenceID)
 			end
 		else
 			ChatFrame_SendSmartTell(presenceName)
@@ -587,7 +612,7 @@ local function addRealID(tooltip, digitWidth)
 		local right = "|cffFFFFFF"..gameText.."|r"
 
 		local y = tooltip:AddLine(left, right)
-		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID, client == BNET_CLIENT_WOW and toonID or nil })
+		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID })
 		if extraLines then
 			local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "
 			for _, line in ipairs(extraLines) do
@@ -798,8 +823,8 @@ local function getDigitWidth(font)
 	return getDigitWidthFontString:GetStringWidth()
 end
 
-local tooltipFont = CreateFont(addonName.."TooltipFont")
-tooltipFont:SetFontObject(GameTooltipText)
+local tooltipFont = _G.CreateFont(addonName.."TooltipFont")
+tooltipFont:SetFontObject(_G.GameTooltipText)
 tooltipFont:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
 local function updateTooltip(tooltip)
 	-- Calculate the width of 1 digit
