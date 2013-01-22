@@ -78,6 +78,8 @@ local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0
 local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:0:0:0:0:16:16:0:16:0:16|t"
 local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:0:0:0:0:16:16:0:16:0:16|t"
 
+local CHECK_ICON = "|TInterface\\Buttons\\UI-CheckBox-Check:0:0|t"
+
 local STATUS_ICON = "icon"
 local STATUS_TEXT = "text"
 local STATUS_NONE = "none"
@@ -394,7 +396,26 @@ local function getGroupIndicator(name)
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGroupMembers") then
 		if IsInGroup() and name ~= "" then -- don't check self if we're not in a group
 			if UnitInParty(name) or UnitInRaid(name) then
-				return "|TInterface\\Buttons\\UI-CheckBox-Check:0:0|t" -- checkmark
+				return CHECK_ICON -- checkmark
+			end
+		end
+		return spacer()
+	end
+	return ""
+end
+
+local function getRealIDGroupIndicator(presenceID, playerRealmID)
+	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGroupMembers") then
+		local index = BNGetFriendIndex(presenceID)
+		for i = 1, BNGetNumFriendToons(index) do
+			local _, toonName, client, realmName, realmID = BNGetFriendToonInfo(index, i)
+			if client == BNET_CLIENT_WOW then
+				if realmID ~= playerRealmID then
+					toonName = toonName.."-"..realmName
+				end
+				if UnitInParty(toonName) or UnitInRaid(toonName) then
+					return CHECK_ICON
+				end
 			end
 		end
 		return spacer()
@@ -542,15 +563,14 @@ local function addRealID(tooltip, digitWidth)
 
 	tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
+	local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
 	for i=1, numOnline do
 		local left = ""
 
 		local presenceID, presenceName, battleTag, isBattleTagPresence, _, _, client, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
 		local _, toonName, client, realmName, realmID, faction, _, className, _, _, level, gameText, _, _, _, toonID = BNGetToonInfo(presenceID)
 
-		-- group member indicator
 		-- is this friend playing WoW on our server?
-		local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
 		if client == BNET_CLIENT_WOW then
 			local name
 			if realmID == playerRealmID then
@@ -559,10 +579,10 @@ local function addRealID(tooltip, digitWidth)
 				-- Cross-realm?
 				name = toonName.."-"..realmName
 			end
-			left = left..getGroupIndicator(name)
-		else
-			left = left..getGroupIndicator("")
 		end
+
+		-- group member indicator
+		left = left..getRealIDGroupIndicator(presenceID, playerRealmID)
 
 		-- player status
 		local playerStatus = ""
