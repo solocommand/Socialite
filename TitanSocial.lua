@@ -84,8 +84,6 @@ local STATUS_ICON = "icon"
 local STATUS_TEXT = "text"
 local STATUS_NONE = "none"
 
-local shouldIgnoreGuildRosterUpdate = false
-
 -- Class support
 local TitanSocial_ClassMap = {}
 
@@ -302,6 +300,23 @@ local function ternary(cond, a, b)
 		return b
 	end
 end
+
+-- GUILD_ROSTER_UPDATE recursion protection
+local guildRosterIgnoreFrame = CreateFrame("frame")
+local frameOver = true
+guildRosterIgnoreFrame:SetScript("OnUpdate", function(self)
+	frameOver = true
+	self:Hide()
+end)
+local function isFreshFrame()
+	if frameOver then
+		frameOver = false
+		guildRosterIgnoreFrame:Show()
+		return true
+	end
+	return false
+end
+
 
 -- collectGuildRosterInfo(split, sortKey, sortAscending)
 -- collects and sorts the guild roster
@@ -808,12 +823,11 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 end
 
 local function addGuild(tooltip, digitWidth)
+	isFreshFrame() -- don't trigger GUILD_ROSTER_UPDATE events due to offline toggling
 	local wasOffline = GetGuildRosterShowOffline()
 	if wasOffline then
 		-- SetGuildRosterShowOffline() seems to sometimes trigger GUILD_ROSTER_UPDATE
-		shouldIgnoreGuildRosterUpdate = true
 		SetGuildRosterShowOffline(false)
-		shouldIgnoreGuildRosterUpdate = false
 	end
 
 	local split = TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat")
@@ -837,9 +851,7 @@ local function addGuild(tooltip, digitWidth)
 	end
 
 	if wasOffline then
-		shouldIgnoreGuildRosterUpdate = true
 		SetGuildRosterShowOffline(wasOffline)
-		shouldIgnoreGuildRosterUpdate = false
 	end
 end
 
@@ -969,8 +981,6 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 end
 
 function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
-	if shouldIgnoreGuildRosterUpdate and event == "GUILD_ROSTER_UPDATE" then return end
-
 	-- Debugging. Pay no attention to the man behind the curtain.
 	if bDebugMode then
 		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: OnEvent")
@@ -978,6 +988,12 @@ function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
 			_G.DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.")
 		end
 		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: Caught Event "..event)
+	end
+
+	if event == "GUILD_ROSTER_UPDATE" and not isFreshFrame() then
+		-- We only want to process one GUILD_ROSTER_UPDATE per frame, to avoid getting into endless loops
+		-- with other addson that toggle the offline state of the guild
+		return
 	end
 
 	-- Update button label
