@@ -1,11 +1,6 @@
 local addonName, addonTable = ...
 local L = addonTable.L
-
-----------------------------------------------------------------------
---  Libraries
-----------------------------------------------------------------------
-
-local LibQTip = _G.LibStub('LibQTip-1.0')
+local tooltip = addonTable.tooltip
 
 ----------------------------------------------------------------------
 --  Global variables
@@ -472,14 +467,6 @@ local function getStatusText(status)
 	return ""
 end
 
-local function padLevel(level, digitWidth)
-	level = tostring(tonumber(level) or 0)
-	if #level < 2 then
-		level = spacer(digitWidth)..level
-	end
-	return level
-end
-
 local rightClickFrame
 local function getRightClickFrame()
 	if not rightClickFrame then
@@ -573,10 +560,18 @@ local function clickRealID(frame, info, button)
 	end
 end
 
-local function addRealID(tooltip, digitWidth)
+local function addDoubleLine(indented, left, right)
+	if indented then
+		tooltip:AddLine(nil, nil, left, right)
+	else
+		tooltip:AddColspanLine(3, "LEFT", left, 1, "RIGHT", right)
+	end
+end
+
+local function addRealID(tooltip)
 	local numTotal, numOnline = BNGetNumFriends()
 
-	tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	addDoubleLine(false, TitanUtils_GetNormalText(L.TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
 	for i=1, numOnline do
@@ -597,7 +592,7 @@ local function addRealID(tooltip, digitWidth)
 		end
 
 		-- group member indicator
-		left = left..getRealIDGroupIndicator(presenceID, playerRealmID)
+		local check = getRealIDGroupIndicator(presenceID, playerRealmID)
 
 		-- player status
 		local playerStatus = ""
@@ -609,18 +604,17 @@ local function addRealID(tooltip, digitWidth)
 
 		-- Character (and faction)
 		do
-			local first, second
+			local name
 			if client == BNET_CLIENT_WOW then
-				first = padLevel(level, digitWidth)
-				second = colorText(toonName, className)
+				level = "|cffFFFFFF"..level.."|r"
+				name = colorText(toonName, className)
 			else
-				first = client
-				second = "|cffCCCCCC"..toonName.."|r"
+				level = "|cffFFFFFF"..client.."|r"
+				name = "|cffCCCCCC"..toonName.."|r"
 			end
-			left = left.."|cffFFFFFF"..first.."|r  "
 			left = left..getFactionIndicator(faction, client)
 			left = left..getStatusIcon(playerStatus)
-			left = left..second.." "
+			left = left..name.." "
 		end
 
 		-- Full name
@@ -663,17 +657,13 @@ local function addRealID(tooltip, digitWidth)
 		-- Location
 		local right = "|cffFFFFFF"..gameText.."|r"
 
-		local y = tooltip:AddLine(left, right)
+		local y = tooltip:AddLine(check, level, left, right)
 		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID })
 
 		-- Extra lines
-		local indent = getGroupIndicator("")..spacer(digitWidth, 2).."  "..getFactionIndicator("", "")
 		if extraLines then
 			for _, line in ipairs(extraLines) do
-				-- indent the line over
-				line = indent..line
-				local y, x = tooltip:AddLine()
-				tooltip:SetCell(y, x, line, nil, nil, 2)
+				addDoubleLine(true, line)
 			end
 		end
 
@@ -693,15 +683,17 @@ local function addRealID(tooltip, digitWidth)
 				left = toonName
 				right = gameText
 			end
-			tooltip:AddLine(indent.."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..left.."|r", "|cffFFFFFF"..right.."|r")
+			left = "|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..left.."|r"
+			right = "|cffFFFFFF"..right.."|r"
+			addDoubleLine(true, left, right)
 		end
 	end
 end
 
-local function addFriends(tooltip, digitWidth)
+local function addFriends(tooltip)
 	local numTotal, numOnline = GetNumFriends()
 
-	tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_FRIENDS), "|cffFFFFFF"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	addDoubleLine(false, TitanUtils_GetNormalText(L.TOOLTIP_FRIENDS), "|cffFFFFFF"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	for i=1, numOnline do
 		local left = ""
@@ -709,7 +701,7 @@ local function addFriends(tooltip, digitWidth)
 		local name, level, class, area, connected, playerStatus, playerNote, isRAF = GetFriendInfo(i)
 
 		-- Group indicator
-		left = left..getGroupIndicator(name)
+		local check = getGroupIndicator(name)
 
 		-- fix unknown names - why does this happen?
 		local origname = name
@@ -718,7 +710,7 @@ local function addFriends(tooltip, digitWidth)
 		end
 
 		-- Level
-		left = left.."|cffFFFFFF"..padLevel(level, digitWidth).."|r  "
+		local level = "|cffFFFFFF"..level.."|r"
 
 		-- Status icon
 		left = left..getStatusIcon(playerStatus)
@@ -740,17 +732,17 @@ local function addFriends(tooltip, digitWidth)
 			right = "|cffFFFFFF"..area.."|r"
 		end
 		
-		local y =tooltip:AddLine(left, right)
+		local y = tooltip:AddLine(check, level, left, right)
 		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, false, false, false })
 	end
 end
 
-local function processGuildMember(i, isRemote, tooltip, digitWidth)
+local function processGuildMember(i, isRemote, tooltip)
 	local left = ""
 
 	local name, rank, rankIndex, level, class, zone, note, officerNote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(i)
 
-	left = left..getGroupIndicator(name)
+	local check = getGroupIndicator(name)
 
 	-- fix name
 	local origname = name
@@ -779,7 +771,7 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 	end
 
 	-- Level
-	left = left.."|cffFFFFFF"..padLevel(level, digitWidth).."|r  "
+	local level = "|cffFFFFFF"..level.."|r"
 
 	-- Status icon
 	if not isMobile then
@@ -818,11 +810,11 @@ local function processGuildMember(i, isRemote, tooltip, digitWidth)
 		right = "|cffFFFFFF"..zone.."|r"
 	end
 
-	local y = tooltip:AddLine(left, right)
+	local y = tooltip:AddLine(check, level, left, right)
 	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, true, isMobile, isRemote })
 end
 
-local function addGuild(tooltip, digitWidth)
+local function addGuild(tooltip)
 	isFreshFrame() -- don't trigger GUILD_ROSTER_UPDATE events due to offline toggling
 	local wasOffline = GetGuildRosterShowOffline()
 	if wasOffline then
@@ -836,17 +828,17 @@ local function addGuild(tooltip, digitWidth)
 
 	local numGuild = split and numOnline or numRemote
 
-	tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_GUILD), "|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	addDoubleLine(false, TitanUtils_GetNormalText(L.TOOLTIP_GUILD), "|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 
 	for i, guildIndex in ipairs(roster) do
 		local isRemote = guildIndex > numOnline
-		processGuildMember(guildIndex, isRemote, tooltip, digitWidth)
+		processGuildMember(guildIndex, isRemote, tooltip)
 
 		if split and i == numOnline then
 			-- add header for Remote Chat
 			local numRemoteChat = numRemote - numOnline
-			tooltip:AddLine(" ")
-			tooltip:AddLine(TitanUtils_GetNormalText(L.TOOLTIP_REMOTE_CHAT), "|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+			tooltip:AddLine()
+			addDoubleLine(false, TitanUtils_GetNormalText(L.TOOLTIP_REMOTE_CHAT), "|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..numTotal))
 		end
 	end
 
@@ -855,57 +847,29 @@ local function addGuild(tooltip, digitWidth)
 	end
 end
 
-local function buildTooltip(tooltip, digitWidth)
-	tooltip:AddHeader(_G.HIGHLIGHT_FONT_COLOR_CODE .. L.TOOLTIP .. "|r")
+local function buildTooltip(tooltip)
+	tooltip:AddColspanHeader(3, "LEFT", L.TOOLTIP)
 
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
-		tooltip:AddLine(" ")
-		addRealID(tooltip, digitWidth)
+		tooltip:AddLine()
+		addRealID(tooltip)
 	end
 	
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
-		tooltip:AddLine(" ")
-		addFriends(tooltip, digitWidth)
+		tooltip:AddLine()
+		addFriends(tooltip)
 	end
 	
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
-		tooltip:AddLine(" ")
-		addGuild(tooltip, digitWidth)
+		tooltip:AddLine()
+		addGuild(tooltip)
 	end
 end
 
--- getDigitWidth(font)
--- PARAMETERS:
---   font - Font - the font we want the width of
--- RETURNS:
---   number - the width of a single digit in the specified font
-local getDigitWidthFontString = _G.UIParent:CreateFontString()
-getDigitWidthFontString:Hide()
-local function getDigitWidth(font)
-	getDigitWidthFontString:SetFontObject(font)
-	getDigitWidthFontString:SetText("0")
-	return getDigitWidthFontString:GetStringWidth()
-end
-
-local tooltipFont = _G.CreateFont(addonName.."TooltipFont")
-tooltipFont:SetFontObject(_G.GameTooltipText)
-tooltipFont:SetTextColor(NORMAL_FONT_COLOR.r, NORMAL_FONT_COLOR.g, NORMAL_FONT_COLOR.b)
 local function updateTooltip(tooltip)
-	-- Calculate the width of 1 digit
-	-- We're assuming that all digits in a font have the same width, since that seems to be the case
-	-- Ask the LabelProvider for a cell for our tooltip using the current font
-	--local cell = LibQTip.LabelProvider:AcquireCell(tooltip)
-	--tooltip:SetText("title")
-	--tooltip:AddLine("0")
-	--local digitWidth = _G.GameTooltipTextLeft2:GetStringWidth()
-
-	local digitWidth = getDigitWidth(tooltip:GetFont())
-
 	tooltip:Clear()
 
-	tooltip:SetFont(tooltipFont)
-
-	local ok, message = pcall(buildTooltip, tooltip, digitWidth)
+	local ok, message = pcall(buildTooltip, tooltip)
 	if not ok then
 		print("|cffFF0000TitanSocial error: " .. message .. "|r")
 		error(message, 0)
@@ -1000,12 +964,9 @@ function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
 	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID)
 
 	-- Update tooltip if shown
-	if LibQTip:IsAcquired(TITAN_SOCIAL_TOOLTIP_KEY) then
-		local tooltip = LibQTip:Acquire(TITAN_SOCIAL_TOOLTIP_KEY)
-		if tooltip:IsVisible() then -- we're getting events while the tooltip isn't visible, for some reason
-			updateTooltip(tooltip)
-			tooltip:UpdateScrolling()
-		end
+	if tooltip:IsVisible() then
+		updateTooltip(tooltip)
+		--tooltip:UpdateScrolling()
 	end
 end
 
@@ -1022,13 +983,13 @@ function _G.TitanPanelSocialButton_OnEnter(self)
 	-- Update Titan button label and tooltip
 	TitanPanelButton_UpdateButton(TITAN_SOCIAL_ID)
 
-	local tooltip = LibQTip:Acquire(TITAN_SOCIAL_TOOLTIP_KEY, 2, "LEFT", "RIGHT")
+
+	tooltip:Clear("LEFT", 0, "RIGHT", "LEFT", "RIGHT")
 	tooltip:SetAutoHideDelay(0.2, self)
 	updateTooltip(tooltip)
 	tooltip:SmartAnchorTo(self)
-	tooltip:SetFrameStrata("FULLSCREEN_DIALOG") -- so contextual menu works
 	tooltip:Show()
-	tooltip:UpdateScrolling()
+	--tooltip:UpdateScrolling()
 end
 
 function _G.TitanPanelSocialButton_OnClick(self, button)
@@ -1043,11 +1004,6 @@ function _G.TitanPanelSocialButton_OnClick(self, button)
 			ToggleGuildFrame(1); -- guild tab
 		end
 	elseif button == "RightButton" then
-		-- hide the tooltip so the contextual menu will be visible
-		if LibQTip:IsAcquired(TITAN_SOCIAL_TOOLTIP_KEY) then
-			local tooltip = LibQTip:Acquire(TITAN_SOCIAL_TOOLTIP_KEY)
-			tooltip:Hide()
-			tooltip:Release()
-		end
+		tooltip:Hide()
 	end
 end
