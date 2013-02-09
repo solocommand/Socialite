@@ -967,7 +967,6 @@ function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
 	-- Update tooltip if shown
 	if tooltip:IsVisible() then
 		updateTooltip(tooltip)
-		--tooltip:UpdateScrolling()
 	end
 end
 
@@ -990,7 +989,6 @@ function _G.TitanPanelSocialButton_OnEnter(self)
 	updateTooltip(tooltip)
 	tooltip:SmartAnchorTo(self)
 	tooltip:Show()
-	--tooltip:UpdateScrolling()
 end
 
 function _G.TitanPanelSocialButton_OnClick(self, button)

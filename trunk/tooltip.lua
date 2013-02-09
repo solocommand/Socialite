@@ -8,19 +8,75 @@ local UIParent = _G.UIParent
 local GameTooltip = _G.GameTooltip
 local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR = _G.NORMAL_FONT_COLOR, _G.HIGHLIGHT_FONT_COLOR
 
-local tframe = CreateFrame("frame", nil, _G.UIParent)
-tframe:Hide()
-tframe.lines = {}
-tframe.columns = {}
-tframe:SetClampedToScreen(true)
-tframe:SetFrameStrata("FULLSCREEN_DIALOG")
 local H_PADDING = 6
 local V_PADDING = 3
 local H_MARGIN = 10
 local V_MARGIN = 10
+local MW_STEP = 10
 
-local ResetTooltipSize, SetTooltipSize
+local ResetTooltipSize, SetTooltipSize, tframe_OnMouseWheel, slider_OnValueChanged
+local tooltip_UpdateScrollerValues
 local _SetLineScript
+
+local tframe = CreateFrame("ScrollFrame", nil, _G.UIParent)
+tframe:Hide()
+tframe.lines = {}
+tframe.columns = {}
+tframe:SetClampedToScreen(false)
+tframe:SetFrameStrata("FULLSCREEN_DIALOG")
+do
+	local scrollframe = CreateFrame("ScrollFrame", nil, tframe)
+	scrollframe:SetPoint("TOPLEFT", tframe, "TOPLEFT", H_MARGIN, -V_MARGIN)
+	scrollframe:SetPoint("BOTTOMRIGHT", tframe, "BOTTOMRIGHT", -H_MARGIN, V_MARGIN)
+	local scrollchild = CreateFrame("frame", nil, scrollframe)
+	scrollframe:SetScrollChild(scrollchild)
+	tframe.scrollframe = scrollframe
+	tframe.scrollchild = scrollchild
+	local slider = CreateFrame("Slider", nil, tframe)
+	slider:Hide()
+	slider:SetOrientation("VERTICAL")
+	-- the thumb texture isn't based on the slider's width, so we need to muck with its scale
+	slider:SetWidth(20)
+	slider:SetScale(16/slider:GetWidth())
+	--[=[ textures ]=]
+	do
+		slider:SetThumbTexture("Interface\\BUTTONS\\UI-ScrollBar-Knob")
+		--slider:GetThumbTexture():SetTexCoord(0.2, 0.8, 0.125, 0.875)
+		-- background
+		local texture = slider:CreateTexture(nil, "BACKGROUND")
+		texture:SetTexture(0, 0, 0, 0.5)
+		texture:SetPoint("TOPLEFT", slider, "TOPLEFT", 0, -5)
+		texture:SetPoint("BOTTOMRIGHT", slider, "BOTTOMRIGHT", 0, 5)
+		--[[ track border ]]
+		-- top
+		local topTexture = slider:CreateTexture()
+		topTexture:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar")
+		topTexture:SetTexCoord(0, 0.484375, 0.078125, 0.20)
+		topTexture:SetSize(27, 20)
+		topTexture:SetPoint("TOPLEFT", slider, "TOPLEFT", -4, -5)
+		-- bottom
+		local bottomTexture = slider:CreateTexture()
+		bottomTexture:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar")
+		bottomTexture:SetTexCoord(0.515625, 1.0, 0.1440625, 0.3359375)
+		bottomTexture:SetSize(27, 52)
+		bottomTexture:SetPoint("BOTTOMLEFT", slider, "BOTTOMLEFT", -4, 5)
+		-- middle
+		texture = slider:CreateTexture()
+		texture:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar")
+		texture:SetTexCoord(0, 0.484375, 0.1640625, 1)
+		texture:SetPoint("TOPLEFT", topTexture, "BOTTOMLEFT")
+		texture:SetPoint("BOTTOMRIGHT", bottomTexture, "TOPRIGHT")
+	end
+	slider:SetPoint("TOPRIGHT", tframe, "TOPRIGHT", -H_MARGIN / slider:GetScale(), -V_MARGIN / slider:GetScale())
+	slider:SetPoint("BOTTOMRIGHT", tframe, "BOTTOMRIGHT", -H_MARGIN / slider:GetScale(), V_MARGIN / slider:GetScale())
+	slider:SetMinMaxValues(0, 1)
+	slider:SetValueStep(1)
+	slider:SetValue(0)
+	slider:SetScript("OnValueChanged", function(slider, value)
+		tframe.scrollframe:SetVerticalScroll(value)
+	end)
+	tframe.scroller = slider
+end
 
 local acquireCell, releaseCell, acquireColumn, releaseColumn, acquireLine, releaseLine
 do
@@ -124,15 +180,15 @@ function tooltip:Clear(...)
 			col.justification = arg
 			col.width = 0
 			col:SetWidth(1)
-			col:SetParent(tframe)
-			col:SetPoint("TOP", tframe)
-			col:SetPoint("BOTTOM", tframe)
-			col:SetFrameLevel(tframe:GetFrameLevel() + 1)
+			col:SetParent(tframe.scrollchild)
+			col:SetPoint("TOP", tframe.scrollchild)
+			col:SetPoint("BOTTOM", tframe.scrollchild)
+			col:SetFrameLevel(tframe.scrollchild:GetFrameLevel() + 1)
 			if #tframe.columns > 0 then
 				col:SetPoint("LEFT", tframe.columns[#tframe.columns], "RIGHT", padding, 0)
 				col.left_padding = padding
 			else
-				col:SetPoint("LEFT", tframe, "LEFT", H_MARGIN, 0)
+				col:SetPoint("LEFT", tframe.scrollchild, "LEFT")
 				col.left_padding = 0
 			end
 			col:Show()
@@ -171,9 +227,45 @@ end
 -- local
 function SetTooltipSize(width, height)
 	tframe.width = width
-	tframe:SetWidth(2*H_MARGIN + width)
+	tframe.scrollchild:SetWidth(width)
 	tframe.height = height
-	tframe:SetHeight(2*V_MARGIN + height)
+	tframe.scrollchild:SetHeight(height)
+
+	-- Check if we need to scroll or not, and constrain the tooltip's frame
+	local scale = tframe:GetScale()
+	local top = tframe:GetTop()
+	local bottom = tframe:GetBottom()
+	local screenheight = _G.UIParent:GetHeight() / scale
+
+	if bottom ~= nil and top ~= nil and (bottom < 0 or top > screenheight) then
+		-- scroll
+		if bottom < 0 then
+			bottom = 5 -- give us some padding
+		end
+		if top > screenheight then
+			top = screenheight - 5 -- same padding
+		end
+		local theight = top - bottom
+		if not tframe.scroller:IsShown() then
+			tframe.scroller:Show()
+			tframe.scrollframe:SetPoint("RIGHT", tframe, "RIGHT", -H_MARGIN - tframe.scroller:GetWidth() * tframe.scroller:GetScale() - H_MARGIN, 0)
+			tframe:SetScript("OnMouseWheel", tframe_OnMouseWheel)
+			tframe:EnableMouseWheel(true)
+		end
+		tframe:SetScript("OnUpdate", tooltip_UpdateScrollerValues)
+		tframe:SetHeight(theight)
+		tframe:SetWidth(3*H_MARGIN + width + tframe.scroller:GetWidth() * tframe.scroller:GetScale())
+	else
+		if tframe.scroller:IsShown() then
+			tframe.scroller:Hide()
+			tframe.scrollframe:SetPoint("RIGHT", tframe, "RIGHT", -H_MARGIN, 0)
+			tframe:EnableMouseWheel(false)
+			tframe:SetScript("OnMouseWheel", nil)
+		end
+		tframe:SetScript("OnUpdate", nil)
+		tframe:SetHeight(2*V_MARGIN + height)
+		tframe:SetWidth(2*H_MARGIN + width)
+	end
 end
 
 local _AddLine
@@ -254,15 +346,15 @@ end
 -- local
 function _AddLine(isHeader, ...)
 	local line = acquireLine()
-	line:SetParent(tframe)
-	line:SetFrameLevel(tframe:GetFrameLevel()+1)
-	line:SetPoint("LEFT", tframe, "LEFT", H_MARGIN, 0)
-	line:SetPoint("RIGHT", tframe, "RIGHT", -H_MARGIN, 0)
+	line:SetParent(tframe.scrollchild)
+	line:SetFrameLevel(tframe.scrollchild:GetFrameLevel()+1)
+	line:SetPoint("LEFT", tframe.scrollchild, "LEFT", H_MARGIN, 0)
+	line:SetPoint("RIGHT", tframe.scrollchild, "RIGHT", -H_MARGIN, 0)
 	if #tframe.lines > 0 then
 		line:SetPoint("TOP", tframe.lines[#tframe.lines], "BOTTOM", 0, -V_PADDING)
 		line.top_padding = V_PADDING
 	else
-		line:SetPoint("TOP", tframe, "TOP", 0, -V_MARGIN)
+		line:SetPoint("TOP", tframe.scrollchild, "TOP")
 		line.top_padding = 0
 	end
 	local font = isHeader and tframe.headerFont or tframe.font
@@ -445,6 +537,26 @@ do
 	end
 end
 
+-- local
+function tframe_OnMouseWheel(frame, delta)
+	local min, max = frame.scroller:GetMinMaxValues()
+	local cur = frame.scroller:GetValue()
+	if delta < 0 and cur < max then
+		frame.scroller:SetValue(math.min(cur + MW_STEP, max))
+	elseif delta > 0 and cur > min then
+		frame.scroller:SetValue(math.max(cur - MW_STEP, min))
+	end
+end
+
+-- local
+function tooltip_UpdateScrollerValues(frame)
+	if frame.scroller:IsShown() then
+		local theight = frame:GetTop() - frame:GetBottom()
+		frame.scroller:SetMinMaxValues(0, (frame.height + 2*V_MARGIN) - theight)
+	end
+	frame:SetScript("OnUpdate", nil)
+end
+
 -- Lifted from Cork, but also appears almost-unchanged in LibQTip. Did this come from somewhere common?
 local function GetTipAnchor(frame)
 	local x,y = frame:GetCenter()
@@ -513,6 +625,11 @@ do
 	end
 end
 
+tframe:SetScript("OnShow", function()
+	-- ensure the scrolling calculation has been done
+	SetTooltipSize(tframe.width, tframe.height)
+end)
+
 --[[ Frame methods ]]
 
 -- IsVisible()
@@ -541,5 +658,6 @@ end
 -- Hides the tooltip.
 function tooltip:Hide()
 	self:SetAutoHideDelay(nil)
+	tframe.scroller:SetValue(0)
 	tframe:Hide()
 end
