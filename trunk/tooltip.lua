@@ -13,9 +13,10 @@ local V_PADDING = 3
 local H_MARGIN = 10
 local V_MARGIN = 10
 local MW_STEP = 10
+local EDGE_PAD = 5
 
 local ResetTooltipSize, SetTooltipSize, tframe_OnMouseWheel, slider_OnValueChanged
-local tooltip_UpdateScrollerValues
+local tooltip_OnUpdate
 local _SetLineScript
 
 local tframe = CreateFrame("ScrollFrame", nil, _G.UIParent)
@@ -224,6 +225,85 @@ function ResetTooltipSize()
 	SetTooltipSize(width, height)
 end
 
+local reanchorAndClamp
+do
+	local tmp = {}
+	function reanchorAndClamp()
+		if tframe.anchor and tframe.clamped then
+			tframe:ClearAllPoints()
+			tframe:SetPoint(unpack(tframe.anchor, 1, tframe.count))
+			tframe.clamped = false
+		end
+
+		-- Check if we need to scroll or not, and constrain the tooltip's frame
+		tframe:SetHeight(2*V_MARGIN + tframe.height)
+		local scale = tframe:GetScale()
+		local top = tframe:GetTop()
+		local bottom = tframe:GetBottom()
+		local screenheight = _G.UIParent:GetHeight() / scale
+
+		if bottom ~= nil and top ~= nil and (bottom < 0 or top > screenheight) then
+			-- scroll
+			if bottom < 0 then
+				bottom = EDGE_PAD
+			end
+			if top > screenheight then
+				top = screenheight - EDGE_PAD
+			end
+			local theight = top - bottom
+			if not tframe.scroller:IsShown() then
+				tframe.scroller:Show()
+				tframe.scrollframe:SetPoint("RIGHT", tframe, "RIGHT", -H_MARGIN - tframe.scroller:GetWidth() * tframe.scroller:GetScale() - H_MARGIN, 0)
+				tframe:SetScript("OnMouseWheel", tframe_OnMouseWheel)
+				tframe:EnableMouseWheel(true)
+			end
+			tframe:SetHeight(theight)
+			tframe:SetWidth(3*H_MARGIN + tframe.width + tframe.scroller:GetWidth() * tframe.scroller:GetScale())
+		else
+			if tframe.scroller:IsShown() then
+				tframe.scroller:Hide()
+				tframe.scrollframe:SetPoint("RIGHT", tframe, "RIGHT", -H_MARGIN, 0)
+				tframe:EnableMouseWheel(false)
+				tframe:SetScript("OnMouseWheel", nil)
+			end
+			tframe:SetWidth(2*H_MARGIN + tframe.width)
+		end
+
+		-- ensure we don't go off the side of the screen either
+		if tframe.anchor then
+			local left, right = tframe:GetLeft(), tframe:GetRight()
+			local screenwidth = _G.UIParent:GetWidth() / scale
+			if left ~= nil and right ~= nil then
+				local newanchor
+				if left < 0 then
+					table.wipe(tmp)
+					tmp[1], tmp[2], tmp[3], tmp[4], tmp[5] = "LEFT", _G.UIParent, "LEFT", EDGE_PAD, 0
+					newanchor = tmp
+				elseif right > screenwidth then
+					table.wipe(tmp)
+					tmp[2], tmp[5] = _G.UIParent, 0
+					if right - left > screenwidth - EDGE_PAD then
+						tmp[1], tmp[3], tmp[4] = "LEFT", "LEFT", EDGE_PAD
+					else
+						tmp[1], tmp[3], tmp[4] = "RIGHT", "RIGHT", -EDGE_PAD
+					end
+					newanchor = tmp
+				end
+				if newanchor then
+					-- remove any existing LEFT/RIGHT points
+					local anchor = tframe.anchor
+					if anchor[1]:match(".+LEFT$") or anchor[1]:match(".+RIGHT$") then
+						tframe:ClearAllPoints()
+						tframe:SetPoint(anchor[1]:gsub("LEFT$","",1):gsub("RIGHT$","",1), anchor[2], anchor[3], anchor[4] or 0, 0)
+					end
+					tframe:SetPoint(unpack(newanchor, 1, 5))
+					tframe.clamped = true
+				end
+			end
+		end
+	end
+end
+
 -- local
 function SetTooltipSize(width, height)
 	tframe.width = width
@@ -231,41 +311,7 @@ function SetTooltipSize(width, height)
 	tframe.height = height
 	tframe.scrollchild:SetHeight(height)
 
-	-- Check if we need to scroll or not, and constrain the tooltip's frame
-	local scale = tframe:GetScale()
-	local top = tframe:GetTop()
-	local bottom = tframe:GetBottom()
-	local screenheight = _G.UIParent:GetHeight() / scale
-
-	if bottom ~= nil and top ~= nil and (bottom < 0 or top > screenheight) then
-		-- scroll
-		if bottom < 0 then
-			bottom = 5 -- give us some padding
-		end
-		if top > screenheight then
-			top = screenheight - 5 -- same padding
-		end
-		local theight = top - bottom
-		if not tframe.scroller:IsShown() then
-			tframe.scroller:Show()
-			tframe.scrollframe:SetPoint("RIGHT", tframe, "RIGHT", -H_MARGIN - tframe.scroller:GetWidth() * tframe.scroller:GetScale() - H_MARGIN, 0)
-			tframe:SetScript("OnMouseWheel", tframe_OnMouseWheel)
-			tframe:EnableMouseWheel(true)
-		end
-		tframe:SetScript("OnUpdate", tooltip_UpdateScrollerValues)
-		tframe:SetHeight(theight)
-		tframe:SetWidth(3*H_MARGIN + width + tframe.scroller:GetWidth() * tframe.scroller:GetScale())
-	else
-		if tframe.scroller:IsShown() then
-			tframe.scroller:Hide()
-			tframe.scrollframe:SetPoint("RIGHT", tframe, "RIGHT", -H_MARGIN, 0)
-			tframe:EnableMouseWheel(false)
-			tframe:SetScript("OnMouseWheel", nil)
-		end
-		tframe:SetScript("OnUpdate", nil)
-		tframe:SetHeight(2*V_MARGIN + height)
-		tframe:SetWidth(2*H_MARGIN + width)
-	end
+	tframe:SetScript("OnUpdate", tooltip_OnUpdate)
 end
 
 local _AddLine
@@ -549,11 +595,14 @@ function tframe_OnMouseWheel(frame, delta)
 end
 
 -- local
-function tooltip_UpdateScrollerValues(frame)
+function tooltip_OnUpdate(frame)
+	reanchorAndClamp()
+
 	if frame.scroller:IsShown() then
 		local theight = frame:GetTop() - frame:GetBottom()
 		frame.scroller:SetMinMaxValues(0, (frame.height + 2*V_MARGIN) - theight)
 	end
+
 	frame:SetScript("OnUpdate", nil)
 end
 
@@ -566,6 +615,15 @@ local function GetTipAnchor(frame)
 	return vhalf..hhalf, frame, (vhalf == "TOP" and "BOTTOM" or "TOP")..hhalf
 end
 
+local function toTable(t, ...)
+	table.wipe(t)
+	t.count = select('#', ...)
+	for i = 1, t.count do
+		t[i] = select(i, ...)
+	end
+	return t
+end
+
 -- SmartAnchorTo(frame)
 --
 -- Anchors the tooltip to the frame, smartly.
@@ -574,7 +632,10 @@ function tooltip:SmartAnchorTo(frame)
 		error("Invalid frame", 2)
 	end
 	tframe:ClearAllPoints()
-	tframe:SetPoint(GetTipAnchor(frame))
+	tframe.anchor = toTable(tframe.anchor or {}, GetTipAnchor(frame))
+	tframe:SetPoint(unpack(tframe.anchor, 1, tframe.anchor.count))
+	tframe.clamped = false
+	reanchorAndClamp()
 end
 
 -- SetAutoHideDelay(delay[, frame])
