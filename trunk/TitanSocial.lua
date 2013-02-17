@@ -683,7 +683,7 @@ local function addRealID(tooltip)
 				left = toonName
 				right = gameText
 			end
-			left = "|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..left.."|r"
+			left = getFactionIndicator(faction, client).."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..left.."|r"
 			right = "|cffFFFFFF"..right.."|r"
 			addDoubleLine(true, left, right)
 		end
