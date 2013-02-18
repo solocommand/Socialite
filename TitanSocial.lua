@@ -438,6 +438,8 @@ local function getFactionIndicator(faction, client)
 		if client == BNET_CLIENT_WOW then
 			if faction == "Horde" or faction == "Alliance" then
 				return "|TInterface\\PVPFrame\\PVP-Currency-"..faction..":0|t"
+			elseif faction == "Neutral" then
+				return "|TInterface\\FriendsFrame\\Battlenet-WoWicon:0|t"
 			end
 		elseif client and client ~= "" then
 			return "|T"..BNet_GetClientTexture(client)..":0|t"
