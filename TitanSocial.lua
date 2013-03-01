@@ -35,6 +35,7 @@ local ToggleDropDownMenu, CloseDropDownMenus = _G.ToggleDropDownMenu, _G.CloseDr
 local PlaySound = _G.PlaySound
 local UnitFactionGroup = _G.UnitFactionGroup
 local BNet_GetClientTexture = _G.BNet_GetClientTexture
+local InCombatLockdown = _G.InCombatLockdown
 
 local TravelPassDropDown = _G.TravelPassDropDown
 
@@ -78,6 +79,10 @@ local CHECK_ICON = "|TInterface\\Buttons\\UI-CheckBox-Check:0:0|t"
 local STATUS_ICON = "icon"
 local STATUS_TEXT = "text"
 local STATUS_NONE = "none"
+
+local INTERACTION_ALWAYS = "always"
+local INTERACTION_OOC = "outofcombat"
+local INTERACTION_NEVER = "never"
 
 -- Class support
 local TitanSocial_ClassMap = {}
@@ -172,6 +177,9 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 
 		-- Status menu
 		addSubmenu(L.MENU_STATUS, "Status", level)
+
+		-- Interaction menu
+		addSubmenu(L.MENU_INTERACTION, "Interaction", level)
 		
 		TitanPanelRightClickMenu_AddSpacer(level)
 		TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID, level)
@@ -213,6 +221,13 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			addRadioRefresh(L.MENU_STATUS_ICON, "ShowStatus", STATUS_ICON, level)
 			addRadioRefresh(L.MENU_STATUS_TEXT, "ShowStatus", STATUS_TEXT, level)
 			addRadioRefresh(L.MENU_STATUS_NONE, "ShowStatus", STATUS_NONE, level)
+		end
+
+		-- Interaction Menu
+		if menuList == "Interaction" then
+			addRadioRefresh(L.MENU_INTERACTION_ALWAYS, "TooltipInteraction", INTERACTION_ALWAYS, level)
+			addRadioRefresh(L.MENU_INTERACTION_OOC, "TooltipInteraction", INTERACTION_OOC, level)
+			addRadioRefresh(L.MENU_INTERACTION_NEVER, "TooltipInteraction", INTERACTION_NEVER, level)
 		end
 		
 		if menuList == "Options" then
@@ -922,6 +937,7 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 			ShowIcon = 1,
 			ShowLabel = 1,
 			ShowTooltipTotals = 1,
+			TooltipInteraction = INTERACTION_ALWAYS,
 		}
 	}
 
@@ -991,6 +1007,13 @@ function _G.TitanPanelSocialButton_OnEnter(self)
 	updateTooltip(tooltip)
 	tooltip:SmartAnchorTo(self)
 	tooltip:Show()
+end
+
+function _G.TitanPanelSocialButton_OnLeave(self)
+	local interaction = TitanGetVar(TITAN_SOCIAL_ID, "TooltipInteraction")
+	if interaction == INTERACTION_NEVER or (interaction == INTERACTION_OOC and InCombatLockdown()) then
+		tooltip:Hide()
+	end
 end
 
 function _G.TitanPanelSocialButton_OnClick(self, button)

@@ -16,7 +16,10 @@
 					</OnEvent>
 					<OnEnter>
 						TitanPanelSocialButton_OnEnter(self);
-					</OnEnter>	
+					</OnEnter>
+					<OnLeave>
+						TitanPanelSocialButton_OnLeave(self)
+					</OnLeave>
 					<OnClick>
 						TitanPanelSocialButton_OnClick(self, button);
 						TitanPanelButton_OnClick(self, button);
