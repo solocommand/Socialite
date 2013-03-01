@@ -49,6 +49,11 @@ L.MENU_STATUS_NONE = "None"
 
 L.MENU_SHOW_GROUP_MEMBERS = "Show Group Members"
 
+L.MENU_INTERACTION = "Tooltip Interaction"
+L.MENU_INTERACTION_ALWAYS = "Always"
+L.MENU_INTERACTION_OOC = "Out Of Combat"
+L.MENU_INTERACTION_NEVER = "Never"
+
 L.MENU_LABEL = "Show Label"
 L.MENU_HIDE = "Hide"
 L.MENU_OPTIONS = "Options"
