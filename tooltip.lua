@@ -205,9 +205,12 @@ function tooltip:Clear(...)
 	ResetTooltipSize()
 
 	-- pull current GameTooltip values
-	tframe:SetBackdrop(GameTooltip:GetBackdrop())
-	tframe:SetBackdropColor(GameTooltip:GetBackdropColor())
-	tframe:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+	local backdrop = GameTooltip:GetBackdrop()
+	tframe:SetBackdrop(backdrop)
+	if backdrop then
+		tframe:SetBackdropColor(GameTooltip:GetBackdropColor())
+		tframe:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
+	end
 	tframe:SetScale(GameTooltip:GetScale())
 	tframe.font = _G.GameTooltipText
 	tframe.headerFont = _G.GameTooltipHeaderText
