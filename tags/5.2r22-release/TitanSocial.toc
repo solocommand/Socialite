@@ -1,0 +1,9 @@
+## Interface: 50200
+## Title: Titan Panel [|cffeda55fSocial|r] |cff00aa005.2r22|r
+## Notes: A Titan Panel plugin incorporating Friends, Guild, and RealID Friends
+## Author: solocommand
+## SavedVariables:
+## SavedVariablesPerCharacter: TitanSocialVars
+## Dependencies: Titan
+## Version: 5.2r22
+TitanSocial.xml
