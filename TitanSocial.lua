@@ -626,7 +626,7 @@ local function addRealID(tooltip)
 				level = "|cffFFFFFF"..level.."|r"
 				name = colorText(toonName, className)
 			else
-				level = "|cffFFFFFF"..client.."|r"
+				level = "|cffFFFFFF"..(client or "??").."|r"
 				name = "|cffCCCCCC"..toonName.."|r"
 			end
 			left = left..getFactionIndicator(faction, client)
