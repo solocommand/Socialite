@@ -624,10 +624,10 @@ local function addRealID(tooltip)
 			local name
 			if client == BNET_CLIENT_WOW then
 				level = "|cffFFFFFF"..level.."|r"
-				name = colorText(toonName, className)
+				name = toonName and colorText(toonName, className) or "|cffFFFFFFUnknown|r"
 			else
 				level = "|cffFFFFFF"..(client or "??").."|r"
-				name = "|cffCCCCCC"..toonName.."|r"
+				name = "|cffCCCCCC"..(toonName or "Unknown").."|r"
 			end
 			left = left..getFactionIndicator(faction, client)
 			left = left..getStatusIcon(playerStatus)
