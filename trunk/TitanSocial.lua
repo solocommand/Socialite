@@ -382,8 +382,8 @@ local function collectGuildRosterInfo(split, sortKey, sortAscending)
 			if sortKey == "zone" and azone ~= bzone then
 				return ternary(sortAscending, azone < bzone, azone > bzone)
 			end
-			aname = string.lower(aname)
-			bname = string.lower(bname)
+			aname = string.lower(aname or "Unknown")
+			bname = string.lower(bname or "Unknown")
 			-- if name is the secondary sort, it's always ascending
 			if sortAscending or sortKey ~= "name" then
 				return aname < bname
