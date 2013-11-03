@@ -625,6 +625,8 @@ local function addRealID(tooltip)
 			if client == BNET_CLIENT_WOW then
 				level = "|cffFFFFFF"..level.."|r"
 				name = toonName and colorText(toonName, className) or "|cffFFFFFFUnknown|r"
+            elseif client == WTCG then
+                client = HS
 			else
 				level = "|cffFFFFFF"..(client or "??").."|r"
 				name = "|cffCCCCCC"..(toonName or "Unknown").."|r"
