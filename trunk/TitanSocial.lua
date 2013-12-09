@@ -691,23 +691,25 @@ local function addRealID(tooltip)
 
 		-- Additional toons
 		local playerFactionGroup = UnitFactionGroup("player")
-		for j = 2, BNGetNumFriendToons(i) do
-			local _, toonName, client, _, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(i, j)
-			local left, right
-			if client == BNET_CLIENT_WOW then
-				local cooperateLabel = ""
-				if realmID ~= playerRealmID or faction ~= playerFactionGroup then
-					cooperateLabel = _G.CANNOT_COOPERATE_LABEL
+		for j=1, BNGetNumFriendToons(i) do
+			local hasFocus, toonName, client, _, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(i, j)
+			if not hasFocus then
+				local left, right
+				if client == BNET_CLIENT_WOW then
+					local cooperateLabel = ""
+					if realmID ~= playerRealmID or faction ~= playerFactionGroup then
+						cooperateLabel = _G.CANNOT_COOPERATE_LABEL
+					end
+					left = _G.FRIENDS_TOOLTIP_WOW_TOON_TEMPLATE:format(toonName..cooperateLabel, level, race, class)
+					right = zoneName
+				else
+					left = toonName
+					right = gameText
 				end
-				left = _G.FRIENDS_TOOLTIP_WOW_TOON_TEMPLATE:format(toonName..cooperateLabel, level, race, class)
-				right = zoneName
-			else
-				left = toonName
-				right = gameText
+				left = getFactionIndicator(faction, client).."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..(left or "Unknown").."|r"
+				right = "|cffFFFFFF"..right.."|r"
+				addDoubleLine(true, left, right)
 			end
-			left = getFactionIndicator(faction, client).."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..left.."|r"
-			right = "|cffFFFFFF"..right.."|r"
-			addDoubleLine(true, left, right)
 		end
 	end
 end
