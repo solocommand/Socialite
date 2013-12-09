@@ -40,6 +40,7 @@ local InCombatLockdown = _G.InCombatLockdown
 local TravelPassDropDown = _G.TravelPassDropDown
 
 local BNET_CLIENT_WOW = _G.BNET_CLIENT_WOW
+local BNET_CLIENT_WTCG = _G.BNET_CLIENT_WTCG
 local REMOTE_CHAT = _G.REMOTE_CHAT
 local CHAT_FLAG_AFK, CHAT_FLAG_DND = _G.CHAT_FLAG_AFK, _G.CHAT_FLAG_DND
 local FRIENDS_TEXTURE_AFK, FRIENDS_TEXTURE_DND = _G.FRIENDS_TEXTURE_AFK, _G.FRIENDS_TEXTURE_DND
@@ -625,10 +626,12 @@ local function addRealID(tooltip)
 			if client == BNET_CLIENT_WOW then
 				level = "|cffFFFFFF"..level.."|r"
 				name = toonName and colorText(toonName, className) or "|cffFFFFFFUnknown|r"
-            elseif client == WTCG then
-                client = HS
 			else
-				level = "|cffFFFFFF"..(client or "??").."|r"
+				local clientname = client
+				if client == BNET_CLIENT_WTCG then
+					clientname = "HS"
+				end
+				level = "|cffFFFFFF"..(clientname or "??").."|r"
 				name = "|cffCCCCCC"..(toonName or "Unknown").."|r"
 			end
 			left = left..getFactionIndicator(faction, client)
@@ -674,7 +677,7 @@ local function addRealID(tooltip)
 		end
 
 		-- Location
-		local right = "|cffFFFFFF"..gameText.."|r"
+		local right = gameText and ("|cffFFFFFF"..gameText.."|r") or ""
 
 		local y = tooltip:AddLine(check, level, left, right)
 		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID })
