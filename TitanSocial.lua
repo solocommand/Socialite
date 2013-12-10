@@ -693,7 +693,9 @@ local function addRealID(tooltip)
 		local playerFactionGroup = UnitFactionGroup("player")
 		for j=1, BNGetNumFriendToons(i) do
 			local hasFocus, toonName, client, _, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(i, j)
-			if not hasFocus then
+			-- there seems to be a bug where sometimes players show up with extra toons, but the toon info is all nil
+			-- Use the client field to check for this
+			if not hasFocus and client then
 				local left, right
 				if client == BNET_CLIENT_WOW then
 					local cooperateLabel = ""
