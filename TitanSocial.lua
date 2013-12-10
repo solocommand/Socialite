@@ -707,7 +707,7 @@ local function addRealID(tooltip)
 					right = gameText
 				end
 				left = getFactionIndicator(faction, client).."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..(left or "Unknown").."|r"
-				right = "|cffFFFFFF"..right.."|r"
+				right = "|cffFFFFFF"..(right or "").."|r"
 				addDoubleLine(true, left, right)
 			end
 		end
