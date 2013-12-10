@@ -1027,8 +1027,13 @@ function _G.TitanPanelSocialButton_OnClick(self, button)
 	-- Detect mouse clicks
 	if button == "LeftButton" then
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
-			ToggleFriendsFrame(1); -- friends tab
-			FriendsFrame_Update()
+			-- We want to show the friends tab, but there's a taint issue :/
+			if FriendsFrame:IsShown() then
+				HideUIPanel(FriendsFrame)
+			else
+				ShowUIPanel(FriendsFrame)
+			end
+			--ToggleFriendsFrame(1); -- friends tab
 		end
 
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
