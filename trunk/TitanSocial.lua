@@ -9,7 +9,7 @@ local tooltip = addonTable.tooltip
 -- GLOBALS: table math select string tostring tonumber ipairs print pcall select error unpack
 
 local _G = _G
-local strsplit = _G.strsplit
+local Ambiguate = _G.Ambiguate
 
 local RAID_CLASS_COLORS = _G.RAID_CLASS_COLORS
 local IsInGuild, IsInGroup = _G.IsInGuild, _G.IsInGroup
@@ -18,7 +18,6 @@ local GuildRoster = _G.GuildRoster
 local GetGuildInfo, GetGuildRosterInfo, GetNumGuildMembers = _G.GetGuildInfo, _G.GetGuildRosterInfo, _G.GetNumGuildMembers
 local GetGuildRosterShowOffline, SetGuildRosterShowOffline = _G.GetGuildRosterShowOffline, _G.SetGuildRosterShowOffline
 local GetNumFriends, GetFriendInfo = _G.GetNumFriends, _G.GetFriendInfo
-local GetRealmName = _G.GetRealmName
 local ToggleFriendsFrame, ToggleGuildFrame = _G.ToggleFriendsFrame, _G.ToggleGuildFrame
 local FriendsFrame, ShowUIPanel, HideUIPanel = _G.FriendsFrame, _G.ShowUIPanel, _G.HideUIPanel
 local FriendsFrame_Update = _G.FriendsFrame_Update
@@ -767,7 +766,7 @@ local function addFriends(tooltip)
 	end
 end
 
-local function processGuildMember(i, isRemote, tooltip, playerRealmName)
+local function processGuildMember(i, isRemote, tooltip)
 	local left = ""
 
 	local name, rank, rankIndex, level, class, zone, note, officerNote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(i)
@@ -780,13 +779,7 @@ local function processGuildMember(i, isRemote, tooltip, playerRealmName)
 		name = "Unknown"
 	end
 
-	-- strip realm from name if player realm
-	do
-		local toonName, realmName = strsplit("-", name, 2)
-		if realmName == playerRealmName then
-			name = toonName
-		end
-	end
+	name = Ambiguate(name, "guild")
 
 	-- fix playerStatus
 	if playerStatus == 1 then
@@ -860,8 +853,6 @@ local function addGuild(tooltip)
 		SetGuildRosterShowOffline(false)
 	end
 
-	local playerRealmName = GetRealmName()
-
 	local split = TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat")
 	local sortKey = TitanGetVar(TITAN_SOCIAL_ID, "SortGuild") and TitanGetVar(TITAN_SOCIAL_ID, "GuildSortKey") or nil
 	local roster, numTotal, numOnline, numRemote = collectGuildRosterInfo(split, sortKey, TitanGetVar(TITAN_SOCIAL_ID, "GuildSortAscending") or false)
@@ -872,7 +863,7 @@ local function addGuild(tooltip)
 
 	for i, guildIndex in ipairs(roster) do
 		local isRemote = guildIndex > numOnline
-		processGuildMember(guildIndex, isRemote, tooltip, playerRealmName)
+		processGuildMember(guildIndex, isRemote, tooltip)
 
 		if split and i == numOnline then
 			-- add header for Remote Chat
