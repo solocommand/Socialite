@@ -162,6 +162,35 @@ local function addRadioRefresh(text, key, value, level)
 	UIDropDownMenu_AddButton(info, level)
 end
 
+-- Returns two counts, first is for friends and second is for bnet.
+-- Identical to counting the tables from parseRealID() but cheaper
+local function countRealID()
+	local numTotal, numOnline = BNGetNumFriends()
+
+	local friends, bnet = 0, 0
+	for i=1, numOnline do
+		local isBnet = nil
+		for j=1, BNGetNumFriendToons(i) do
+			local client = select(3, BNGetFriendToonInfo(i, j))
+			if client then
+				if client == "App" then
+					isBnet = true
+				else
+					isBnet = false
+					break
+				end
+			end
+		end
+		if isBnet == true then
+			bnet = bnet + 1
+		elseif isBnet == false then
+			friends = friends + 1
+		end
+	end
+
+	return friends, bnet
+end
+
 -- TitanPanelRightClickMenu_PrepareSocialMenu() must be global for TitanPanel to find it
 function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 	if level == 1 then
@@ -198,6 +227,7 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_BROADCASTS, TITAN_SOCIAL_ID, "ShowRealIDBroadcasts", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_FACTIONS, TITAN_SOCIAL_ID, "ShowRealIDFactions", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_NOTE, TITAN_SOCIAL_ID, "ShowRealIDNotes", nil, level)
+			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_APP, TITAN_SOCIAL_ID, "ShowRealIDApp", nil, level)
 		end
 		
 		-- Friends Menu
@@ -282,8 +312,16 @@ function _G.TitanPanelSocialButton_GetButtonText(id)
 
 	local comps = {}
 
-	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
-		table.insert(comps, "|cff00A2E8"..select(2, BNGetNumFriends()).."|r")
+	local showRealID = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID")
+	local showRealIDApp = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDApp")
+	if showRealID or showRealIDApp then
+		local numFriends, numBnet = countRealID()
+		if showRealID then
+			table.insert(comps, "|cff00A2E8"..numFriends.."|r")
+		end
+		if showRealIDApp then
+			table.insert(comps, "|cff00A2E8"..numBnet.."|r")
+		end
 	end
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
 		table.insert(comps, "|cffFFFFFF"..select(2,GetNumFriends()).."|r")
@@ -589,67 +627,181 @@ local function addDoubleLine(indented, left, right)
 	end
 end
 
-local function addRealID(tooltip)
+-- Returns two tables, first is for friends and second is for bnet.
+-- Both are arrays of identically-formatted tables. "friends" is all the normal RealID friends
+-- and "bnet" is all the friends in the Battle.Net app. Any friends in the app and elsewhere are considered
+-- to only be elsewhere.
+-- The individual player tables are formatted as follows: {
+--     presenceID,
+--     presenceName,
+--     battleTag: nil if not isBattleTagPresence,
+--     isAFK,
+--     isDND,
+--     broadcastText,
+--     noteText,
+--     focus: {
+--         name,
+--         client,
+--         realmName,
+--         realmID,
+--         faction,
+--         race,
+--         class,
+--         zone,
+--         level,
+--         gameText
+--     },
+--     alts: nil or non-empty array of tables identical to focus
+-- }
+local function parseRealID()
 	local numTotal, numOnline = BNGetNumFriends()
 
-	addDoubleLine(false, TitanUtils_GetNormalText(L.TOOLTIP_REALID), "|cff00A2E8"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
-
-	local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
+	local friends, bnet = {}, {}
 	for i=1, numOnline do
-		local left = ""
+		local presenceID, presenceName, battleTag, isBattleTagPresence, _, _, _, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
+		if not isBattleTagPresence then
+			battleTag = nil
+		end
 
-		local presenceID, presenceName, battleTag, isBattleTagPresence, _, _, client, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
-		local _, toonName, client, realmName, realmID, faction, _, className, _, _, level, gameText, _, _, _, toonID = BNGetToonInfo(presenceID)
-
-		-- is this friend playing WoW on our server?
-		if client == BNET_CLIENT_WOW then
-			local name
-			if realmID == playerRealmID then
-				name = toonName
-			else
-				-- Cross-realm?
-				name = toonName.."-"..realmName
+		local isBnet = true
+		local toons, focus
+		for j=1, BNGetNumFriendToons(i) do
+			local hasFocus, toonName, client, realmName, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(i, j)
+			-- in the past I've seen this return nil data, so use the client as a marker
+			-- also skip any bnet toons if we've already seen a non-bnet one
+			if client and (isBnet or client ~= "App") then
+				if isBnet and client ~= "App" then
+					-- clear the bnet toon if we already found it
+					if toons ~= nil then table.wipe(toons) end
+					focus = nil 
+					isBnet = false
+				end
+				local toon = {
+					name = toonName,
+					client = client,
+					realmName = realmName,
+					realmID = realmID,
+					faction = faction,
+					race = race,
+					class = class,
+					zone = zoneName,
+					level = level,
+					gameText = gameText
+				}
+				if hasFocus then
+					if focus ~= nil then
+						if toons == nil then toons = {} end
+						table.insert(toons, 1, focus)
+					end
+					focus = toon
+				else
+					if toons == nil then toons = {} end
+					table.insert(toons, toon)
+				end
 			end
 		end
 
+		if focus == nil and #toons > 0 then
+			focus = toons[1]
+			table.remove(toons, 1)
+			if #toons == 0 then toons = nil end
+		end
+
+		if focus then
+			local friend = {
+				presenceID = presenceID,
+				presenceName = presenceName,
+				battleTag = battleTag,
+				isAFK = isAFK,
+				isDND = isDND,
+				broadcastText = broadcastText,
+				noteText = noteText,
+				focus = focus,
+				toons = toons
+			}
+			if isBnet then
+				table.insert(bnet, friend)
+			else
+				table.insert(friends, friend)
+			end
+		end
+	end
+
+	return friends, bnet
+end
+
+local function addRealID(tooltip, friends, isBnetClient)
+	local numTotal = BNGetNumFriends()
+
+	local header
+	if isBnetClient then
+		header = L.TOOLTIP_REALID_APP
+	else
+		header = L.TOOLTIP_REALID
+	end
+	addDoubleLine(false, TitanUtils_GetNormalText(header), "|cff00A2E8"..#friends.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+
+	local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
+	for _, friend in ipairs(friends) do
+		local left = ""
+
+		local focus = friend.focus
+
+		-- is this friend playing WoW on our server?
+		--if focus.client == BNET_CLIENT_WOW then
+			--local name
+			--if focus.realmID == playerRealmID then
+				--name = focus.name
+			--else
+				---- Cross-realm?
+				--name = focus.name.."-"..focus.realmName
+			--end
+		--end
+
 		-- group member indicator
-		local check = getRealIDGroupIndicator(presenceID, playerRealmID)
+		local check = getRealIDGroupIndicator(friend.presenceID, playerRealmID)
 
 		-- player status
 		local playerStatus = ""
-		if isAFK then
+		if friend.isAFK then
 			playerStatus = CHAT_FLAG_AFK
-		elseif isDND then
+		elseif friend.isDND then
 			playerStatus = CHAT_FLAG_DND
 		end
 
 		-- Character (and faction)
+		local level = friend.level
 		do
 			local name
-			if client == BNET_CLIENT_WOW then
-				level = "|cffFFFFFF"..level.."|r"
-				name = toonName and colorText(toonName, className) or "|cffFFFFFFUnknown|r"
+			if focus.client == BNET_CLIENT_WOW then
+				level = "|cffFFFFFF"..focus.level.."|r"
+				name = focus.name and colorText(focus.name, focus.class) or "|cffFFFFFFUnknown|r"
 			else
-				local clientname = client
-				if client == BNET_CLIENT_WTCG then
+				local clientname = focus.client
+				if clientname == BNET_CLIENT_WTCG then
 					clientname = "HS"
+				elseif clientname == "App" then
+					clientname = "BN"
 				end
 				level = "|cffFFFFFF"..(clientname or "??").."|r"
-				name = "|cffCCCCCC"..(toonName or "Unknown").."|r"
+				name = "|cffCCCCCC"..(focus.name or "Unknown").."|r"
 			end
-			left = left..getFactionIndicator(faction, client)
+			left = left..getFactionIndicator(focus.faction, focus.client)
 			left = left..getStatusIcon(playerStatus)
 			left = left..name.." "
 		end
 
 		-- Full name
-		left = left.."[|cff00A2E8"..(isBattleTagPresence and battleTag or presenceName).."|r] "
+		left = left.."[|cff00A2E8"..(friend.battleTag or friend.presenceName).."|r] "
 
 		-- Status
 		left = left..getStatusText(playerStatus).." "
 
+		local broadcastText = friend.broadcastText
+
 		-- Note
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDNotes") then
+			local noteText = friend.noteText
 			if noteText and noteText ~= "" then
 				left = left.."|cffFFFFFF"..noteText.."|r"
 				-- prepend "\n" onto broadcast to put it onto next line
@@ -680,10 +832,10 @@ local function addRealID(tooltip)
 		end
 
 		-- Location
-		local right = gameText and ("|cffFFFFFF"..gameText.."|r") or ""
+		local right = focus.gameText and ("|cffFFFFFF"..focus.gameText.."|r") or ""
 
 		local y = tooltip:AddLine(check, level, left, right)
-		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { presenceName, presenceID })
+		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { friend.presenceName, friend.presenceID })
 
 		-- Extra lines
 		if extraLines then
@@ -693,26 +845,21 @@ local function addRealID(tooltip)
 		end
 
 		-- Additional toons
-		local playerFactionGroup = UnitFactionGroup("player")
-		for j=1, BNGetNumFriendToons(i) do
-			local hasFocus, toonName, client, _, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(i, j)
-			-- there seems to be a bug where sometimes players show up with extra toons, but the toon info is all nil
-			-- Use the client field to check for this
-			if not hasFocus and client then
+		if friend.toons ~= nil then
+			local playerFactionGroup = UnitFactionGroup("player")
+			for _, toon in ipairs(friend.toons) do
 				local left, right
-				if client == BNET_CLIENT_WOW then
+				if toon.client == BNET_CLIENT_WOW then
 					local cooperateLabel = ""
-					if realmID ~= playerRealmID or faction ~= playerFactionGroup then
+					if toon.realmID ~= playerRealmID or toon.faction ~= playerFactionGroup then
 						cooperateLabel = _G.CANNOT_COOPERATE_LABEL
 					end
-					left = _G.FRIENDS_TOOLTIP_WOW_TOON_TEMPLATE:format(toonName..cooperateLabel, level, race, class)
-					right = zoneName
+					left = _G.FRIENDS_TOOLTIP_WOW_TOON_TEMPLATE:format(toon.name..cooperateLabel, toon.level, toon.race, toon.class)
 				else
-					left = toonName
-					right = gameText
+					left = toon.name
 				end
-				left = getFactionIndicator(faction, client).."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..(left or "Unknown").."|r"
-				right = "|cffFFFFFF"..(right or "").."|r"
+				left = getFactionIndicator(toon.faction, toon.client).."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..(left or "Unknown").."|r"
+				right = "|cffFFFFFF"..(toon.gameText or "").."|r"
 				addDoubleLine(true, left, right)
 			end
 		end
@@ -881,9 +1028,20 @@ end
 local function buildTooltip(tooltip)
 	tooltip:AddColspanHeader(3, "LEFT", L.TOOLTIP)
 
-	if TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
-		tooltip:AddLine()
-		addRealID(tooltip)
+	local showRealID = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID")
+	local showRealIDApp = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDApp")
+	if showRealID or showRealIDApp then
+		local friends, bnet = parseRealID()
+
+		if showRealID then
+			tooltip:AddLine()
+			addRealID(tooltip, friends, false)
+		end
+
+		if showRealIDApp then
+			tooltip:AddLine()
+			addRealID(tooltip, bnet, true)
+		end
 	end
 	
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
@@ -936,6 +1094,7 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 			ShowRealIDBroadcasts = false,
 			ShowRealIDNotes = true,
 			ShowRealIDFactions = true,
+			ShowRealIDApp = 1,
 			ShowFriends = 1,
 			ShowFriendsNote = 1,
 			ShowGuild = 1,
@@ -1033,7 +1192,7 @@ end
 function _G.TitanPanelSocialButton_OnClick(self, button)
 	-- Detect mouse clicks
 	if button == "LeftButton" then
-		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") then
+		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDApp") then
 			-- We want to show the friends tab, but there's a taint issue :/
 			if FriendsFrame:IsShown() then
 				HideUIPanel(FriendsFrame)
