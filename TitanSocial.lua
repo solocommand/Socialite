@@ -164,28 +164,30 @@ end
 
 -- Returns two counts, first is for friends and second is for bnet.
 -- Identical to counting the tables from parseRealID() but cheaper
-local function countRealID()
+-- filterClients indicates if bnet should be filtered out of friends
+-- and vice versa.
+local function countRealID(filterClients)
 	local numTotal, numOnline = BNGetNumFriends()
 
 	local friends, bnet = 0, 0
 	for i=1, numOnline do
-		local isBnet = nil
+		local isRegular, isBnet = false, false
 		for j=1, BNGetNumFriendToons(i) do
 			local client = select(3, BNGetFriendToonInfo(i, j))
 			if client then
 				if client == "App" then
 					isBnet = true
 				else
-					isBnet = false
-					break
+					isRegular = true
+					if filterClients then
+						isBnet = false
+						break
+					end
 				end
 			end
 		end
-		if isBnet == true then
-			bnet = bnet + 1
-		elseif isBnet == false then
-			friends = friends + 1
-		end
+		if isBnet then bnet = bnet + 1 end
+		if isRegular then friends = friends + 1 end
 	end
 
 	return friends, bnet
@@ -315,7 +317,7 @@ function _G.TitanPanelSocialButton_GetButtonText(id)
 	local showRealID = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID")
 	local showRealIDApp = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDApp")
 	if showRealID or showRealIDApp then
-		local numFriends, numBnet = countRealID()
+		local numFriends, numBnet = countRealID(showRealID)
 		if showRealID then
 			table.insert(comps, "|cff00A2E8"..numFriends.."|r")
 		end
@@ -651,31 +653,26 @@ end
 --         level,
 --         gameText
 --     },
---     alts: nil or non-empty array of tables identical to focus
+--     alts: nil or non-empty array of tables identical to focus,
+--     bnet: nil or table identical to focus
 -- }
-local function parseRealID()
+-- filterClients indicates whether friends with both bnet and non-bnet should
+-- be filtered out of the bnet list
+local function parseRealID(filterClients)
 	local numTotal, numOnline = BNGetNumFriends()
 
-	local friends, bnet = {}, {}
+	local friends, bnets = {}, {}
 	for i=1, numOnline do
 		local presenceID, presenceName, battleTag, isBattleTagPresence, _, _, _, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
 		if not isBattleTagPresence then
 			battleTag = nil
 		end
 
-		local isBnet = true
-		local toons, focus
+		local toons, focus, bnet
 		for j=1, BNGetNumFriendToons(i) do
 			local hasFocus, toonName, client, realmName, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(i, j)
 			-- in the past I've seen this return nil data, so use the client as a marker
-			-- also skip any bnet toons if we've already seen a non-bnet one
-			if client and (isBnet or client ~= "App") then
-				if isBnet and client ~= "App" then
-					-- clear the bnet toon if we already found it
-					if toons ~= nil then table.wipe(toons) end
-					focus = nil 
-					isBnet = false
-				end
+			if client then
 				local toon = {
 					name = toonName,
 					client = client,
@@ -688,7 +685,10 @@ local function parseRealID()
 					level = level,
 					gameText = gameText
 				}
-				if hasFocus then
+				if client == "App" then
+					-- assume no more than 1 bnet toon, but check anyway
+					if bnet == nil then bnet = toon end
+				elseif hasFocus then
 					if focus ~= nil then
 						if toons == nil then toons = {} end
 						table.insert(toons, 1, focus)
@@ -701,13 +701,13 @@ local function parseRealID()
 			end
 		end
 
-		if focus == nil and #toons > 0 then
+		if focus == nil and toons ~= nil and #toons > 0 then
 			focus = toons[1]
 			table.remove(toons, 1)
 			if #toons == 0 then toons = nil end
 		end
 
-		if focus then
+		if focus ~= nil or bnet ~= nil then
 			local friend = {
 				presenceID = presenceID,
 				presenceName = presenceName,
@@ -717,17 +717,19 @@ local function parseRealID()
 				broadcastText = broadcastText,
 				noteText = noteText,
 				focus = focus,
-				toons = toons
+				alts = toons,
+				bnet = bnet
 			}
-			if isBnet then
-				table.insert(bnet, friend)
-			else
+			if focus ~= nil then
 				table.insert(friends, friend)
+			end
+			if bnet ~= nil and (not filterClients or focus == nil) then
+				table.insert(bnets, friend)
 			end
 		end
 	end
 
-	return friends, bnet
+	return friends, bnets
 end
 
 local function addRealID(tooltip, friends, isBnetClient)
@@ -745,7 +747,7 @@ local function addRealID(tooltip, friends, isBnetClient)
 	for _, friend in ipairs(friends) do
 		local left = ""
 
-		local focus = friend.focus
+		local focus = isBnetClient and friend.bnet or friend.focus
 
 		-- is this friend playing WoW on our server?
 		--if focus.client == BNET_CLIENT_WOW then
@@ -845,9 +847,9 @@ local function addRealID(tooltip, friends, isBnetClient)
 		end
 
 		-- Additional toons
-		if friend.toons ~= nil then
+		if friend.alts ~= nil then
 			local playerFactionGroup = UnitFactionGroup("player")
-			for _, toon in ipairs(friend.toons) do
+			for _, toon in ipairs(friend.alts) do
 				local left, right
 				if toon.client == BNET_CLIENT_WOW then
 					local cooperateLabel = ""
@@ -1031,7 +1033,7 @@ local function buildTooltip(tooltip)
 	local showRealID = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID")
 	local showRealIDApp = TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDApp")
 	if showRealID or showRealIDApp then
-		local friends, bnet = parseRealID()
+		local friends, bnet = parseRealID(showRealID)
 
 		if showRealID then
 			tooltip:AddLine()
