@@ -102,6 +102,9 @@ end
 --  Code
 ----------------------------------------------------------------------
 
+local updateTooltip
+local countRealID
+
 local function colorText(text, className)
 	local classIndex, coloredText=nil
 
@@ -160,37 +163,6 @@ local function addRadioRefresh(text, key, value, level)
 	info.keepShownOnClick = true
 	info.checked = optionDropdownCheckedFunc
 	UIDropDownMenu_AddButton(info, level)
-end
-
--- Returns two counts, first is for friends and second is for bnet.
--- Identical to counting the tables from parseRealID() but cheaper
--- filterClients indicates if bnet should be filtered out of friends
--- and vice versa.
-local function countRealID(filterClients)
-	local numTotal, numOnline = BNGetNumFriends()
-
-	local friends, bnet = 0, 0
-	for i=1, numOnline do
-		local isRegular, isBnet = false, false
-		for j=1, BNGetNumFriendToons(i) do
-			local client = select(3, BNGetFriendToonInfo(i, j))
-			if client then
-				if client == "App" then
-					isBnet = true
-				else
-					isRegular = true
-					if filterClients then
-						isBnet = false
-						break
-					end
-				end
-			end
-		end
-		if isBnet then bnet = bnet + 1 end
-		if isRegular then friends = friends + 1 end
-	end
-
-	return friends, bnet
 end
 
 -- TitanPanelRightClickMenu_PrepareSocialMenu() must be global for TitanPanel to find it
@@ -621,12 +593,30 @@ local function clickRealID(frame, info, button)
 	end
 end
 
+local function clickHeader(frame, varName, button)
+	TitanSetVar(TITAN_SOCIAL_ID, varName, not TitanGetVar(TITAN_SOCIAL_ID, varName))
+	updateTooltip(tooltip)
+end
+
 local function addDoubleLine(indented, left, right)
 	if indented then
-		tooltip:AddLine(nil, nil, left, right)
+		return tooltip:AddLine(nil, nil, left, right)
 	else
-		tooltip:AddColspanLine(3, "LEFT", left, 1, "RIGHT", right)
+		return tooltip:AddColspanLine(3, "LEFT", left, 1, "RIGHT", right)
 	end
+end
+
+local function addHeader(header, color, online, total, collapsed, collapseVar)
+	header = header..":"
+	local left = TitanUtils_GetNormalText(header)
+	if collapsed then
+		left = left.." |cff808080"..L.TOOLTIP_COLLAPSED.."|r"
+	end
+	if color then color = "|cff"..color end
+	local right = (color or "")..online..(color and "|r")..TitanUtils_GetNormalText("/"..total)
+	local y = addDoubleLine(false, left, right)
+	tooltip:SetLineScript(y, "OnMouseDown", clickHeader, collapseVar)
+	return y
 end
 
 -- Returns two tables, first is for friends and second is for bnet.
@@ -732,7 +722,38 @@ local function parseRealID(filterClients)
 	return friends, bnets
 end
 
-local function addRealID(tooltip, friends, isBnetClient)
+-- Returns two counts, first is for friends and second is for bnet.
+-- Identical to counting the tables from parseRealID() but cheaper
+-- filterClients indicates if bnet should be filtered out of friends
+-- and vice versa.
+function countRealID(filterClients) -- local at top of file
+	local numTotal, numOnline = BNGetNumFriends()
+
+	local friends, bnet = 0, 0
+	for i=1, numOnline do
+		local isRegular, isBnet = false, false
+		for j=1, BNGetNumFriendToons(i) do
+			local client = select(3, BNGetFriendToonInfo(i, j))
+			if client then
+				if client == "App" then
+					isBnet = true
+				else
+					isRegular = true
+					if filterClients then
+						isBnet = false
+						break
+					end
+				end
+			end
+		end
+		if isBnet then bnet = bnet + 1 end
+		if isRegular then friends = friends + 1 end
+	end
+
+	return friends, bnet
+end
+
+local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 	local numTotal = BNGetNumFriends()
 
 	local header
@@ -741,7 +762,10 @@ local function addRealID(tooltip, friends, isBnetClient)
 	else
 		header = L.TOOLTIP_REALID
 	end
-	addDoubleLine(false, TitanUtils_GetNormalText(header), "|cff00A2E8"..#friends.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	local collapsed = TitanGetVar(TITAN_SOCIAL_ID, collapseVar)
+	addHeader(header, "00A2E8", #friends, numTotal, collapsed, collapseVar)
+
+	if collapsed then return end
 
 	local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
 	for _, friend in ipairs(friends) do
@@ -868,10 +892,13 @@ local function addRealID(tooltip, friends, isBnetClient)
 	end
 end
 
-local function addFriends(tooltip)
+local function addFriends(tooltip, collapseVar)
 	local numTotal, numOnline = GetNumFriends()
 
-	addDoubleLine(false, TitanUtils_GetNormalText(L.TOOLTIP_FRIENDS), "|cffFFFFFF"..numOnline.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	local collapsed = TitanGetVar(TITAN_SOCIAL_ID, collapseVar)
+	addHeader(L.TOOLTIP_FRIENDS, "FFFFFF", numOnline, numTotal, collapsed, collapseVar)
+
+	if collapsed then return end
 
 	for i=1, numOnline do
 		local left = ""
@@ -994,7 +1021,7 @@ local function processGuildMember(i, isRemote, tooltip)
 	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, true, isMobile, isRemote })
 end
 
-local function addGuild(tooltip)
+local function addGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
 	isFreshFrame() -- don't trigger GUILD_ROSTER_UPDATE events due to offline toggling
 	local wasOffline = GetGuildRosterShowOffline()
 	if wasOffline then
@@ -1008,17 +1035,24 @@ local function addGuild(tooltip)
 
 	local numGuild = split and numOnline or numRemote
 
-	addDoubleLine(false, TitanUtils_GetNormalText(L.TOOLTIP_GUILD), "|cff00FF00"..numGuild.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+	local collapseGuild = TitanGetVar(TITAN_SOCIAL_ID, collapseGuildVar)
+	local collapseRemoteChat = TitanGetVar(TITAN_SOCIAL_ID, collapseRemoteChatVar)
+	addHeader(L.TOOLTIP_GUILD, "00FF00", numGuild, numTotal, collapseGuild, collapseGuildVar)
 
 	for i, guildIndex in ipairs(roster) do
 		local isRemote = guildIndex > numOnline
-		processGuildMember(guildIndex, isRemote, tooltip)
+		local afterSplit = split and isRemote
+		if (afterSplit and collapseRemoteChat) or (not afterSplit and collapseGuild) then
+			-- collapsed
+		else
+			processGuildMember(guildIndex, isRemote, tooltip)
+		end
 
 		if split and i == numOnline then
 			-- add header for Remote Chat
 			local numRemoteChat = numRemote - numOnline
 			tooltip:AddLine()
-			addDoubleLine(false, TitanUtils_GetNormalText(L.TOOLTIP_REMOTE_CHAT), "|cff00FF00"..numRemoteChat.."|r"..TitanUtils_GetNormalText("/"..numTotal))
+			addHeader(L.TOOLTIP_REMOTE_CHAT, "00FF00", numRemoteChat, numTotal, collapseRemoteChat, collapseRemoteChatVar)
 		end
 	end
 
@@ -1037,27 +1071,27 @@ local function buildTooltip(tooltip)
 
 		if showRealID then
 			tooltip:AddLine()
-			addRealID(tooltip, friends, false)
+			addRealID(tooltip, friends, false, "CollapseRealID")
 		end
 
 		if showRealIDApp then
 			tooltip:AddLine()
-			addRealID(tooltip, bnet, true)
+			addRealID(tooltip, bnet, true, "CollapseRealIDApp")
 		end
 	end
 	
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
 		tooltip:AddLine()
-		addFriends(tooltip)
+		addFriends(tooltip, "CollapseFriends")
 	end
 	
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
 		tooltip:AddLine()
-		addGuild(tooltip)
+		addGuild(tooltip, "CollapseGuild", "CollapseRemoteChat")
 	end
 end
 
-local function updateTooltip(tooltip)
+function updateTooltip(tooltip) -- local at top of file
 	tooltip:Clear()
 
 	local ok, message = pcall(buildTooltip, tooltip)
@@ -1092,27 +1126,31 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 			--ShowColoredText = true,
 		},
 		savedVariables = {
-			ShowRealID = 1,
+			ShowRealID = true,
 			ShowRealIDBroadcasts = false,
 			ShowRealIDNotes = true,
 			ShowRealIDFactions = true,
-			ShowRealIDApp = 1,
-			ShowFriends = 1,
-			ShowFriendsNote = 1,
-			ShowGuild = 1,
+			ShowRealIDApp = true,
+			ShowFriends = true,
+			ShowFriendsNote = true,
+			ShowGuild = true,
 			ShowGuildLabel = false,
-			ShowGuildNote = 1,
-			ShowSplitRemoteChat = 1,
-			ShowGuildONote = 1,
-			ShowGroupMembers = 1,
+			ShowGuildNote = true,
+			ShowSplitRemoteChat = true,
+			ShowGuildONote = true,
+			ShowGroupMembers = true,
 			SortGuild = false,
 			GuildSortKey = "rank",
 			GuildSortAscending = true,
 			ShowStatus = STATUS_ICON,
-			ShowIcon = 1,
-			ShowLabel = 1,
-			ShowTooltipTotals = 1,
+			ShowIcon = true,
+			ShowLabel = true,
 			TooltipInteraction = INTERACTION_ALWAYS,
+			CollapseRealID = false,
+			CollapseRealIDApp = false,
+			CollapseFriends = false,
+			CollapseGuild = false,
+			CollapseRemoteChat = false
 		}
 	}
 
