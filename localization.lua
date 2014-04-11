@@ -222,19 +222,26 @@ if GetLocale() == "ruRU" then
 end
 
 
--- ptBR
+-- ptBR by Kasth 10.4.2014
 
 if GetLocale() == "ptBR" then
 	L.BUTTON_TITLE = "Social: "
+	L.REMOTE_CHAT = "Chat Remoto"
 
 	L.TOOLTIP = "Social"
-	L.TOOLTIP_REALID = "Amigos com RealID Online:"
+	L.TOOLTIP_REALID = "Amigos de RealID Online:"
+	L.TOOLTIP_REALID_APP = "Amigos Online no Aplicativo Battle.net"
 	L.TOOLTIP_FRIENDS = "Amigos Online:"
 	L.TOOLTIP_GUILD = "Membros da Guilda Online:"
+	L.TOOLTIP_REMOTE_CHAT = "Chat Remoto"
+	L.TOOLTIP_COLLAPSED = "(comprimido, clique para expandir)"
 
 	L.MENU_REALID = "RealID"
-	L.MENU_REALID_FRIENDS = "Mostrar Amigos com RealID"
+	L.MENU_REALID_FRIENDS = "Mostrar Amigos de RealID"
 	L.MENU_REALID_BROADCASTS = "Mostrar Transmissões de RealID"
+	L.MENU_REALID_FACTIONS = "Mostrar facções de RealID"
+	L.MENU_REALID_NOTE = "Mostrar Notas"
+	L.MENU_REALID_APP = "Mostrar Aplicativo Battle.net"
 
 	L.MENU_FRIENDS = "Amigos"
 	L.MENU_FRIENDS_SHOW = "Mostrar Amigos"
@@ -243,8 +250,31 @@ if GetLocale() == "ptBR" then
 	L.MENU_GUILD = "Guilda"
 	L.MENU_GUILD_MEMBERS = "Mostrar Membros da Guilda"
 	L.MENU_GUILD_LABEL = "Mostrar Nome da Guilda"
-	L.MENU_GUILD_NOTE = "Mostrar Notas dos Membros da Guilda"
-	L.MENU_GUILD_ONOTE = "Mostrar Nota Oficial"
+	L.MENU_GUILD_NOTE = "Mostrar Notas da Guilda"
+	L.MENU_GUILD_ONOTE = "Mostrar Nota de Oficial"
+	L.MENU_GUILD_REMOTE_CHAT = "Separar Chat Remoto"
+
+	L.MENU_GUILD_SORT = "Sort"
+	L.MENU_GUILD_SORT_DEFAULT = "Ordenar pela Lista da Guilda"
+	L.MENU_GUILD_SORT_NAME = "Nome"
+	L.MENU_GUILD_SORT_RANK = "Posto"
+	L.MENU_GUILD_SORT_CLASS = "Classe"
+	L.MENU_GUILD_SORT_LEVEL = "Nivel"
+	L.MENU_GUILD_SORT_ZONE = "Zona"
+	L.MENU_GUILD_SORT_ASCENDING = "Crescente"
+	L.MENU_GUILD_SORT_DESCENDING = "Decrescente"
+
+	L.MENU_STATUS = "Mostrar Status Como"
+	L.MENU_STATUS_ICON = "Ícone"
+	L.MENU_STATUS_TEXT = "Texto"
+	L.MENU_STATUS_NONE = "Nada"
+
+	L.MENU_SHOW_GROUP_MEMBERS = "Mostrar Membros do Grupo"
+
+	L.MENU_INTERACTION = "Interação da Dica"
+	L.MENU_INTERACTION_ALWAYS = "Sempre"
+	L.MENU_INTERACTION_OOC = "Fora de Combate"
+	L.MENU_INTERACTION_NEVER = "Nunca"
 
 	L.MENU_LABEL = "Exibir Título"
 	L.MENU_HIDE = "Esconder"
