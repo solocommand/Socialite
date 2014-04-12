@@ -5,5 +5,5 @@
 ## SavedVariables:
 ## SavedVariablesPerCharacter: TitanSocialVars
 ## Dependencies: Titan
-## Version: 5.4r29
+## Version: 5.4r30
 TitanSocial.xml
