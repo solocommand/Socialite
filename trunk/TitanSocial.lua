@@ -451,6 +451,7 @@ local function getRealIDGroupIndicator(presenceID, playerRealmID)
 		for i = 1, BNGetNumFriendToons(index) do
 			local _, toonName, client, realmName, realmID = BNGetFriendToonInfo(index, i)
 			if client == BNET_CLIENT_WOW then
+				realmName = realmName:gsub("[%s%-]", "")
 				if realmID ~= playerRealmID then
 					toonName = toonName.."-"..realmName
 				end
