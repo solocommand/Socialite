@@ -97,32 +97,51 @@ end
 -- deDE
 
 if GetLocale() == "deDE" then
-	-- Last Update by solocommand: 10/29/2010
+	-- Last Update by Mistrahw: 10/19/2014
 
-	--L.BUTTON_TITLE = ""
+	L.TOOLTIP_REALID = "RealID Freunde Online" 
+	L.TOOLTIP_REALID_APP = "RealID Freunde in der Battle.Net App" 
+	L.TOOLTIP_FRIENDS = "Freunde Online" 
+	L.TOOLTIP_GUILD = "Gildenmitglieder Online" 
+	L.TOOLTIP_REMOTE_CHAT = "Remote Chat" 
+	L.TOOLTIP_COLLAPSED = "(minimiert, klicken zum erweitern)"
 
-	--L.TOOLTIP = ""
-	L.TOOLTIP_REALID = "Kontakte Freundschaftssystem:"
-	L.TOOLTIP_FRIENDS = "Kontakte:"
-	--L.TOOLTIP_GUILD = "Gilde Members:"
+	L.MENU_REALID_FRIENDS = "Zeige RealID Freunde" 
+	L.MENU_REALID_BROADCASTS = "Zeige RealID Statusmeldungen" 
+	L.MENU_REALID_FACTIONS = "Zeige RealID Fraktion" 
+	L.MENU_REALID_NOTE = "Zeige Notiz" 
+	L.MENU_REALID_APP = "Zeige Battle.Net App"
 
-	L.MENU_REALID = "Freundschaftssystem"
-	L.MENU_REALID_FRIENDS = "Zeige Kontakte Freundschaftssystem"
-	L.MENU_REALID_BROADCASTS = "Zeige Kontakte Statusmeldungen"
+	L.MENU_FRIENDS = "Freunde" 
+	L.MENU_FRIENDS_SHOW = "Zeige Freunde" 
+	L.MENU_FRIENDS_NOTE = "Zeige Notizen"
 
-	L.MENU_FRIENDS = "Kontakte"
-	L.MENU_FRIENDS_SHOW = "Zeige Kontakte"
-	L.MENU_FRIENDS_NOTE = "Zeige Notiz Kontakte"
+	L.MENU_GUILD = "Gilde" 
+	L.MENU_GUILD_MEMBERS = "Zeige Gildenmitglieder" 
+	L.MENU_GUILD_LABEL = "Zeige Gildenname"
+	L.MENU_GUILD_NOTE = "Zeige Gildennotiz" 
+	L.MENU_GUILD_ONOTE = "Zeige Offiziersnotiz" 
+	L.MENU_GUILD_REMOTE_CHAT = "Remote Chat anzeigen"
 
-	L.MENU_GUILD = "Gilde"
-	--L.MENU_GUILD_MEMBERS = "Zeige Members Gilde"
-	L.MENU_GUILD_LABEL = "Zeige Gildename"
-	--L.MENU_GUILD_NOTE = "Zeige Member Notiz"
-	--L.MENU_GUILD_ONOTE = "Zeige Officer Notiz"
+	L.MENU_GUILD_SORT = "Sortieren" 
+	L.MENU_GUILD_SORT_DEFAULT = "Benutze Gildensortierung" 
+	L.MENU_GUILD_SORT_RANK = "Rang" 
+	L.MENU_GUILD_SORT_CLASS = "Klasse" 
+	L.MENU_GUILD_SORT_ASCENDING = "Aufwärts" 
+	L.MENU_GUILD_SORT_DESCENDING = "Abwärts"
 
-	--L.MENU_LABEL = "Zeige Label"
-	L.MENU_HIDE = "Ausblenden"
-	L.MENU_OPTIONS = "Optionen"
+	L.MENU_STATUS = "Zeige Status als" 
+	L.MENU_STATUS_NONE = "Nichts"
+
+	L.MENU_SHOW_GROUP_MEMBERS = "Zeige Gruppenmitglieder"
+
+	L.MENU_INTERACTION = "Tooltip anzeigen" 
+	L.MENU_INTERACTION_ALWAYS = "Immer" 
+	L.MENU_INTERACTION_OOC = "Ausserhalb vom Kampf" 
+	L.MENU_INTERACTION_NEVER = "Nie"
+
+	L.MENU_LABEL = "Beschriftunstext anzeigen" 
+	L.MENU_HIDE = "ausblenden" L.MENU_OPTIONS = "Optionen"
 end
 
 
