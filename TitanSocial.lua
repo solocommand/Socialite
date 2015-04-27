@@ -948,12 +948,13 @@ local function processGuildMember(i, isRemote, tooltip)
 
 	local name, rank, rankIndex, level, class, zone, note, officerNote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(i)
 
+	local origname = name
 	name = Ambiguate(name, "guild")
 
 	local check = getGroupIndicator(name)
 
 	-- fix name
-	local origname = name
+	-- local origname = name
 	if name == "" then
 		name = "Unknown"
 	end
