@@ -21,8 +21,8 @@ local GetNumFriends, GetFriendInfo = _G.GetNumFriends, _G.GetFriendInfo
 local ToggleFriendsFrame, ToggleGuildFrame = _G.ToggleFriendsFrame, _G.ToggleGuildFrame
 local FriendsFrame, ShowUIPanel, HideUIPanel = _G.FriendsFrame, _G.ShowUIPanel, _G.HideUIPanel
 local FriendsFrame_Update = _G.FriendsFrame_Update
-local BNGetNumFriends, BNGetFriendInfo, BNGetToonInfo, BNGetInfo = _G.BNGetNumFriends, _G.BNGetFriendInfo, _G.BNGetToonInfo, _G.BNGetInfo
-local BNGetFriendIndex, BNGetNumFriendToons, BNGetFriendToonInfo = _G.BNGetFriendIndex, _G.BNGetNumFriendToons, _G.BNGetFriendToonInfo
+local BNGetNumFriends, BNGetFriendInfo, BNGetGameAccountInfo, BNGetInfo = _G.BNGetNumFriends, _G.BNGetFriendInfo, _G.BNGetGameAccountInfo, _G.BNGetInfo
+local BNGetFriendIndex, BNGetNumFriendGameAccounts, BNGetFriendGameAccountInfo = _G.BNGetFriendIndex, _G.BNGetNumFriendGameAccounts, _G.BNGetFriendGameAccountInfo
 local UIDropDownMenu_CreateInfo = _G.UIDropDownMenu_CreateInfo
 local UIDropDownMenu_Refresh = _G.UIDropDownMenu_Refresh
 local UIDropDownMenu_GetCurrentDropDown = _G.UIDropDownMenu_GetCurrentDropDown
@@ -448,8 +448,8 @@ end
 local function getRealIDGroupIndicator(presenceID, playerRealmID)
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGroupMembers") then
 		local index = BNGetFriendIndex(presenceID)
-		for i = 1, BNGetNumFriendToons(index) do
-			local _, toonName, client, realmName, realmID = BNGetFriendToonInfo(index, i)
+		for i = 1, BNGetNumFriendGameAccounts(index) do
+			local _, toonName, client, realmName, realmID = BNGetFriendGameAccountInfo(index, i)
 			if client == BNET_CLIENT_WOW then
 				realmName = realmName:gsub("[%s%-]", "")
 				if realmID ~= playerRealmID then
@@ -561,7 +561,7 @@ end
 local function sendBattleNetInvite(presenceID)
 	local index = BNGetFriendIndex(presenceID)
 	if index then
-		local numToons = BNGetNumFriendToons(index)
+		local numToons = BNGetNumFriendGameAccounts(index)
 		if numToons > 1 then
 			PlaySound("igMainMenuOptionCheckBoxOn")
 			local dropDown = TravelPassDropDown
@@ -660,8 +660,8 @@ local function parseRealID(filterClients)
 		end
 
 		local toons, focus, bnet
-		for j=1, BNGetNumFriendToons(i) do
-			local hasFocus, toonName, client, realmName, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendToonInfo(i, j)
+		for j=1, BNGetNumFriendGameAccounts(i) do
+			local hasFocus, toonName, client, realmName, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendGameAccountInfo(i, j)
 			-- in the past I've seen this return nil data, so use the client as a marker
 			if client then
 				local toon = {
@@ -733,8 +733,8 @@ function countRealID(filterClients) -- local at top of file
 	local friends, bnet = 0, 0
 	for i=1, numOnline do
 		local isRegular, isBnet = false, false
-		for j=1, BNGetNumFriendToons(i) do
-			local client = select(3, BNGetFriendToonInfo(i, j))
+		for j=1, BNGetNumFriendGameAccounts(i) do
+			local client = select(3, BNGetFriendGameAccountInfo(i, j))
 			if client then
 				if client == "App" then
 					isBnet = true
@@ -768,7 +768,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 
 	if collapsed then return end
 
-	local playerRealmID = select(5, BNGetToonInfo(select(3, BNGetInfo())))
+	local playerRealmID = select(5, BNGetGameAccountInfo(select(3, BNGetInfo())))
 	for _, friend in ipairs(friends) do
 		local left = ""
 
