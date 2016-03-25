@@ -71,7 +71,7 @@ local bDebugMode = false
 
 -- Required Titan variables
 local TITAN_SOCIAL_ID = "Social"
-local TITAN_SOCIAL_VERSION = "5.4r30"
+local TITAN_SOCIAL_VERSION = "6.2.4"
 local TITAN_SOCIAL_TOOLTIP_KEY = "TitanSocialTooltip"
 
 local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0:16:16:0:16:0:16:73:177:73|t"
@@ -169,16 +169,16 @@ end
 function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 	if level == 1 then
 		TitanPanelRightClickMenu_AddTitle(TitanUtils_GetPlugin(TITAN_SOCIAL_ID).menuText, level)
-		
+
 		-- RealID Menu
 		addSubmenu(L.MENU_REALID, "RealID", level)
-		
+
 		-- Friends Menu
 		addSubmenu(L.MENU_FRIENDS, "Friends", level)
-		
+
 		-- Guild Menu
 		addSubmenu(L.MENU_GUILD, "Guild", level)
-		
+
 		TitanPanelRightClickMenu_AddSpacer(level)
 		TitanPanelRightClickMenu_AddToggleVar(L.MENU_SHOW_GROUP_MEMBERS, TITAN_SOCIAL_ID, "ShowGroupMembers", nil, level)
 
@@ -187,7 +187,7 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 
 		-- Interaction menu
 		addSubmenu(L.MENU_INTERACTION, "Interaction", level)
-		
+
 		TitanPanelRightClickMenu_AddSpacer(level)
 		TitanPanelRightClickMenu_AddToggleIcon(TITAN_SOCIAL_ID, level)
 		TitanPanelRightClickMenu_AddToggleVar(L.MENU_LABEL, TITAN_SOCIAL_ID, "ShowLabel", nil, level)
@@ -203,14 +203,14 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_NOTE, TITAN_SOCIAL_ID, "ShowRealIDNotes", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_REALID_APP, TITAN_SOCIAL_ID, "ShowRealIDApp", nil, level)
 		end
-		
+
 		-- Friends Menu
 		if menuList == "Friends" then
 			TitanPanelRightClickMenu_AddTitle(L.MENU_FRIENDS, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_FRIENDS_SHOW, TITAN_SOCIAL_ID, "ShowFriends", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_FRIENDS_NOTE, TITAN_SOCIAL_ID, "ShowFriendsNote", nil, level)
 		end
-		
+
 		-- Guild Menu
 		if menuList == "Guild" then
 			TitanPanelRightClickMenu_AddTitle(L.MENU_GUILD, level)
@@ -219,7 +219,7 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_NOTE, TITAN_SOCIAL_ID, "ShowGuildNote", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_ONOTE, TITAN_SOCIAL_ID, "ShowGuildONote", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_REMOTE_CHAT, TITAN_SOCIAL_ID, "ShowSplitRemoteChat", nil, level)
-			
+
 			TitanPanelRightClickMenu_AddSpacer(level)
 			addSubmenu(L.MENU_GUILD_SORT, "GuildSort", level)
 		end
@@ -237,7 +237,7 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			addRadioRefresh(L.MENU_INTERACTION_OOC, "TooltipInteraction", INTERACTION_OOC, level)
 			addRadioRefresh(L.MENU_INTERACTION_NEVER, "TooltipInteraction", INTERACTION_NEVER, level)
 		end
-		
+
 		if menuList == "Options" then
 			TitanPanelRightClickMenu_AddTitle(L.MENU_OPTIONS, level)
 		end
@@ -937,7 +937,7 @@ local function addFriends(tooltip, collapseVar)
 		if area ~= nil then
 			right = "|cffFFFFFF"..area.."|r"
 		end
-		
+
 		local y = tooltip:AddLine(check, level, left, right)
 		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, false, false, false })
 	end
@@ -1081,12 +1081,12 @@ local function buildTooltip(tooltip)
 			addRealID(tooltip, bnet, true, "CollapseRealIDApp")
 		end
 	end
-	
+
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
 		tooltip:AddLine()
 		addFriends(tooltip, "CollapseFriends")
 	end
-	
+
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
 		tooltip:AddLine()
 		addGuild(tooltip, "CollapseGuild", "CollapseRemoteChat")

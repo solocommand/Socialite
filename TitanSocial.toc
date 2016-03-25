@@ -1,12 +1,12 @@
-## Interface: 60100
+## Interface: 60200
 ## X-Min-Interface: 60000
-## Title: Titan Panel [|cffeda55fSocial|r] |cff00aa006.1r32|r
+## Title: Titan Panel [|cffeda55fSocial|r] |cff00aa006.2.4|r
 ## Notes: A Titan Panel plugin incorporating Friends, Guild, and RealID Friends
 ## Author: solocommand and eridius
 ## SavedVariables:
 ## SavedVariablesPerCharacter: TitanSocialVars
 ## Dependencies: Titan
-## Version: 6.1r32
+## Version: 6.2.4
 ## LoadOnDemand: 0
 ## DefaultState: enabled
 TitanSocial.xml
