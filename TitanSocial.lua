@@ -652,6 +652,11 @@ end
 local function parseRealID(filterClients)
 	local numTotal, numOnline = BNGetNumFriends()
 
+	-- lately we've been seeing BNGetFriendGameAccountInfo returning duplicate info for a player,
+	-- making it seem as though they're playing the same toon 3 times simultaneously.
+	-- Work around that by filtering out duplicates using the bnetIDGameAccount.
+	local seen = {}
+
 	local friends, bnets = {}, {}
 	for i=1, numOnline do
 		local presenceID, presenceName, battleTag, isBattleTagPresence, _, _, _, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
@@ -659,11 +664,13 @@ local function parseRealID(filterClients)
 			battleTag = nil
 		end
 
+		table.wipe(seen)
+
 		local toons, focus, bnet
 		for j=1, BNGetNumFriendGameAccounts(i) do
-			local hasFocus, toonName, client, realmName, realmID, faction, race, class, _, zoneName, level, gameText = BNGetFriendGameAccountInfo(i, j)
+			local hasFocus, toonName, client, realmName, realmID, faction, race, class, _, zoneName, level, gameText, _, _, _, bnetIDGameAccount = BNGetFriendGameAccountInfo(i, j)
 			-- in the past I've seen this return nil data, so use the client as a marker
-			if client then
+			if client and seen[bnetIDGameAccount] == nil then
 				local toon = {
 					name = toonName,
 					client = client,
@@ -676,6 +683,7 @@ local function parseRealID(filterClients)
 					level = level,
 					gameText = gameText
 				}
+				seen[bnetIDGameAccount] = toon
 				if client == "App" then
 					-- assume no more than 1 bnet toon, but check anyway
 					if bnet == nil then bnet = toon end
