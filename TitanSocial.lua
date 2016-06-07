@@ -642,7 +642,8 @@ end
 --         class,
 --         zone,
 --         level,
---         gameText
+--         gameText,
+--         location -- gameText, or zone if gameText is "" or nil
 --     },
 --     alts: nil or non-empty array of tables identical to focus,
 --     bnet: nil or table identical to focus
@@ -681,7 +682,8 @@ local function parseRealID(filterClients)
 					class = class,
 					zone = zoneName,
 					level = level,
-					gameText = gameText
+					gameText = gameText,
+					location = gameText == "" and zoneName or gameText
 				}
 				seen[bnetIDGameAccount] = toon
 				if client == "App" then
@@ -867,7 +869,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 		end
 
 		-- Location
-		local right = focus.gameText and ("|cffFFFFFF"..focus.gameText.."|r") or ""
+		local right = focus.location and focus.location ~= "" and ("|cffFFFFFF"..focus.location.."|r") or ""
 
 		local y = tooltip:AddLine(check, level, left, right)
 		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { friend.presenceName, friend.presenceID })
@@ -894,7 +896,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 					left = toon.name
 				end
 				left = getFactionIndicator(toon.faction, toon.client).."|cffFEE15C"..FRIENDS_LIST_PLAYING.."|cffFFFFFF "..(left or "Unknown").."|r"
-				right = "|cffFFFFFF"..(toon.gameText or "").."|r"
+				right = "|cffFFFFFF"..(toon.location or "").."|r"
 				addDoubleLine(true, left, right)
 			end
 		end
