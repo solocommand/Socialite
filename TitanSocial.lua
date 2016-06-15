@@ -445,17 +445,17 @@ local function getGroupIndicator(name)
 	return ""
 end
 
-local function getRealIDGroupIndicator(presenceID, playerRealmID)
+local function getRealIDGroupIndicator(bnetIDAccount, playerRealmName)
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGroupMembers") then
-		local index = BNGetFriendIndex(presenceID)
+		local index = BNGetFriendIndex(bnetIDAccount)
 		for i = 1, BNGetNumFriendGameAccounts(index) do
-			local _, toonName, client, realmName, realmID = BNGetFriendGameAccountInfo(index, i)
+			local _, characterName, client, realmName = BNGetFriendGameAccountInfo(index, i)
 			if client == BNET_CLIENT_WOW then
-				realmName = realmName:gsub("[%s%-]", "")
-				if realmID ~= playerRealmID then
-					toonName = toonName.."-"..realmName
+				if realmName and realmName ~= "" and realmName ~= playerRealmName then
+					realmName = realmName:gsub("[%s%-]", "")
+					characterName = characterName.."-"..realmName
 				end
-				if UnitInParty(toonName) or UnitInRaid(toonName) then
+				if UnitInParty(characterName) or UnitInRaid(characterName) then
 					return CHECK_ICON
 				end
 			end
@@ -514,7 +514,7 @@ local function showGuildRightClick(player, isMobile)
 	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "GUILD", nil, player) end
 	frame.displayMode = "MENU";
 	frame.friendsList = false
-	frame.presenceID = nil
+	frame.bnetIDAccount = nil
 	frame.isMobile = isMobile
 	ToggleDropDownMenu(1, nil, frame, "cursor")
 end
@@ -524,17 +524,17 @@ local function showFriendRightClick(player)
 	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end
 	frame.displayMode = "MENU"
 	frame.friendsList = true
-	frame.presenceID = nil
+	frame.bnetIDAccount = nil
 	frame.isMobile = nil
 	ToggleDropDownMenu(1, nil, frame, "cursor")
 end
 
-local function showRealIDRightClick(presenceName, presenceID)
+local function showRealIDRightClick(accountName, bnetIDAccount)
 	local frame = getRightClickFrame()
-	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "BN_FRIEND", nil, presenceName) end
+	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "BN_FRIEND", nil, accountName) end
 	frame.displayMode = "MENU"
 	frame.friendsList = true
-	frame.presenceID = presenceID
+	frame.bnetIDAccount = bnetIDAccount
 	frame.isMobile = nil
 	ToggleDropDownMenu(1, nil, frame, "cursor")
 end
@@ -558,11 +558,32 @@ local function clickPlayer(frame, info, button)
 	end
 end
 
-local function sendBattleNetInvite(presenceID)
-	local index = BNGetFriendIndex(presenceID)
+local function sendBattleNetInvite(bnetIDAccount)
+	local playerFactionGroup = UnitFactionGroup("player")
+	local index = BNGetFriendIndex(bnetIDAccount)
 	if index then
-		local numToons = BNGetNumFriendGameAccounts(index)
-		if numToons > 1 then
+		local numGameAccounts = BNGetNumFriendGameAccounts(index)
+		if numGameAccounts > 1 then
+			-- See if there's only one game account we can invite
+			local validGameAccountID = nil
+			for i = 1, numGameAccounts do
+				local _, _, client, _, realmID, faction, _, _, _, _, _, _, _, _, _, bnetIDGameAccount = BNGetFriendGameAccountInfo(index, i)
+				if client == BNET_CLIENT_WOW and faction == playerFactionGroup and realmID ~= 0 then
+					-- Valid account
+					if validGameAccountID and validGameAccountID ~= bnetIDGameAccount then
+						-- Found two accounts. Bail out.
+						validGameAccountID = nil
+						break
+					else
+						validGameAccountID = bnetIDGameAccount
+					end
+				end
+			end
+			if validGameAccountID then
+				BNInviteFriend(validGameAccountID)
+				return
+			end
+			-- More than one account, show the dropdown
 			PlaySound("igMainMenuOptionCheckBoxOn")
 			local dropDown = TravelPassDropDown
 			if dropDown.index ~= index then
@@ -571,26 +592,26 @@ local function sendBattleNetInvite(presenceID)
 			dropDown.index = index
 			ToggleDropDownMenu(1, nil, dropDown, "cursor", 1, -1)
 		else
-			local toonID = select(6, BNGetFriendInfo(index))
-			if toonID then
-				BNInviteFriend(toonID)
+			local bnetIDGameAccount = select(6, BNGetFriendInfo(index))
+			if bnetIDGameAccount then
+				BNInviteFriend(bnetIDGameAccount)
 			end
 		end
 	end
 end
 
 local function clickRealID(frame, info, button)
-	local presenceName, presenceID = unpack(info)
+	local accountName, bnetIDAccount = unpack(info)
 	if button == "LeftButton" then
 		if IsAltKeyDown() then
-			if CanGroupWithAccount(presenceID) then
-				sendBattleNetInvite(presenceID)
+			if CanGroupWithAccount(bnetIDAccount) then
+				sendBattleNetInvite(bnetIDAccount)
 			end
 		else
-			ChatFrame_SendSmartTell(presenceName)
+			ChatFrame_SendSmartTell(accountName)
 		end
 	elseif button == "RightButton" then
-		showRealIDRightClick(presenceName, presenceID)
+		showRealIDRightClick(accountName, bnetIDAccount)
 	end
 end
 
@@ -625,8 +646,8 @@ end
 -- and "bnet" is all the friends in the Battle.Net app. Any friends in the app and elsewhere are considered
 -- to only be elsewhere.
 -- The individual player tables are formatted as follows: {
---     presenceID,
---     presenceName,
+--     bnetIDAccount,
+--     accountName,
 --     battleTag: nil if not isBattleTagPresence,
 --     isAFK,
 --     isDND,
@@ -643,7 +664,7 @@ end
 --         zone,
 --         level,
 --         gameText,
---         location -- gameText, or zone if gameText is "" or nil
+--         location -- zone, or gameText if zone is "" or nil
 --     },
 --     alts: nil or non-empty array of tables identical to focus,
 --     bnet: nil or table identical to focus
@@ -651,6 +672,7 @@ end
 -- filterClients indicates whether friends with both bnet and non-bnet should
 -- be filtered out of the bnet list
 local function parseRealID(filterClients)
+	local playerRealmName = GetRealmName()
 	local numTotal, numOnline = BNGetNumFriends()
 
 	-- lately we've been seeing BNGetFriendGameAccountInfo returning duplicate info for a player,
@@ -660,7 +682,7 @@ local function parseRealID(filterClients)
 
 	local friends, bnets = {}, {}
 	for i=1, numOnline do
-		local presenceID, presenceName, battleTag, isBattleTagPresence, _, _, _, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
+		local bnetIDAccount, accountName, battleTag, isBattleTagPresence, _, _, _, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
 		if not isBattleTagPresence then
 			battleTag = nil
 		end
@@ -682,9 +704,21 @@ local function parseRealID(filterClients)
 					class = class,
 					zone = zoneName,
 					level = level,
-					gameText = gameText,
-					location = gameText == "" and zoneName or gameText
+					gameText = gameText
 				}
+				if client == BNET_CLIENT_WOW then
+					if zoneName and zoneName ~= "" then
+						if realmName and realmName ~= "" and realmName ~= playerRealmName then
+							toon.location = zoneName.." - "..realmName
+						else
+							toon.location = zoneName
+						end
+					else
+						toon.location = realmName
+					end
+				else
+					toon.location = gameText
+				end
 				seen[bnetIDGameAccount] = toon
 				if client == "App" then
 					-- assume no more than 1 bnet toon, but check anyway
@@ -710,8 +744,8 @@ local function parseRealID(filterClients)
 
 		if focus ~= nil or bnet ~= nil then
 			local friend = {
-				presenceID = presenceID,
-				presenceName = presenceName,
+				bnetIDAccount = bnetIDAccount,
+				accountName = accountName,
 				battleTag = battleTag,
 				isAFK = isAFK,
 				isDND = isDND,
@@ -778,7 +812,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 
 	if collapsed then return end
 
-	local playerRealmID = select(5, BNGetGameAccountInfo(select(3, BNGetInfo())))
+	local playerRealmName = GetRealmName()
 	for _, friend in ipairs(friends) do
 		local left = ""
 
@@ -787,7 +821,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 		-- is this friend playing WoW on our server?
 		--if focus.client == BNET_CLIENT_WOW then
 			--local name
-			--if focus.realmID == playerRealmID then
+			--if focus.realmName == playerRealmName then
 				--name = focus.name
 			--else
 				---- Cross-realm?
@@ -796,7 +830,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 		--end
 
 		-- group member indicator
-		local check = getRealIDGroupIndicator(friend.presenceID, playerRealmID)
+		local check = getRealIDGroupIndicator(friend.bnetIDAccount, playerRealmName)
 
 		-- player status
 		local playerStatus = ""
@@ -829,7 +863,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 		end
 
 		-- Full name
-		left = left.."[|cff00A2E8"..(friend.battleTag or friend.presenceName).."|r] "
+		left = left.."[|cff00A2E8"..(friend.battleTag or friend.accountName).."|r] "
 
 		-- Status
 		left = left..getStatusText(playerStatus).." "
@@ -872,7 +906,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 		local right = focus.location and focus.location ~= "" and ("|cffFFFFFF"..focus.location.."|r") or ""
 
 		local y = tooltip:AddLine(check, level, left, right)
-		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { friend.presenceName, friend.presenceID })
+		tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { friend.accountName, friend.bnetIDAccount })
 
 		-- Extra lines
 		if extraLines then
@@ -888,7 +922,7 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 				local left, right
 				if toon.client == BNET_CLIENT_WOW then
 					local cooperateLabel = ""
-					if toon.realmID ~= playerRealmID or toon.faction ~= playerFactionGroup then
+					if toon.realmName ~= playerRealmName or toon.faction ~= playerFactionGroup then
 						cooperateLabel = _G.CANNOT_COOPERATE_LABEL
 					end
 					left = _G.FRIENDS_TOOLTIP_WOW_TOON_TEMPLATE:format(toon.name..cooperateLabel, toon.level, toon.race, toon.class)
