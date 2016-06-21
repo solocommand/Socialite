@@ -1213,6 +1213,7 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 	self:RegisterEvent("BN_FRIEND_TOON_OFFLINE")
 	self:RegisterEvent("BN_FRIEND_TOON_ONLINE")
 	self:RegisterEvent("BN_TOON_NAME_UPDATED")
+	self:RegisterEvent("BN_FRIEND_INFO_CHANGED")
 	self:RegisterEvent("CHAT_MSG_BN_INLINE_TOAST_BROADCAST") -- a friend changes their broadcast
 
 	-- Friend Events
