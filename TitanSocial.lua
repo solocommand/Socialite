@@ -259,6 +259,7 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			addSortOption(L.MENU_GUILD_SORT_NAME, "GuildSortKey", "name", level)
 			addSortOption(L.MENU_GUILD_SORT_RANK, "GuildSortKey", "rank", level)
 			addSortOption(L.MENU_GUILD_SORT_CLASS, "GuildSortKey", "class", level)
+			addSortOption(L.MENU_GUILD_SORT_NOTE, "GuildSortKey", "note", level)
 			addSortOption(L.MENU_GUILD_SORT_LEVEL, "GuildSortKey", "level", level)
 			addSortOption(L.MENU_GUILD_SORT_ZONE, "GuildSortKey", "zone", level)
 			TitanPanelRightClickMenu_AddSpacer(level)
@@ -383,8 +384,8 @@ local function collectGuildRosterInfo(split, sortKey, sortAscending)
 
 	if sortKey then
 		local function sortFunc(a, b)
-			local aname, _, arankIndex, alevel, aclass, azone = GetGuildRosterInfo(a)
-			local bname, _, brankIndex, blevel, bclass, bzone = GetGuildRosterInfo(b)
+			local aname, _, arankIndex, alevel, aclass, azone, anote = GetGuildRosterInfo(a)
+			local bname, _, brankIndex, blevel, bclass, bzone, bnote = GetGuildRosterInfo(b)
 			if sortKey == "rank" and arankIndex ~= brankIndex then
 				-- rank indices are reversed from what you'd expect, so flip the meaning of ascending
 				return ternary(sortAscending, arankIndex > brankIndex, arankIndex < brankIndex)
@@ -397,6 +398,9 @@ local function collectGuildRosterInfo(split, sortKey, sortAscending)
 			end
 			if sortKey == "zone" and azone ~= bzone then
 				return ternary(sortAscending, azone < bzone, azone > bzone)
+			end
+			if sortKey == "note" and anote ~= bnote then
+				return ternary(sortAscending, anote < bnote, anote > bnote)
 			end
 			aname = string.lower(aname or "Unknown")
 			bname = string.lower(bname or "Unknown")
