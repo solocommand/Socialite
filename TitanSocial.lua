@@ -508,7 +508,7 @@ end
 
 local function showGuildRightClick(player, isMobile)
 	local frame = getRightClickFrame()
-	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "GUILD", nil, player) end
+	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end -- COMMUNITIES_WOW_MEMBER
 	frame.displayMode = "MENU";
 	frame.friendsList = false
 	frame.bnetIDAccount = nil
