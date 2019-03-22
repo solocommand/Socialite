@@ -35,7 +35,7 @@ if not L_UIDropDownMenu_CreateInfo then
 	L_UIDropDownMenu_AddButton = _G.Lib_UIDropDownMenu_AddButton
 end
 local CanViewOfficerNote = _G.CanViewOfficerNote
-local ChatFrame_SendTell, ChatFrame_SendSmartTell = _G.ChatFrame_SendTell, _G.ChatFrame_SendSmartTell
+local ChatFrame_SendTell, ChatFrame_SendBNetTell = _G.ChatFrame_SendTell, _G.ChatFrame_SendBNetTell
 local InviteUnit, BNInviteFriend = _G.InviteUnit, _G.BNInviteFriend
 local CanGroupWithAccount = _G.CanGroupWithAccount
 local IsAltKeyDown = _G.IsAltKeyDown
@@ -605,7 +605,7 @@ local function clickRealID(frame, info, button)
 				sendBattleNetInvite(bnetIDAccount)
 			end
 		else
-			ChatFrame_SendSmartTell(accountName)
+			ChatFrame_SendBNetTell(accountName)
 		end
 	elseif button == "RightButton" then
 		showRealIDRightClick(accountName, bnetIDAccount)
