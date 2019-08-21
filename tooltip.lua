@@ -45,7 +45,7 @@ do
 		--slider:GetThumbTexture():SetTexCoord(0.2, 0.8, 0.125, 0.875)
 		-- background
 		local texture = slider:CreateTexture(nil, "BACKGROUND")
-		texture:SetTexture(0, 0, 0, 0.5)
+		texture:SetColorTexture(0, 0, 0, 0.5)
 		texture:SetPoint("TOPLEFT", slider, "TOPLEFT", 0, -5)
 		texture:SetPoint("BOTTOMRIGHT", slider, "BOTTOMRIGHT", 0, 5)
 		--[[ track border ]]
