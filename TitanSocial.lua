@@ -581,7 +581,7 @@ local function sendBattleNetInvite(bnetIDAccount)
 				return
 			end
 			-- More than one account, show the dropdown
-			PlaySound("igMainMenuOptionCheckBoxOn")
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			local dropDown = TravelPassDropDown
 			if dropDown.index ~= index then
 				Lib_CloseDropDownMenus()
