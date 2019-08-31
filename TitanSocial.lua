@@ -943,7 +943,8 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 end
 
 local function addFriends(tooltip, collapseVar)
-	local numTotal, numOnline = GetNumFriends()
+    local numTotal = C_FriendList.GetNumFriends()
+    local numOnline = C_FriendList.GetNumOnlineFriends()
 
 	local collapsed = TitanGetVar(TITAN_SOCIAL_ID, collapseVar)
 	addHeader(L.TOOLTIP_FRIENDS, "FFFFFF", numOnline, numTotal, collapsed, collapseVar)
@@ -953,16 +954,15 @@ local function addFriends(tooltip, collapseVar)
 	for i=1, numOnline do
 		local left = ""
 
-		local name, level, class, area, connected, playerStatus, playerNote, isRAF = GetFriendInfo(i)
-
+		local info = C_FriendList.GetFriendInfoByIndex(i)
+		local playerStatus = nil
+		if info.afk == true then
+			playerStatus = _G.CHAT_FLAG_AFK
+		elseif info.dnd == true then
+			playerStatus = _G.CHAT_FLAG_DND
+		end
 		-- Group indicator
 		local check = getGroupIndicator(name)
-
-		-- fix unknown names - why does this happen?
-		local origname = name
-		if name == "" then
-			name = "Unknown"
-		end
 
 		-- Level
 		local level = "|cffFFFFFF"..level.."|r"
@@ -971,15 +971,15 @@ local function addFriends(tooltip, collapseVar)
 		left = left..getStatusIcon(playerStatus)
 
 		-- Name
-		left = left..colorText(name, class).." "
+		left = left..colorText(info.name, info.className).." "
 
 		-- Status
 		left = left..getStatusText(playerStatus).." "
 
 		-- Notes
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote") then
-			if playerNote and playerNote ~= "" then
-				left = left.."|cffFFFFFF"..playerNote.."|r "
+			if notes and notes ~= "" then
+				left = left.."|cffFFFFFF"..notes.."|r "
 			end
 		end
 		local right = ""
