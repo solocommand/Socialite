@@ -181,7 +181,7 @@ local function addRadioRefresh(text, key, value, level)
 end
 
 -- TitanPanelRightClickMenu_PrepareSocialMenu() must be global for TitanPanel to find it
-function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
+function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 	if level == 1 then
 		TitanPanelRightClickMenu_AddTitle(TitanUtils_GetPlugin(TITAN_SOCIAL_ID).menuText, level)
 
@@ -1155,7 +1155,7 @@ end
 --  Event Handlers
 ----------------------------------------------------------------------
 
-function _G.TitanPanelSocialButton_OnLoad(self)
+function TitanPanelSocialButton_OnLoad(self)
 	--
 	-- LOCAL REGISTRY --
 	--
@@ -1204,24 +1204,21 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 		}
 	}
 
-	--
-	-- EVENT CATCHING --
-	--
+	self:SetScript("OnEvent",  function(_, event, arg1, ...)
+		if event == "PLAYER_LOGIN" then
+			TitanPanelSocialButton_Update()
+        elseif event == "BN_FRIEND_ACCOUNT_OFFLINE" or event == "BN_FRIEND_ACCOUNT_ONLINE" then
+			TitanPanelSocialButton_Update()
+        elseif event == "BN_FRIEND_INFO_CHANGED" or event == "CHAT_MSG_BN_INLINE_TOAST_BROADCAST" then
+			TitanPanelSocialButton_Update()
+		elseif event == "FRIENDLIST_UPDATE" then
+			TitanPanelSocialButton_Update()
+		elseif event == "GUILD_ROSTER_UPDATE" then
+			TitanPanelSocialButton_Update()
+		end
+    end)
 
-	-- General Events
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-
-	-- RealID Events
-	self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-	self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
-	self:RegisterEvent("BN_FRIEND_INFO_CHANGED")
-	self:RegisterEvent("CHAT_MSG_BN_INLINE_TOAST_BROADCAST") -- a friend changes their broadcast
-
-	-- Friend Events
-	self:RegisterEvent("FRIENDLIST_UPDATE")
-
-	-- Guild Events
-	self:RegisterEvent("GUILD_ROSTER_UPDATE")
+	self:RegisterEvent("PLAYER_LOGIN")
 end
 
 local function updateUI()
@@ -1240,20 +1237,11 @@ updateFrame:SetScript("OnUpdate", function(self)
 	self:Hide()
 end)
 
-function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
-	-- Debugging. Pay no attention to the man behind the curtain.
-	if bDebugMode then
-		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: OnEvent")
-		if event == "PLAYER_ENTERING_WORLD" then
-			_G.DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.")
-		end
-		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: Caught Event "..event)
-	end
-
+function _TitanPanelSocialButton_Update(self)
 	updateFrame:Show()
 end
 
-function _G.TitanPanelSocialButton_OnEnter(self)
+function TitanPanelSocialButton_OnEnter(self)
 	if TitanPanelRightClickMenu_IsVisible() then return end -- ignore OnEnter when the contextual menu is visible
 
 	-- If in a guild, steal roster update. If not, ignore and update anyway
@@ -1274,14 +1262,14 @@ function _G.TitanPanelSocialButton_OnEnter(self)
 	tooltip:Show()
 end
 
-function _G.TitanPanelSocialButton_OnLeave(self)
+function TitanPanelSocialButton_OnLeave(self)
 	local interaction = TitanGetVar(TITAN_SOCIAL_ID, "TooltipInteraction")
 	if interaction == INTERACTION_NEVER or (interaction == INTERACTION_OOC and InCombatLockdown()) then
 		tooltip:Hide()
 	end
 end
 
-function _G.TitanPanelSocialButton_OnClick(self, button)
+function TitanPanelSocialButton_OnClick(self, button)
 	-- Detect mouse clicks
 	if button == "LeftButton" then
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDApp") then
