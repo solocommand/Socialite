@@ -962,10 +962,12 @@ local function addFriends(tooltip, collapseVar)
 			playerStatus = _G.CHAT_FLAG_DND
 		end
 		-- Group indicator
-		local check = getGroupIndicator(name)
+		local check = getGroupIndicator(info.name)
+
 
 		-- Level
-		local level = "|cffFFFFFF"..level.."|r"
+		local level = "|cffFFFFFF"..info.level.."|r"
+
 
 		-- Status icon
 		left = left..getStatusIcon(playerStatus)
@@ -978,13 +980,13 @@ local function addFriends(tooltip, collapseVar)
 
 		-- Notes
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote") then
-			if notes and notes ~= "" then
-				left = left.."|cffFFFFFF"..notes.."|r "
+			if info.notes and info.notes ~= "" then
+				left = left.."|cffFFFFFF"..info.notes.."|r "
 			end
 		end
 		local right = ""
-		if area ~= nil then
-			right = "|cffFFFFFF"..area.."|r"
+		if info.area ~= nil then
+			right = "|cffFFFFFF"..info.area.."|r"
 		end
 
 		local y = tooltip:AddLine(check, level, left, right)
