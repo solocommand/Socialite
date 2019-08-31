@@ -8,7 +8,7 @@ local tooltip = addonTable.tooltip
 
 -- GLOBALS: table math select string tostring tonumber ipairs print pcall select error unpack
 
-local _G = _G
+local _G = getfenv(0);
 local Ambiguate = _G.Ambiguate
 
 local RAID_CLASS_COLORS = _G.RAID_CLASS_COLORS
@@ -17,7 +17,7 @@ local UnitInParty, UnitInRaid = _G.UnitInParty, _G.UnitInRaid
 local GuildRoster = _G.GuildRoster
 local GetGuildInfo, GetGuildRosterInfo, GetNumGuildMembers = _G.GetGuildInfo, _G.GetGuildRosterInfo, _G.GetNumGuildMembers
 local GetGuildRosterShowOffline, SetGuildRosterShowOffline = _G.GetGuildRosterShowOffline, _G.SetGuildRosterShowOffline
-local GetNumFriends, GetFriendInfo = _G.GetNumFriends, _G.GetFriendInfo
+local GetNumFriends, GetFriendInfo = C_FriendList.GetNumFriends, C_FriendList.GetFriendInfo
 local ToggleFriendsFrame, ToggleGuildFrame = _G.ToggleFriendsFrame, _G.ToggleGuildFrame
 local FriendsFrame, ShowUIPanel, HideUIPanel = _G.FriendsFrame, _G.ShowUIPanel, _G.HideUIPanel
 local FriendsFrame_Update = _G.FriendsFrame_Update
@@ -97,12 +97,20 @@ local INTERACTION_NEVER = "never"
 
 -- Class support
 local TitanSocial_ClassMap = {}
-
--- Build the class map
-for i = 1, _G.GetNumClasses() do
-	local name, className, classId = _G.GetClassInfo(i)
-	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
-	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+if (_G.GetNumClasses) then
+	-- Retail
+	for i = 1, _G.GetNumClasses() do
+		local name, className, classId = _G.GetClassInfo(i)
+		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
+		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+	end
+else
+	-- Classic
+	local classes = { 'DRUID', 'HUNTER', 'MAGE', 'PALADIN', 'PRIEST', 'ROGUE', 'SHAMAN', 'WARLOCK', 'WARRIOR' }
+	for i, name in ipairs(classes) do
+		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[name]] = name
+		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[name]] = name
+	end
 end
 
 ----------------------------------------------------------------------
