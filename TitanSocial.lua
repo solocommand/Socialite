@@ -8,7 +8,7 @@ local tooltip = addonTable.tooltip
 
 -- GLOBALS: table math select string tostring tonumber ipairs print pcall select error unpack
 
-local _G = _G
+local _G = getfenv(0);
 local Ambiguate = _G.Ambiguate
 
 local RAID_CLASS_COLORS = _G.RAID_CLASS_COLORS
@@ -17,7 +17,7 @@ local UnitInParty, UnitInRaid = _G.UnitInParty, _G.UnitInRaid
 local GuildRoster = _G.GuildRoster
 local GetGuildInfo, GetGuildRosterInfo, GetNumGuildMembers = _G.GetGuildInfo, _G.GetGuildRosterInfo, _G.GetNumGuildMembers
 local GetGuildRosterShowOffline, SetGuildRosterShowOffline = _G.GetGuildRosterShowOffline, _G.SetGuildRosterShowOffline
-local GetNumFriends, GetFriendInfo = _G.GetNumFriends, _G.GetFriendInfo
+local GetNumFriends, GetFriendInfo = C_FriendList.GetNumFriends, C_FriendList.GetFriendInfo
 local ToggleFriendsFrame, ToggleGuildFrame = _G.ToggleFriendsFrame, _G.ToggleGuildFrame
 local FriendsFrame, ShowUIPanel, HideUIPanel = _G.FriendsFrame, _G.ShowUIPanel, _G.HideUIPanel
 local FriendsFrame_Update = _G.FriendsFrame_Update
@@ -97,12 +97,20 @@ local INTERACTION_NEVER = "never"
 
 -- Class support
 local TitanSocial_ClassMap = {}
-
--- Build the class map
-for i = 1, _G.GetNumClasses() do
-	local name, className, classId = _G.GetClassInfo(i)
-	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
-	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+if (_G.GetNumClasses) then
+	-- Retail
+	for i = 1, _G.GetNumClasses() do
+		local name, className, classId = _G.GetClassInfo(i)
+		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
+		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+	end
+else
+	-- Classic
+	local classes = { 'DRUID', 'HUNTER', 'MAGE', 'PALADIN', 'PRIEST', 'ROGUE', 'SHAMAN', 'WARLOCK', 'WARRIOR' }
+	for i, name in ipairs(classes) do
+		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[name]] = name
+		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[name]] = name
+	end
 end
 
 ----------------------------------------------------------------------
@@ -173,7 +181,7 @@ local function addRadioRefresh(text, key, value, level)
 end
 
 -- TitanPanelRightClickMenu_PrepareSocialMenu() must be global for TitanPanel to find it
-function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
+function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 	if level == 1 then
 		TitanPanelRightClickMenu_AddTitle(TitanUtils_GetPlugin(TITAN_SOCIAL_ID).menuText, level)
 
@@ -277,7 +285,7 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 end
 
 -- TitanPanelSocialButton_GetButtonText() must be global so TitanPanel can see it
-function _G.TitanPanelSocialButton_GetButtonText(id)
+function TitanPanelSocialButton_GetButtonText(id)
 	local label = " "
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowLabel") then
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildLabel") and TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") and IsInGuild() then
@@ -306,7 +314,7 @@ function _G.TitanPanelSocialButton_GetButtonText(id)
 		end
 	end
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
-		table.insert(comps, "|cffFFFFFF"..select(2,GetNumFriends()).."|r")
+		table.insert(comps, "|cffFFFFFF"..C_FriendList.GetNumOnlineFriends().."|r")
 	end
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
 		local online, remote = select(2, GetNumGuildMembers())
@@ -581,7 +589,7 @@ local function sendBattleNetInvite(bnetIDAccount)
 				return
 			end
 			-- More than one account, show the dropdown
-			PlaySound("igMainMenuOptionCheckBoxOn")
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			local dropDown = TravelPassDropDown
 			if dropDown.index ~= index then
 				Lib_CloseDropDownMenus()
@@ -632,7 +640,7 @@ local function addHeader(header, color, online, total, collapsed, collapseVar)
 		left = left.." |cff808080"..L.TOOLTIP_COLLAPSED.."|r"
 	end
 	if color then color = "|cff"..color end
-	local right = (color or "")..online..(color and "|r")..TitanUtils_GetNormalText("/"..total)
+	local right = (color or "")..(online or "")..(color and "|r")..TitanUtils_GetNormalText("/"..total)
 	local y = addDoubleLine(false, left, right)
 	tooltip:SetLineScript(y, "OnMouseDown", clickHeader, collapseVar)
 	return y
@@ -935,7 +943,8 @@ local function addRealID(tooltip, friends, isBnetClient, collapseVar)
 end
 
 local function addFriends(tooltip, collapseVar)
-	local numTotal, numOnline = GetNumFriends()
+    local numTotal = C_FriendList.GetNumFriends()
+    local numOnline = C_FriendList.GetNumOnlineFriends()
 
 	local collapsed = TitanGetVar(TITAN_SOCIAL_ID, collapseVar)
 	addHeader(L.TOOLTIP_FRIENDS, "FFFFFF", numOnline, numTotal, collapsed, collapseVar)
@@ -945,38 +954,39 @@ local function addFriends(tooltip, collapseVar)
 	for i=1, numOnline do
 		local left = ""
 
-		local name, level, class, area, connected, playerStatus, playerNote, isRAF = GetFriendInfo(i)
-
-		-- Group indicator
-		local check = getGroupIndicator(name)
-
-		-- fix unknown names - why does this happen?
-		local origname = name
-		if name == "" then
-			name = "Unknown"
+		local info = C_FriendList.GetFriendInfoByIndex(i)
+		local playerStatus = nil
+		if info.afk == true then
+			playerStatus = _G.CHAT_FLAG_AFK
+		elseif info.dnd == true then
+			playerStatus = _G.CHAT_FLAG_DND
 		end
+		-- Group indicator
+		local check = getGroupIndicator(info.name)
+
 
 		-- Level
-		local level = "|cffFFFFFF"..level.."|r"
+		local level = "|cffFFFFFF"..info.level.."|r"
+
 
 		-- Status icon
 		left = left..getStatusIcon(playerStatus)
 
 		-- Name
-		left = left..colorText(name, class).." "
+		left = left..colorText(info.name, info.className).." "
 
 		-- Status
 		left = left..getStatusText(playerStatus).." "
 
 		-- Notes
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriendsNote") then
-			if playerNote and playerNote ~= "" then
-				left = left.."|cffFFFFFF"..playerNote.."|r "
+			if info.notes and info.notes ~= "" then
+				left = left.."|cffFFFFFF"..info.notes.."|r "
 			end
 		end
 		local right = ""
-		if area ~= nil then
-			right = "|cffFFFFFF"..area.."|r"
+		if info.area ~= nil then
+			right = "|cffFFFFFF"..info.area.."|r"
 		end
 
 		local y = tooltip:AddLine(check, level, left, right)
@@ -1147,7 +1157,7 @@ end
 --  Event Handlers
 ----------------------------------------------------------------------
 
-function _G.TitanPanelSocialButton_OnLoad(self)
+function TitanPanelSocialButton_OnLoad(self)
 	--
 	-- LOCAL REGISTRY --
 	--
@@ -1196,24 +1206,21 @@ function _G.TitanPanelSocialButton_OnLoad(self)
 		}
 	}
 
-	--
-	-- EVENT CATCHING --
-	--
+	self:SetScript("OnEvent",  function(_, event, arg1, ...)
+		if event == "PLAYER_LOGIN" then
+			TitanPanelSocialButton_Update()
+        elseif event == "BN_FRIEND_ACCOUNT_OFFLINE" or event == "BN_FRIEND_ACCOUNT_ONLINE" then
+			TitanPanelSocialButton_Update()
+        elseif event == "BN_FRIEND_INFO_CHANGED" or event == "CHAT_MSG_BN_INLINE_TOAST_BROADCAST" then
+			TitanPanelSocialButton_Update()
+		elseif event == "FRIENDLIST_UPDATE" then
+			TitanPanelSocialButton_Update()
+		elseif event == "GUILD_ROSTER_UPDATE" then
+			TitanPanelSocialButton_Update()
+		end
+    end)
 
-	-- General Events
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-
-	-- RealID Events
-	self:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
-	self:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
-	self:RegisterEvent("BN_FRIEND_INFO_CHANGED")
-	self:RegisterEvent("CHAT_MSG_BN_INLINE_TOAST_BROADCAST") -- a friend changes their broadcast
-
-	-- Friend Events
-	self:RegisterEvent("FRIENDLIST_UPDATE")
-
-	-- Guild Events
-	self:RegisterEvent("GUILD_ROSTER_UPDATE")
+	self:RegisterEvent("PLAYER_LOGIN")
 end
 
 local function updateUI()
@@ -1232,20 +1239,11 @@ updateFrame:SetScript("OnUpdate", function(self)
 	self:Hide()
 end)
 
-function _G.TitanPanelSocialButton_OnEvent(self, event, ...)
-	-- Debugging. Pay no attention to the man behind the curtain.
-	if bDebugMode then
-		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: OnEvent")
-		if event == "PLAYER_ENTERING_WORLD" then
-			_G.DEFAULT_CHAT_FRAME:AddMessage(TITAN_SOCIAL_ID.." v"..TITAN_SOCIAL_VERSION.." Loaded.")
-		end
-		_G.DEFAULT_CHAT_FRAME:AddMessage("Social: Caught Event "..event)
-	end
-
+function TitanPanelSocialButton_Update(self)
 	updateFrame:Show()
 end
 
-function _G.TitanPanelSocialButton_OnEnter(self)
+function TitanPanelSocialButton_OnEnter(self)
 	if TitanPanelRightClickMenu_IsVisible() then return end -- ignore OnEnter when the contextual menu is visible
 
 	-- If in a guild, steal roster update. If not, ignore and update anyway
@@ -1266,14 +1264,14 @@ function _G.TitanPanelSocialButton_OnEnter(self)
 	tooltip:Show()
 end
 
-function _G.TitanPanelSocialButton_OnLeave(self)
+function TitanPanelSocialButton_OnLeave(self)
 	local interaction = TitanGetVar(TITAN_SOCIAL_ID, "TooltipInteraction")
 	if interaction == INTERACTION_NEVER or (interaction == INTERACTION_OOC and InCombatLockdown()) then
 		tooltip:Hide()
 	end
 end
 
-function _G.TitanPanelSocialButton_OnClick(self, button)
+function TitanPanelSocialButton_OnClick(self, button)
 	-- Detect mouse clicks
 	if button == "LeftButton" then
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealID") or TitanGetVar(TITAN_SOCIAL_ID, "ShowRealIDApp") then
