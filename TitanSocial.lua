@@ -314,7 +314,7 @@ function TitanPanelSocialButton_GetButtonText(id)
 		end
 	end
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowFriends") then
-		table.insert(comps, "|cffFFFFFF"..select(2,GetNumFriends()).."|r")
+		table.insert(comps, "|cffFFFFFF"..C_FriendList.GetNumOnlineFriends().."|r")
 	end
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
 		local online, remote = select(2, GetNumGuildMembers())
