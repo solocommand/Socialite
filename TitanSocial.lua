@@ -1239,7 +1239,7 @@ updateFrame:SetScript("OnUpdate", function(self)
 	self:Hide()
 end)
 
-function _TitanPanelSocialButton_Update(self)
+function TitanPanelSocialButton_Update(self)
 	updateFrame:Show()
 end
 
