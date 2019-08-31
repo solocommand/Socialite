@@ -1,11 +1,11 @@
-## Interface: 80200
-## Title: Titan Panel [|cffeda55fSocial|r] |cff00aa008.2.0|r
+## Interface: 11302
+## Title: Titan Panel [|cffeda55fSocial|r] |cff00aa001.13.2|r
 ## Notes: A Titan Panel plugin incorporating Friends, Guild, and RealID Friends
 ## Author: solocommand and eridius
 ## SavedVariables:
 ## SavedVariablesPerCharacter: TitanSocialVars
-## Dependencies: Titan
-## Version: 8.2.0
+## Dependencies: TitanClassic
+## Version: 1.13.2
 ## LoadOnDemand: 0
 ## DefaultState: enabled
 TitanSocial.xml
