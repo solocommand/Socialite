@@ -285,7 +285,7 @@ function _G.TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 end
 
 -- TitanPanelSocialButton_GetButtonText() must be global so TitanPanel can see it
-function _G.TitanPanelSocialButton_GetButtonText(id)
+function TitanPanelSocialButton_GetButtonText(id)
 	local label = " "
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowLabel") then
 		if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuildLabel") and TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") and IsInGuild() then
@@ -640,7 +640,7 @@ local function addHeader(header, color, online, total, collapsed, collapseVar)
 		left = left.." |cff808080"..L.TOOLTIP_COLLAPSED.."|r"
 	end
 	if color then color = "|cff"..color end
-	local right = (color or "")..online..(color and "|r")..TitanUtils_GetNormalText("/"..total)
+	local right = (color or "")..(online or "")..(color and "|r")..TitanUtils_GetNormalText("/"..total)
 	local y = addDoubleLine(false, left, right)
 	tooltip:SetLineScript(y, "OnMouseDown", clickHeader, collapseVar)
 	return y
