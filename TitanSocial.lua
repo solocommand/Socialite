@@ -78,7 +78,7 @@ local bDebugMode = false
 
 -- Required Titan variables
 local TITAN_SOCIAL_ID = "Social"
-local TITAN_SOCIAL_VERSION = "8.2.0"
+local TITAN_SOCIAL_VERSION = "1.13.3"
 local TITAN_SOCIAL_TOOLTIP_KEY = "TitanSocialTooltip"
 
 local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0:16:16:0:16:0:16:73:177:73|t"
@@ -101,8 +101,10 @@ if (_G.GetNumClasses) then
 	-- Retail
 	for i = 1, _G.GetNumClasses() do
 		local name, className, classId = _G.GetClassInfo(i)
-		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
-		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+		if (className) then
+			TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
+			TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+		end
 	end
 else
 	-- Classic
