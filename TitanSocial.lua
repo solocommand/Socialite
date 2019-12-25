@@ -97,22 +97,11 @@ local INTERACTION_NEVER = "never"
 
 -- Class support
 local TitanSocial_ClassMap = {}
-if (_G.GetNumClasses) then
-	-- Retail
-	for i = 1, _G.GetNumClasses() do
-		local name, className, classId = _G.GetClassInfo(i)
-		if (className) then
-			TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
-			TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
-		end
-	end
-else
-	-- Classic
-	local classes = { 'DRUID', 'HUNTER', 'MAGE', 'PALADIN', 'PRIEST', 'ROGUE', 'SHAMAN', 'WARLOCK', 'WARRIOR' }
-	for i, name in ipairs(classes) do
-		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[name]] = name
-		TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[name]] = name
-	end
+-- Classic
+local classes = { 'DRUID', 'HUNTER', 'MAGE', 'PALADIN', 'PRIEST', 'ROGUE', 'SHAMAN', 'WARLOCK', 'WARRIOR' }
+for i, name in ipairs(classes) do
+	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[name]] = name
+	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[name]] = name
 end
 
 ----------------------------------------------------------------------
