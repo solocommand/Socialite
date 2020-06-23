@@ -990,7 +990,7 @@ local function addFriends(tooltip, collapseVar)
 		end
 
 		local y = tooltip:AddLine(check, level, left, right)
-		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, false, false, false })
+		tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { info.name, false, false, false })
 	end
 end
 
