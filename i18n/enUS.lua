@@ -56,8 +56,8 @@ L["TooltipInteractionDescription"] = "TooltipInteractionDescription"
 -- Labels
 L["Socialite"] = "Socialite";
 L["TOOLTIP"] = "Social"
-L["TOOLTIP_REALID"] = "RealID Friends Online"
-L["TOOLTIP_REALID_APP"] = "RealID Friends in Battle.Net App"
+L["TOOLTIP_REALID"] = "Battle.net Friends Online"
+L["TOOLTIP_REALID_APP"] = "Battle.net Friends in App"
 L["TOOLTIP_FRIENDS"] = "Friends Online"
 L["TOOLTIP_GUILD"] = "Guild Members Online"
 L["TOOLTIP_REMOTE_CHAT"] = "Remote Chat"

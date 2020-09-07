@@ -95,7 +95,6 @@ do
   })
 
   local function updateText()
-    showConfig()
     local text = L["Socialite"]..": "
     local comps = {}
 
@@ -152,8 +151,8 @@ do
         if (showRealID) then addon:renderBattleNet(tooltip, friends, false, "CollapseRealID") end
         if (showRealIDApp) then addon:renderBattleNet(tooltip, bnet, true, "CollapseRealIDApp") end
       end
-      -- if (addon.db.ShowFriends) then addFriends(tooltip, "CollapseFriends") end
-      -- if (addon.db.ShowGuild) then addGuild(tooltip, "CollapseGuild", "CollapseRemoteChat") end
+      if (addon.db.ShowFriends) then addon:renderFriends(tooltip, "CollapseFriends") end
+      if (addon.db.ShowGuild) then addon:renderGuild(tooltip, "CollapseGuild", "CollapseRemoteChat") end
     -- end)
 
     -- if (not ok) then
