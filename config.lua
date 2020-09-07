@@ -6,11 +6,13 @@ frame.name = addonName
 frame:Hide()
 
 frame:SetScript("OnShow", function(frame)
-  local function newCheckbox(label, description, onClick)
-    local check = CreateFrame("CheckButton", "SocialiteCheck" .. label, frame, "InterfaceOptionsCheckButtonTemplate")
+  local function newCheckbox(key)
+    local label = L[key]
+    local description = L[key.."Description"]
+    local check = CreateFrame("CheckButton", "SocialiteCheck"..key, frame, "InterfaceOptionsCheckButtonTemplate")
     check:SetScript("OnClick", function(self)
       local tick = self:GetChecked()
-      onClick(self, tick and true or false)
+      addon:setDB(key, tick and true or false)
       if tick then
         PlaySound(856) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON
       else
@@ -29,23 +31,23 @@ frame:SetScript("OnShow", function(frame)
   RealID:SetPoint("TOPLEFT", 16, -16)
   RealID:SetText(L["Battle.net Friends"])
 
-  local ShowRealID = newCheckbox(L.ShowRealID, L.ShowRealIDDescription, function(_, value) addon:setDB("ShowRealID", value) end)
+  local ShowRealID = newCheckbox("ShowRealID")
   ShowRealID:SetChecked(addon.db.ShowRealID)
   ShowRealID:SetPoint("TOPLEFT", RealID, "BOTTOMLEFT", -2, -16)
 
-  local ShowRealIDBroadcasts = newCheckbox(L.ShowRealIDBroadcasts, L.ShowRealIDBroadcastsDescription, function(_, value) addon:setDB("ShowRealIDBroadcasts", value) end)
+  local ShowRealIDBroadcasts = newCheckbox("ShowRealIDBroadcasts")
   ShowRealIDBroadcasts:SetChecked(addon.db.ShowRealIDBroadcasts)
   ShowRealIDBroadcasts:SetPoint("TOPLEFT", ShowRealID, "BOTTOMLEFT", 0, -8)
 
-  local ShowRealIDFactions = newCheckbox(L.ShowRealIDFactions, L.ShowRealIDFactionsDescription, function(_, value) addon:setDB("ShowRealIDFactions", value) end)
+  local ShowRealIDFactions = newCheckbox("ShowRealIDFactions")
   ShowRealIDFactions:SetChecked(addon.db.ShowRealIDFactions)
   ShowRealIDFactions:SetPoint("TOPLEFT", ShowRealIDBroadcasts, "BOTTOMLEFT", 0, -8)
 
-  local ShowRealIDNotes = newCheckbox(L.ShowRealIDNotes, L.ShowRealIDNotesDescription, function(_, value) addon:setDB("ShowRealIDNotes", value) end)
+  local ShowRealIDNotes = newCheckbox("ShowRealIDNotes")
   ShowRealIDNotes:SetChecked(addon.db.ShowRealIDNotes)
   ShowRealIDNotes:SetPoint("TOPLEFT", ShowRealIDFactions, "BOTTOMLEFT", 0, -8)
 
-  local ShowRealIDApp = newCheckbox(L.ShowRealIDApp, L.ShowRealIDAppDescription, function(_, value) addon:setDB("ShowRealIDApp", value) end)
+  local ShowRealIDApp = newCheckbox("ShowRealIDApp")
   ShowRealIDApp:SetChecked(addon.db.ShowRealIDApp)
   ShowRealIDApp:SetPoint("TOPLEFT", ShowRealIDNotes, "BOTTOMLEFT", 0, -8)
 
@@ -54,11 +56,11 @@ frame:SetScript("OnShow", function(frame)
   Friends:SetPoint("TOPLEFT", ShowRealIDApp, "BOTTOMLEFT", 2, -16)
   Friends:SetText(L["Character Friends"])
 
-  local ShowFriends = newCheckbox(L.ShowFriends, L.ShowFriendsDescription, function(_, value) addon:setDB("ShowFriends", value) end)
+  local ShowFriends = newCheckbox("ShowFriends")
   ShowFriends:SetChecked(addon.db.ShowFriends)
   ShowFriends:SetPoint("TOPLEFT", Friends, "BOTTOMLEFT", -2, -16)
 
-  local ShowFriendsNote = newCheckbox(L.ShowFriendsNote, L.ShowFriendsNoteDescription, function(_, value) addon:setDB("ShowFriendsNote", value) end)
+  local ShowFriendsNote = newCheckbox("ShowFriendsNote")
   ShowFriendsNote:SetChecked(addon.db.ShowFriendsNote)
   ShowFriendsNote:SetPoint("TOPLEFT", ShowFriends, "BOTTOMLEFT", 0, -8)
 
@@ -83,31 +85,31 @@ frame:SetScript("OnShow", function(frame)
   Guild:SetPoint("TOPLEFT", 320, -16)
   Guild:SetText(L["Guild Members"])
 
-  local ShowGuild = newCheckbox(L.ShowGuild, L.ShowGuildDescription, function(_, value) addon:setDB("ShowGuild", value) end)
+  local ShowGuild = newCheckbox("ShowGuild")
   ShowGuild:SetChecked(addon.db.ShowGuild)
   ShowGuild:SetPoint("TOPLEFT", Guild, "BOTTOMLEFT", -2, -16)
 
-  local ShowGuildLabel = newCheckbox(L.ShowGuildLabel, L.ShowGuildLabelDescription, function(_, value) addon:setDB("ShowGuildLabel", value) end)
+  local ShowGuildLabel = newCheckbox("ShowGuildLabel")
   ShowGuildLabel:SetChecked(addon.db.ShowGuildLabel)
   ShowGuildLabel:SetPoint("TOPLEFT", ShowGuild, "BOTTOMLEFT", 0, -8)
 
-  local ShowGuildNote = newCheckbox(L.ShowGuildNote, L.ShowGuildNoteDescription, function(_, value) addon:setDB("ShowGuildNote", value) end)
+  local ShowGuildNote = newCheckbox("ShowGuildNote")
   ShowGuildNote:SetChecked(addon.db.ShowGuildNote)
   ShowGuildNote:SetPoint("TOPLEFT", ShowGuildLabel, "BOTTOMLEFT", 0, -8)
 
-  local ShowGuildONote = newCheckbox(L.ShowGuildONote, L.ShowGuildONoteDescription, function(_, value) addon:setDB("ShowGuildONote", value) end)
+  local ShowGuildONote = newCheckbox("ShowGuildONote")
   ShowGuildONote:SetChecked(addon.db.ShowGuildONote)
   ShowGuildONote:SetPoint("TOPLEFT", ShowGuildNote, "BOTTOMLEFT", 0, -8)
 
-  local ShowSplitRemoteChat = newCheckbox(L.ShowSplitRemoteChat, L.ShowSplitRemoteChatDescription, function(_, value) addon:setDB("ShowSplitRemoteChat", value) end)
+  local ShowSplitRemoteChat = newCheckbox("ShowSplitRemoteChat")
   ShowSplitRemoteChat:SetChecked(addon.db.ShowSplitRemoteChat)
   ShowSplitRemoteChat:SetPoint("TOPLEFT", ShowGuildONote, "BOTTOMLEFT", 0, -8)
 
-  local GuildSort = newCheckbox(L.GuildSort, L.GuildSortDescription, function(_, value) addon:setDB("GuildSort", value) end)
+  local GuildSort = newCheckbox("GuildSort")
   GuildSort:SetChecked(addon.db.GuildSort)
   GuildSort:SetPoint("TOPLEFT", ShowSplitRemoteChat, "BOTTOMLEFT", 0, -8)
 
-  local GuildSortInverted = newCheckbox(L.GuildSortInverted, L.GuildSortInvertedDescription, function(_, value) addon:setDB("GuildSortInverted", value) end)
+  local GuildSortInverted = newCheckbox("GuildSortInverted")
   GuildSortInverted:SetChecked(addon.db.GuildSortInverted)
   GuildSortInverted:SetPoint("TOPLEFT", GuildSort, "BOTTOMLEFT", 0, -8)
 

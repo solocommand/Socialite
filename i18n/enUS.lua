@@ -55,9 +55,12 @@ L["TooltipInteractionDescription"] = "TooltipInteractionDescription"
 
 -- Labels
 L["Socialite"] = "Socialite";
--- L["Honorable Kills"] = "Honorable Kills";
--- L["Dishonorable Kills"] = "Dishonorable Kills";
--- L["Honor Rank"] = "Honor Rank";
--- L["PvP Stats"] = "PvP Stats";
+L["TOOLTIP"] = "Social"
+L["TOOLTIP_REALID"] = "RealID Friends Online"
+L["TOOLTIP_REALID_APP"] = "RealID Friends in Battle.Net App"
+L["TOOLTIP_FRIENDS"] = "Friends Online"
+L["TOOLTIP_GUILD"] = "Guild Members Online"
+L["TOOLTIP_REMOTE_CHAT"] = "Remote Chat"
+L["TOOLTIP_COLLAPSED"] = "(collapsed, click to expand)"
 
 addon.L = L

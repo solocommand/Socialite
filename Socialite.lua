@@ -1,5 +1,6 @@
 local addonName, addon = ...
 local L = addon.L
+local tooltip = addon.tooltip
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
 local function print(...) _G.print("|c259054ffSocialite:|r", ...) end
 
@@ -93,37 +94,6 @@ do
     end
   })
 
-  -- Returns two counts, first is for friends and second is for bnet.
-  -- Identical to counting the tables from parseRealID() but cheaper
-  -- filterClients indicates if bnet should be filtered out of friends
-  -- and vice versa.
-  local function countRealID(filterClients)
-    local numTotal, numOnline = BNGetNumFriends()
-
-    local friends, bnet = 0, 0
-    for i=1, numOnline do
-      local isRegular, isBnet = false, false
-      for j=1, BNGetNumFriendGameAccounts(i) do
-        local client = select(3, BNGetFriendGameAccountInfo(i, j))
-        if client then
-          if client == "App" then
-            isBnet = true
-          else
-            isRegular = true
-            if filterClients then
-              isBnet = false
-              break
-            end
-          end
-        end
-      end
-      if isBnet then bnet = bnet + 1 end
-      if isRegular then friends = friends + 1 end
-    end
-
-    return friends, bnet
-  end
-
   local function updateText()
     showConfig()
     local text = L["Socialite"]..": "
@@ -132,14 +102,14 @@ do
     -- Prefix/guild label
     if addon.db.ShowGuildLabel and addon.db.ShowGuild and IsInGuild() then
       local guildName = GetGuildInfo("player")
-      if guildName then text = guildName..": " end
+      if guildName then text = normal(guildName..": ") end
     end
 
     -- Battle.net Friends
     local showRealID = addon.db.ShowRealID
     local showRealIDApp = addon.db.ShowRealIDApp
     if showRealID or showRealIDApp then
-      local numFriends, numBnet = countRealID(showRealID)
+      local numFriends, numBnet = addon:countRealID(showRealID)
       if showRealID then
         table.insert(comps, "|cff00A2E8"..numFriends.."|r")
       end
@@ -171,10 +141,25 @@ do
     dataobj.text = text..table.concat(comps, " |cffffd200/|r ")
   end
 
-  local function updateTooltip()
-    print("Update tooltip!")
-    GameTooltip:AddLine(L["Socialite"].."\n")
-    GameTooltip:AddLine(muted("NYI"))
+  local function updateTooltip(tooltip)
+    -- local ok, message = pcall(function ()
+      addon.tooltip:Clear()
+      addon.tooltip:AddColspanHeader(3, "LEFT", L["Socialite"])
+      local showRealID = addon.db.ShowRealID
+      local showRealIDApp = addon.db.ShowRealIDApp
+      if (showRealID or showRealIDApp) then
+        local friends, bnet = addon:parseRealID(showRealID)
+        if (showRealID) then addon:renderBattleNet(tooltip, friends, false, "CollapseRealID") end
+        if (showRealIDApp) then addon:renderBattleNet(tooltip, bnet, true, "CollapseRealIDApp") end
+      end
+      -- if (addon.db.ShowFriends) then addFriends(tooltip, "CollapseFriends") end
+      -- if (addon.db.ShowGuild) then addGuild(tooltip, "CollapseGuild", "CollapseRemoteChat") end
+    -- end)
+
+    -- if (not ok) then
+    --   print("error: "..message)
+    --   error(message, 0)
+    -- end
   end
 
   function addon:setDB(key, value)
@@ -193,17 +178,28 @@ do
 
   f:SetScript("OnEvent", updateText)
 
-  function dataobj:OnTooltipShow() updateTooltip() end
-
   function dataobj:OnEnter()
-    GameTooltip:SetOwner(self, "ANCHOR_NONE")
-    GameTooltip:SetPoint("TOPLEFT", self, "BOTTOMLEFT")
-    GameTooltip:ClearLines()
-    dataobj.OnTooltipShow()
-    GameTooltip:Show()
+    -- If in a guild, steal roster update. If not, ignore and update anyway
+    -- if IsInGuild() then
+    --   _G.FriendsFrame:UnregisterEvent("GUILD_ROSTER_UPDATE")
+    --   GuildRoster()
+    --   _G.FriendsFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
+    -- end
+
+    -- Update Titan button label and tooltip
+
+    -- Render tooltip
+    addon.tooltip:Clear("LEFT", 0, "RIGHT", "LEFT", "RIGHT")
+    addon.tooltip:SetAutoHideDelay(0.2, self)
+    updateTooltip(tooltip)
+    addon.tooltip:SmartAnchorTo(self)
+    addon.tooltip:Show()
   end
 
   function dataobj:OnLeave()
-    GameTooltip:Hide()
+    local i = addon.db.TooltipInteraction
+    if i == "never" or (i == "outofcombat" and InCombatLockdown()) then
+      addon.tooltip:Hide()
+    end
   end
 end

@@ -14,5 +14,7 @@ i18n/enUS.lua
 # i18n/esES.lua
 # i18n/ruRU.lua
 
+tooltip.lua
+functions.lua
 Socialite.lua
 config.lua
