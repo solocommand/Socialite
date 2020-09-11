@@ -397,8 +397,8 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
     -- Location
     local right = focus.location and focus.location ~= "" and ("|cffFFFFFF"..focus.location.."|r") or ""
 
-    local y = tooltip:AddLine(check, level, left, right)
-    tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { friend.accountName, friend.bnetIDAccount })
+    local y = addon.tooltip:AddLine(check, level, left, right)
+    addon.tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { friend.accountName, friend.bnetIDAccount })
 
     -- Extra lines
     if extraLines then
@@ -651,7 +651,7 @@ function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
 	end
 
 	local split = addon.db.ShowSplitRemoteChat
-	local sortKey = addon.db.SortGuild and addon.db.GuildSortKey or nil
+	local sortKey = addon.db.GuildSort and addon.db.GuildSortKey or nil
 	local roster, numTotal, numOnline, numRemote = collectGuildRosterInfo(split, sortKey, addon.db.GuildSortAscending or false)
 
 	local numGuild = split and numOnline or numRemote

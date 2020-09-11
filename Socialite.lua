@@ -48,7 +48,7 @@ do
     if type(sv.ShowGuildONote) ~= "boolean" then sv.ShowGuildONote = true end
     if type(sv.ShowSplitRemoteChat) ~= "boolean" then sv.ShowSplitRemoteChat = false end
     if type(sv.GuildSort) ~= "boolean" then sv.GuildSort = false end
-    if type(sv.GuildSortInverted) ~= "boolean" then sv.GuildSortInverted = false end
+    if type(sv.GuildSortAscending) ~= "boolean" then sv.GuildSortAscending = false end
     if type(sv.GuildSortKey) ~= "string" then sv.GuildSortKey = "rank" end
 
     if type(sv.ShowStatus) ~= "string" then sv.ShowStatus = "icon" end

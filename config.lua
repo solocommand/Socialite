@@ -6,7 +6,7 @@ frame.name = addonName
 frame:Hide()
 
 frame:SetScript("OnShow", function(frame)
-  local function newCheckbox(key)
+  local function newCheckbox(key, callback)
     local label = L[key]
     local description = L[key.."Description"]
     local check = CreateFrame("CheckButton", "SocialiteCheck"..key, frame, "InterfaceOptionsCheckButtonTemplate")
@@ -18,6 +18,7 @@ frame:SetScript("OnShow", function(frame)
       else
         PlaySound(857) -- SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF
       end
+      if (type(callback) == "function") then callback(tick and true or false) end
     end)
     check.label = _G[check:GetName() .. "Text"]
     check.label:SetText(label)
@@ -70,15 +71,65 @@ frame:SetScript("OnShow", function(frame)
   Tooltip:SetPoint("TOPLEFT", ShowFriendsNote, "BOTTOMLEFT", 2, -16)
   Tooltip:SetText(L["Tooltip Settings"])
 
-  -- "ShowStatus" select box
-  -- L.MENU_STATUS_ICON
-  -- L.MENU_STATUS_TEXT
-  -- L.MENU_STATUS_NONE
+  local info = {}
 
-  -- "TooltipInteraction" select box
-  -- L.MENU_INTERACTION_ALWAYS
-  -- L.MENU_INTERACTION_OOC
-  -- L.MENU_INTERACTION_NEVER
+  local ShowStatusLabel = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  ShowStatusLabel:SetPoint("TOPLEFT", Tooltip, "BOTTOMLEFT", 2, -16)
+  ShowStatusLabel:SetText(L.MENU_STATUS)
+
+	local showStatus = CreateFrame("Frame", "SocialiteShowStatus", frame, "UIDropDownMenuTemplate")
+	showStatus:SetPoint("TOPLEFT", ShowStatusLabel, "BOTTOMLEFT", -15, -10)
+	showStatus.initialize = function()
+		wipe(info)
+		local options = {
+      icon={text=L.MENU_STATUS_ICON, description=L.MENU_STATUS_ICON_DESCRIPTION},
+      text={text=L.MENU_STATUS_TEXT, description=L.MENU_STATUS_TEXT_DESCRIPTION},
+      none={text=L.MENU_STATUS_NONE, description=L.MENU_STATUS_NONE_DESCRIPTION},
+    }
+		for key, opts in next, options do
+      info.text = opts.text
+      info.tooltipTitle = opts.text;
+      info.tooltipText = opts.description;
+      info.tooltipOnButton = true
+			info.value = key
+      info.func = function(self)
+        addon:setDB("ShowStatus", self.value)
+				SocialiteShowStatusText:SetText(self:GetText())
+			end
+      info.checked = key == addon.db.ShowStatus
+      UIDropDownMenu_AddButton(info)
+		end
+	end
+	SocialiteShowStatusText:SetText(L.MENU_STATUS)
+
+  local TooltipInteractionLabel = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  TooltipInteractionLabel:SetPoint("TOPLEFT", SocialiteShowStatus, "BOTTOMLEFT", 15, -16)
+  TooltipInteractionLabel:SetText(L.MENU_INTERACTION)
+
+	local tooltipInteraction = CreateFrame("Frame", "SocialiteTooltipInteraction", frame, "UIDropDownMenuTemplate")
+	tooltipInteraction:SetPoint("TOPLEFT", TooltipInteractionLabel, "BOTTOMLEFT", -15, -10)
+	tooltipInteraction.initialize = function()
+		wipe(info)
+		local options = {
+      icon={text=L.MENU_INTERACTION_ALWAYS, description=L.MENU_INTERACTION_ALWAYS_DESCRIPTION},
+      text={text=L.MENU_INTERACTION_OOC, description=L.MENU_INTERACTION_OOC_DESCRIPTION},
+      none={text=L.MENU_INTERACTION_NEVER, description=L.MENU_INTERACTION_NEVER_DESCRIPTION},
+    }
+		for key, opts in next, options do
+      info.text = opts.text
+      info.tooltipTitle = opts.text;
+      info.tooltipText = opts.description;
+      info.tooltipOnButton = true
+			info.value = key
+			info.func = function(self)
+        addon:setDB("TooltipInteraction", self.value)
+				SocialiteTooltipInteractionText:SetText(self:GetText())
+			end
+      info.checked = key == addon.db.TooltipInteraction
+      UIDropDownMenu_AddButton(info)
+		end
+	end
+	SocialiteTooltipInteractionText:SetText(L.MENU_INTERACTION)
 
   -- Guild config
   local Guild = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -105,23 +156,67 @@ frame:SetScript("OnShow", function(frame)
   ShowSplitRemoteChat:SetChecked(addon.db.ShowSplitRemoteChat)
   ShowSplitRemoteChat:SetPoint("TOPLEFT", ShowGuildONote, "BOTTOMLEFT", 0, -8)
 
-  local GuildSort = newCheckbox("GuildSort")
+  -- Character friends
+  local GuildSorting = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+  GuildSorting:SetPoint("TOPLEFT", ShowSplitRemoteChat, "BOTTOMLEFT", 2, -16)
+  GuildSorting:SetText(L["Guild Sorting"])
+
+  -- Defined here so the sort method can modify it
+	local GuildSortKey = CreateFrame("Frame", "SocialiteGuildSortKey", frame, "UIDropDownMenuTemplate")
+  local GuildSortAscending = newCheckbox("GuildSortAscending")
+
+  local GuildSort = newCheckbox("GuildSort", function(value)
+    if (value) then
+      UIDropDownMenu_EnableDropDown(GuildSortKey)
+      GuildSortAscending:Enable()
+      _G[GuildSortAscending:GetName().."Text"]:SetTextColor(HIGHLIGHT_FONT_COLOR.r, HIGHLIGHT_FONT_COLOR.g, HIGHLIGHT_FONT_COLOR.b);
+  else
+      UIDropDownMenu_DisableDropDown(GuildSortKey)
+      GuildSortAscending:Disable()
+      _G[GuildSortAscending:GetName().."Text"]:SetTextColor(DISABLED_FONT_COLOR.r, DISABLED_FONT_COLOR.g, DISABLED_FONT_COLOR.b);
+    end
+  end)
   GuildSort:SetChecked(addon.db.GuildSort)
-  GuildSort:SetPoint("TOPLEFT", ShowSplitRemoteChat, "BOTTOMLEFT", 0, -8)
+  GuildSort:SetPoint("TOPLEFT", GuildSorting, "BOTTOMLEFT", -2, -16)
 
-  local GuildSortInverted = newCheckbox("GuildSortInverted")
-  GuildSortInverted:SetChecked(addon.db.GuildSortInverted)
-  GuildSortInverted:SetPoint("TOPLEFT", GuildSort, "BOTTOMLEFT", 0, -8)
+  if (not addon.db.GuildSort) then
+    UIDropDownMenu_DisableDropDown(SocialiteGuildSortKey)
+    GuildSortAscending:Disable()
+    _G[GuildSortAscending:GetName().."Text"]:SetTextColor(DISABLED_FONT_COLOR.r, DISABLED_FONT_COLOR.g, DISABLED_FONT_COLOR.b);
+  end
 
-  -- "GuildSortKey" select box
-  -- L.MENU_GUILD_SORT_NAME
-  -- L.MENU_GUILD_SORT_RANK
-  -- L.MENU_GUILD_SORT_CLASS
-  -- L.MENU_GUILD_SORT_NOTE
-  -- L.MENU_GUILD_SORT_LEVEL
-  -- L.MENU_GUILD_SORT_ZONE
+	-- local GuildSortKey
+  GuildSortKey:SetPoint("TOPLEFT", GuildSort, "BOTTOMLEFT", -15, -10)
+	GuildSortKey.initialize = function()
+		wipe(info)
+		local options = {
+      name={text=L.MENU_GUILD_SORT_NAME, description=L.MENU_GUILD_SORT_NAME_DESCRIPTION},
+      rank={text=L.MENU_GUILD_SORT_RANK, description=L.MENU_GUILD_SORT_RANK_DESCRIPTION},
+      class={text=L.MENU_GUILD_SORT_CLASS, description=L.MENU_GUILD_SORT_CLASS_DESCRIPTION},
+      note={text=L.MENU_GUILD_SORT_NOTE, description=L.MENU_GUILD_SORT_NOTE_DESCRIPTION},
+      level={text=L.MENU_GUILD_SORT_LEVEL, description=L.MENU_GUILD_SORT_LEVEL_DESCRIPTION},
+      zone={text=L.MENU_GUILD_SORT_ZONE, description=L.MENU_GUILD_SORT_ZONE_DESCRIPTION},
+    }
+		for key, opts in next, options do
+      info.text = opts.text
+      info.tooltipTitle = opts.text;
+      info.tooltipText = opts.description;
+      info.tooltipOnButton = true
+			info.value = key
+			info.func = function(self)
+        addon:setDB("GuildSortKey", self.value)
+				SocialiteGuildSortKeyText:SetText(self:GetText())
+			end
+      info.checked = key == addon.db.GuildSortKey
+      UIDropDownMenu_AddButton(info)
+		end
+	end
+  SocialiteGuildSortKeyText:SetText(L.MENU_GUILD_SORT)
 
-  --
+	-- local GuildSortAscending
+  GuildSortAscending:SetChecked(addon.db.GuildSortAscending)
+  -- GuildSortAscending:SetPoint("TOPLEFT", GuildSortKey, "BOTTOMLEFT", 0, -8)
+  GuildSortAscending:SetPoint("TOPLEFT", GuildSortKey, "BOTTOMLEFT", 16, -16)
 
   frame:SetScript("OnShow", nil)
 end)

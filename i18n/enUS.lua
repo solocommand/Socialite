@@ -34,12 +34,18 @@ L["ShowGuildONote"] = "Show officer note"
 L["ShowGuildONoteDescription"] = "If enabled, the guild member's officer note will be displayed in the tooltip."
 L["ShowSplitRemoteChat"] = "Separate remote chat"
 L["ShowSplitRemoteChatDescription"] = "If enabled, guild members utilizing the remote chat feature will be displayed separately within the data text and tooltip."
+
+L["Guild Sorting"] = "Guild Sorting"
 L["GuildSort"] = "Custom Sort"
 L["GuildSortDescription"] = "If enabled, the following options will be used to sort the guild members. If disabled, the most recently used guild sort options will be used instead."
 L["GuildSortInverted"] = "Invert sort direction"
 L["GuildSortInvertedDescription"] = "GuildSortInvertedDescription"
 L["GuildSortKey"] = "GuildSortKey"
 L["GuildSortKeyDescription"] = "GuildSortKeyDescription"
+
+
+L["GuildSortAscending"] = "Ascending"
+L["GuildSortAscendingDescription"] = "GuildSortAscendingDescription"
 
 L["Tooltip Settings"] = "Tooltip Settings"
 L["ShowStatus"] = "ShowStatus"
@@ -62,5 +68,34 @@ L["TOOLTIP_FRIENDS"] = "Friends Online"
 L["TOOLTIP_GUILD"] = "Guild Members Online"
 L["TOOLTIP_REMOTE_CHAT"] = "Remote Chat"
 L["TOOLTIP_COLLAPSED"] = "(collapsed, click to expand)"
+
+L["MENU_STATUS"] = "Show status as";
+L["MENU_STATUS_DESCRIPTION"] = "Show friend's online presence as...";
+L["MENU_STATUS_ICON"] = "Icon";
+L["MENU_STATUS_TEXT"] = "Text";
+L["MENU_STATUS_NONE"] = "None";
+L["MENU_STATUS_ICON_DESCRIPTION"] = "When selected, the friend's status will be displayed by an icon, such as |T"..FRIENDS_TEXTURE_DND..":0|t";
+L["MENU_STATUS_TEXT_DESCRIPTION"] = "When selected, the friend's status will be indicated by a text string, such as <Away>";
+L["MENU_STATUS_NONE_DESCRIPTION"] = "When selected, the friend's status will not be displayed.";
+
+L["MENU_INTERACTION"] = "Tooltip interaction"
+L["MENU_INTERACTION_DESCRIPTION"] = "When should the tooltip be interactable?"
+L["MENU_INTERACTION_ALWAYS"] = "Always"
+L["MENU_INTERACTION_OOC"] = "Out Of Combat"
+L["MENU_INTERACTION_NEVER"] = "Never"
+L["MENU_INTERACTION_ALWAYS_DESCRIPTION"] = "MENU_INTERACTION_ALWAYS_DESCRIPTION"
+L["MENU_INTERACTION_OOC_DESCRIPTION"] = "MENU_INTERACTION_OOC_DESCRIPTION"
+L["MENU_INTERACTION_NEVER_DESCRIPTION"] = "MENU_INTERACTION_NEVER_DESCRIPTION"
+
+L["MENU_GUILD_SORT"] = "Sort by"
+-- L["MENU_GUILD_SORT_DEFAULT"] = "Use Guild Roster Sort"
+L["MENU_GUILD_SORT_NAME"] = "Name"
+L["MENU_GUILD_SORT_RANK"] = "Rank"
+L["MENU_GUILD_SORT_CLASS"] = "Class"
+L["MENU_GUILD_SORT_NOTE"] = "Note"
+L["MENU_GUILD_SORT_LEVEL"] = "Level"
+L["MENU_GUILD_SORT_ZONE"] = "Zone"
+L["MENU_GUILD_SORT_ASCENDING"] = "Ascending"
+L["MENU_GUILD_SORT_DESCENDING"] = "Descending"
 
 addon.L = L
