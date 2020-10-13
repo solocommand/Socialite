@@ -2,6 +2,11 @@ local addonName, addon = ...
 local L = addon.L
 local tooltip = addon.tooltip
 
+local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0:16:16:0:16:0:16:73:177:73|t"
+local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:0:0:0:0:16:16:0:16:0:16|t"
+local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:0:0:0:0:16:16:0:16:0:16|t"
+local CHECK_ICON = "|TInterface\\Buttons\\UI-CheckBox-Check:0:0|t"
+
 local function ternary(cond, a, b)
 	if cond then return a end
   return b
@@ -90,6 +95,105 @@ local function getStatusText(status)
 		end
 	end
 	return ""
+end
+
+local rightClickFrame
+local function getRightClickFrame()
+	if not rightClickFrame then
+		rightClickFrame = CreateFrame("Frame", addonName.."TooltipContextualMenu", _G.UIParent, "UIDropDownMenuTemplate")
+	end
+	return rightClickFrame
+end
+
+local function showGuildRightClick(player, isMobile)
+	local frame = getRightClickFrame()
+	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end -- COMMUNITIES_WOW_MEMBER
+	frame.displayMode = "MENU";
+	frame.friendsList = false
+	frame.bnetIDAccount = nil
+	frame.isMobile = isMobile
+	ToggleDropDownMenu(1, nil, frame, "cursor")
+end
+
+local function showFriendRightClick(player)
+	local frame = getRightClickFrame()
+	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end
+	frame.displayMode = "MENU"
+	frame.friendsList = true
+	frame.bnetIDAccount = nil
+	frame.isMobile = nil
+	ToggleDropDownMenu(1, nil, frame, "cursor")
+end
+
+local function showRealIDRightClick(accountName, bnetIDAccount)
+	local frame = getRightClickFrame()
+	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "BN_FRIEND", nil, accountName) end
+	frame.displayMode = "MENU"
+	frame.friendsList = true
+	frame.bnetIDAccount = bnetIDAccount
+	frame.isMobile = nil
+	ToggleDropDownMenu(1, nil, frame, "cursor")
+end
+
+local function clickPlayer(frame, info, button)
+	local player, isGuild, isMobile, isRemote = unpack(info)
+	if player ~= "" then
+		if button == "LeftButton" then
+			if IsAltKeyDown() then
+				if not isRemote then InviteUnit(player) end
+			else
+				ChatFrame_SendTell(player)
+			end
+		elseif button == "RightButton" then
+			if isGuild then
+				showGuildRightClick(player, isRemote)
+			else
+				showFriendRightClick(player)
+			end
+		end
+	end
+end
+
+local function sendBattleNetInvite(bnetIDAccount)
+	local playerFactionGroup = UnitFactionGroup("player")
+	local index = BNGetFriendIndex(bnetIDAccount)
+	if index then
+		local numGameAccounts = BNGetNumFriendGameAccounts(index)
+		if numGameAccounts > 1 then
+			-- See if there's only one game account we can invite
+			local validGameAccountID = nil
+			for i = 1, numGameAccounts do
+				local _, _, client, _, realmID, faction, _, _, _, _, _, _, _, _, _, bnetIDGameAccount = BNGetFriendGameAccountInfo(index, i)
+				if client == BNET_CLIENT_WOW and faction == playerFactionGroup and realmID ~= 0 then
+					-- Valid account
+					if validGameAccountID and validGameAccountID ~= bnetIDGameAccount then
+						-- Found two accounts. Bail out.
+						validGameAccountID = nil
+						break
+					else
+						validGameAccountID = bnetIDGameAccount
+					end
+				end
+			end
+			if validGameAccountID then
+				BNInviteFriend(validGameAccountID)
+				return
+			end
+			-- More than one account, show the dropdown
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			local dropDown = TravelPassDropDown
+			if dropDown.index ~= index then
+				Lib_CloseDropDownMenus()
+			end
+			dropDown.index = index
+			Lib_ToggleDropDownMenu(1, nil, dropDown, "cursor", 1, -1)
+		else
+			local bnetIDGameAccount = select(6, BNGetFriendInfo(index))
+			if bnetIDGameAccount then
+				BNInviteFriend(bnetIDGameAccount)
+			end
+		end
+	end
 end
 
 local function clickRealID(frame, info, button)
@@ -672,7 +776,7 @@ function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
 		if split and i == numOnline then
 			-- add header for Remote Chat
 			local numRemoteChat = numRemote - numOnline
-			tooltip:AddLine()
+			addon.tooltip:AddLine()
 			addHeader(L.TOOLTIP_REMOTE_CHAT, "00FF00", numRemoteChat, numTotal, collapseRemoteChat, collapseRemoteChatVar)
 		end
 	end
