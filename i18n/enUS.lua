@@ -103,6 +103,7 @@ L["MENU_GUILD_SORT_ZONE_DESCRIPTION"] = "Sort by guild member zone/login date"
 -- L["MENU_GUILD_SORT_ASCENDING"] = "Ascending"
 -- L["MENU_GUILD_SORT_DESCENDING"] = "Descending"
 
+L['Minimap Button'] = 'Minimap Button'
 L['Show minimap button'] = 'Show minimap button'
 L['Show the Scoreboard minimap button'] = 'Show the Scoreboard minimap button'
 

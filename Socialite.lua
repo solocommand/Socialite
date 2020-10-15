@@ -1,6 +1,7 @@
 local addonName, addon = ...
 local L = addon.L
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
+local ldbi = LibStub:GetLibrary('LibDBIcon-1.0')
 local function print(...) _G.print("|c259054ffSocialite:|r", ...) end
 
 local function showConfig()
@@ -30,8 +31,9 @@ do
     if loadedAddon ~= addonName then return end
     self:UnregisterEvent("ADDON_LOADED")
 
-    if type(SocialiteSettings) ~= "table" then SocialiteSettings = {} end
+    if type(SocialiteSettings) ~= "table" then SocialiteSettings = {minimap={hide=false}} end
     local sv = SocialiteSettings
+    if type(sv.minimap) ~= "table" then sv.minimap = {hide=false} end
     if type(sv.ShowRealID) ~= "boolean" then sv.ShowRealID = true end
     if type(sv.ShowRealIDApp) ~= "boolean" then sv.ShowRealIDApp = false end
     if type(sv.ShowRealIDBroadcasts) ~= "boolean" then sv.ShowRealIDBroadcasts = true end
@@ -58,6 +60,8 @@ do
 		SlashCmdList.SOCIALITE = showConfig
 		SLASH_SOCIALITE1 = "/social"
 		SLASH_SOCIALITE2 = "/socialite"
+
+    ldbi:Register(addonName, addon.dataobj, addon.db.minimap)
 
 		self:SetScript("OnEvent", nil)
 	end)
@@ -105,6 +109,8 @@ do
       end
     end
   })
+
+  addon.dataobj = dataobj
 
   local function updateText()
     local text = L["Socialite"]..": "

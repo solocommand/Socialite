@@ -1,6 +1,6 @@
 local addonName, addon = ...
 local L = addon.L
-local function print(...) _G.print("|c259054ffSocialite:|r", ...) end
+local ldbi = LibStub('LibDBIcon-1.0', true)
 local frame = addon.frame
 frame.name = addonName
 frame:Hide()
@@ -217,6 +217,27 @@ frame:SetScript("OnShow", function(frame)
   GuildSortAscending:SetChecked(addon.db.GuildSortAscending)
   -- GuildSortAscending:SetPoint("TOPLEFT", GuildSortKey, "BOTTOMLEFT", 0, -8)
   GuildSortAscending:SetPoint("TOPLEFT", GuildSortKey, "BOTTOMLEFT", 16, -16)
+
+  -- Minimap button
+  local MinimapButton = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+  MinimapButton:SetPoint("TOPLEFT", GuildSortAscending, "BOTTOMLEFT", 2, -16)
+  MinimapButton:SetText(L["Minimap Button"])
+
+  local minimapToggle = CreateFrame("CheckButton", "SocialiteCheckMinimapToggle", frame, "InterfaceOptionsCheckButtonTemplate")
+  minimapToggle:SetScript("OnClick", function(self)
+    local value = self:GetChecked()
+    local config = addon.db.minimap
+    config.hide = not value
+    addon:setDB("minimap", config)
+    ldbi:Refresh(addonName)
+  end)
+  minimapToggle.label = _G[minimapToggle:GetName() .. "Text"]
+  minimapToggle.label:SetText(L['Show minimap button'])
+  minimapToggle.tooltipText = L['Show minimap button']
+  minimapToggle.tooltipRequirement = L['Show the Socialite minimap button']
+
+  minimapToggle:SetChecked(not addon.db.minimap.hide)
+  minimapToggle:SetPoint("TOPLEFT", MinimapButton, "BOTTOMLEFT", -2, -16)
 
   frame:SetScript("OnShow", nil)
 end)
