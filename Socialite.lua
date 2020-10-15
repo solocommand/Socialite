@@ -1,6 +1,5 @@
 local addonName, addon = ...
 local L = addon.L
-local tooltip = addon.tooltip
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
 local function print(...) _G.print("|c259054ffSocialite:|r", ...) end
 
@@ -75,6 +74,19 @@ do
     type = "data source",
     icon = "Interface\\FriendsFrame\\BroadcastIcon",
     text = text,
+    OnEnter = function(frame)
+      addon.tooltip:Clear("LEFT", 0, "RIGHT", "LEFT", "RIGHT")
+      addon.tooltip:SetAutoHideDelay(0.2, frame)
+      addon:updateTooltip(frame)
+      addon.tooltip:SmartAnchorTo(frame)
+      addon.tooltip:Show()
+    end,
+    OnLeave = function()
+      local i = addon.db.TooltipInteraction
+      if i == "never" or (i == "outofcombat" and InCombatLockdown()) then
+        addon.tooltip:Hide()
+      end
+    end,
     OnClick = function(self, button)
       if button == "RightButton" then
         showConfig()
@@ -140,7 +152,7 @@ do
     dataobj.text = text..table.concat(comps, " |cffffd200/|r ")
   end
 
-  local function updateTooltip(tooltip)
+  function addon:updateTooltip(frame)
     -- local ok, message = pcall(function ()
       addon.tooltip:Clear()
       addon.tooltip:AddColspanHeader(3, "LEFT", L["Socialite"])
@@ -148,11 +160,11 @@ do
       local showRealIDApp = addon.db.ShowRealIDApp
       if (showRealID or showRealIDApp) then
         local friends, bnet = addon:parseRealID(showRealID)
-        if (showRealID) then addon:renderBattleNet(tooltip, friends, false, "CollapseRealID") end
-        if (showRealIDApp) then addon:renderBattleNet(tooltip, bnet, true, "CollapseRealIDApp") end
+        if (showRealID) then addon:renderBattleNet(frame, friends, false, "CollapseRealID") end
+        if (showRealIDApp) then addon:renderBattleNet(frame, bnet, true, "CollapseRealIDApp") end
       end
-      if (addon.db.ShowFriends) then addon:renderFriends(tooltip, "CollapseFriends") end
-      if (addon.db.ShowGuild) then addon:renderGuild(tooltip, "CollapseGuild", "CollapseRemoteChat") end
+      if (addon.db.ShowFriends) then addon:renderFriends(frame, "CollapseFriends") end
+      if (addon.db.ShowGuild) then addon:renderGuild(frame, "CollapseGuild", "CollapseRemoteChat") end
     -- end)
 
     -- if (not ok) then
@@ -177,28 +189,4 @@ do
 
   f:SetScript("OnEvent", updateText)
 
-  function dataobj:OnEnter()
-    -- If in a guild, steal roster update. If not, ignore and update anyway
-    -- if IsInGuild() then
-    --   _G.FriendsFrame:UnregisterEvent("GUILD_ROSTER_UPDATE")
-    --   GuildRoster()
-    --   _G.FriendsFrame:RegisterEvent("GUILD_ROSTER_UPDATE")
-    -- end
-
-    -- Update Titan button label and tooltip
-
-    -- Render tooltip
-    addon.tooltip:Clear("LEFT", 0, "RIGHT", "LEFT", "RIGHT")
-    addon.tooltip:SetAutoHideDelay(0.2, self)
-    updateTooltip(tooltip)
-    addon.tooltip:SmartAnchorTo(self)
-    addon.tooltip:Show()
-  end
-
-  function dataobj:OnLeave()
-    local i = addon.db.TooltipInteraction
-    if i == "never" or (i == "outofcombat" and InCombatLockdown()) then
-      addon.tooltip:Hide()
-    end
-  end
 end

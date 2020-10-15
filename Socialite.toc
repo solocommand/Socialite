@@ -1,18 +1,20 @@
-## Interface: 90002
-## Title: Socialite [|cff9900ccbeta|r]
+## Interface: 90001
+## Title: Socialite
 ## Notes: A customizable data broker for displaying friends and guild members.
 ## Author: solocommand
 ## SavedVariables: SocialiteSettings
-## Version: 9.0.0
+## Version: @project-version@
+## X-ReleaseDate: @project-date-iso@
+## X-License: MIT
 
 vendor/LibStub.lua
 vendor/CallbackHandler-1.0.lua
 vendor/LibDataBroker-1.1.lua
 
-i18n/enUS.lua
-# i18n/deDE.lua
-# i18n/esES.lua
-# i18n/ruRU.lua
+i18n\enUS.lua
+# i18n\deDE.lua
+# i18n\esES.lua
+# i18n\ruRU.lua
 
 tooltip.lua
 functions.lua
