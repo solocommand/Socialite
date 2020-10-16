@@ -125,13 +125,13 @@ do
     -- Battle.net Friends
     local showRealID = addon.db.ShowRealID
     local showRealIDApp = addon.db.ShowRealIDApp
-    if showRealID or showRealIDApp then
-      local numFriends, numBnet = addon:countRealID(showRealID)
+    if showRealID then
+      local friendsInGames, friendsInApps = addon:countRealID(showRealID)
       if showRealID then
-        table.insert(comps, "|cff00A2E8"..numFriends.."|r")
+        table.insert(comps, "|cff00A2E8"..friendsInGames.."|r")
       end
       if showRealIDApp then
-        table.insert(comps, "|cff00A2E8"..numBnet.."|r")
+        table.insert(comps, "|cffcccccc"..friendsInApps.."|r")
       end
     end
 
@@ -166,8 +166,12 @@ do
       local showRealIDApp = addon.db.ShowRealIDApp
       if (showRealID or showRealIDApp) then
         local friends, bnet = addon:parseRealID(showRealID)
-        if (showRealID) then addon:renderBattleNet(frame, friends, false, "CollapseRealID") end
-        if (showRealIDApp) then addon:renderBattleNet(frame, bnet, true, "CollapseRealIDApp") end
+        if (showRealID) then
+          addon:renderBattleNet(frame, friends, false, "CollapseRealID")
+          if (showRealIDApp) then
+            addon:renderBattleNet(frame, bnet, true, "CollapseRealIDApp")
+          end
+        end
       end
       if (addon.db.ShowFriends) then addon:renderFriends(frame, "CollapseFriends") end
       if (addon.db.ShowGuild) then addon:renderGuild(frame, "CollapseGuild", "CollapseRemoteChat") end

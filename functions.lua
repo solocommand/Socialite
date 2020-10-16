@@ -2,6 +2,39 @@ local addonName, addon = ...
 local L = addon.L
 local tooltip = addon.tooltip
 
+-- Moved blizz functions
+local BNGetNumFriendGameAccounts = C_BattleNet.GetFriendNumGameAccounts;
+local BNGetFriendGameAccountInfo = C_BattleNet.GetFriendGameAccountInfo;
+local BNGetFriendInfo = C_BattleNet.GetFriendAccountInfo;
+local InviteUnit = C_PartyInfo.InviteUnit;
+
+local playerRealmName = GetRealmName()
+
+local function tprint(tbl, indent)
+  if not indent then indent = 0 end
+  local toprint = string.rep(" ", indent) .. "{\r\n"
+  indent = indent + 2
+  for k, v in pairs(tbl) do
+    toprint = toprint .. string.rep(" ", indent)
+    if (type(k) == "number") then
+      toprint = toprint .. "[" .. k .. "] = "
+    elseif (type(k) == "string") then
+      toprint = toprint  .. k ..  "= "
+    end
+    if (type(v) == "number") then
+      toprint = toprint .. v .. ",\r\n"
+    elseif (type(v) == "string") then
+      toprint = toprint .. "\"" .. v .. "\",\r\n"
+    elseif (type(v) == "table") then
+      toprint = toprint .. tprint(v, indent + 2) .. ",\r\n"
+    else
+      toprint = toprint .. "\"" .. tostring(v) .. "\",\r\n"
+    end
+  end
+  toprint = toprint .. string.rep(" ", indent-2) .. "}"
+  return toprint
+end
+
 local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0:16:16:0:16:0:16:73:177:73|t"
 local MOBILE_BUSY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-BusyMobile:0:0:0:0:16:16:0:16:0:16|t"
 local MOBILE_AWAY_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat-AwayMobile:0:0:0:0:16:16:0:16:0:16|t"
@@ -110,7 +143,7 @@ local function showGuildRightClick(player, isMobile)
 	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end -- COMMUNITIES_WOW_MEMBER
 	frame.displayMode = "MENU";
 	frame.friendsList = false
-	frame.bnetIDAccount = nil
+	frame.bnetAccountID = nil
 	frame.isMobile = isMobile
 	ToggleDropDownMenu(1, nil, frame, "cursor")
 end
@@ -120,17 +153,17 @@ local function showFriendRightClick(player)
 	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end
 	frame.displayMode = "MENU"
 	frame.friendsList = true
-	frame.bnetIDAccount = nil
+	frame.bnetAccountID = nil
 	frame.isMobile = nil
 	ToggleDropDownMenu(1, nil, frame, "cursor")
 end
 
-local function showRealIDRightClick(accountName, bnetIDAccount)
+local function showRealIDRightClick(accountName, bnetAccountID)
 	local frame = getRightClickFrame()
 	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "BN_FRIEND", nil, accountName) end
 	frame.displayMode = "MENU"
 	frame.friendsList = true
-	frame.bnetIDAccount = bnetIDAccount
+	frame.bnetAccountID = bnetAccountID
 	frame.isMobile = nil
 	ToggleDropDownMenu(1, nil, frame, "cursor")
 end
@@ -154,9 +187,9 @@ local function clickPlayer(frame, info, button)
 	end
 end
 
-local function sendBattleNetInvite(bnetIDAccount)
+local function sendBattleNetInvite(bnetAccountID)
 	local playerFactionGroup = UnitFactionGroup("player")
-	local index = BNGetFriendIndex(bnetIDAccount)
+	local index = BNGetFriendIndex(bnetAccountID)
 	if index then
 		local numGameAccounts = BNGetNumFriendGameAccounts(index)
 		if numGameAccounts > 1 then
@@ -197,23 +230,23 @@ local function sendBattleNetInvite(bnetIDAccount)
 end
 
 local function clickRealID(frame, info, button)
-	local accountName, bnetIDAccount = unpack(info)
+	local accountName, bnetAccountID = unpack(info)
 	if button == "LeftButton" then
 		if IsAltKeyDown() then
-			if CanGroupWithAccount(bnetIDAccount) then
-				sendBattleNetInvite(bnetIDAccount)
+			if CanGroupWithAccount(bnetAccountID) then
+				sendBattleNetInvite(bnetAccountID)
 			end
 		else
 			ChatFrame_SendBNetTell(accountName)
 		end
 	elseif button == "RightButton" then
-		showRealIDRightClick(accountName, bnetIDAccount)
+		showRealIDRightClick(accountName, bnetAccountID)
 	end
 end
 
-local function getGroupIndicator(bnetIDAccount, playerRealmName)
+local function getGroupIndicator(bnetAccountID, playerRealmName)
   if addon.db.ShowGroupMembers then
-    local index = BNGetFriendIndex(bnetIDAccount)
+    local index = BNGetFriendIndex(bnetAccountID)
     for i = 1, BNGetNumFriendGameAccounts(index) do
       local _, characterName, client, realmName = BNGetFriendGameAccountInfo(index, i)
       if client == BNET_CLIENT_WOW then
@@ -231,126 +264,114 @@ local function getGroupIndicator(bnetIDAccount, playerRealmName)
   return ""
 end
 
--- Returns two tables, first is for friends and second is for bnet.
--- Both are arrays of identically-formatted tables. "friends" is all the normal RealID friends
--- and "bnet" is all the friends in the Battle.Net app. Any friends in the app and elsewhere are considered
--- to only be elsewhere.
--- The individual player tables are formatted as follows: {
---     bnetIDAccount,
---     accountName,
---     battleTag: nil if not isBattleTagPresence,
---     isAFK,
---     isDND,
---     broadcastText,
---     noteText,
---     focus: {
---         name,
---         client,
---         realmName,
---         realmID,
---         faction,
---         race,
---         class,
---         zone,
---         level,
---         gameText,
---         location -- zone, or gameText if zone is "" or nil
---     },
---     alts: nil or non-empty array of tables identical to focus,
---     bnet: nil or table identical to focus
--- }
--- filterClients indicates whether friends with both bnet and non-bnet should
--- be filtered out of the bnet list
-function addon:parseRealID(filterClients)
-  local playerRealmName = GetRealmName()
-  local numTotal, numOnline = BNGetNumFriends()
 
-  -- lately we've been seeing BNGetFriendGameAccountInfo returning duplicate info for a player,
-  -- making it seem as though they're playing the same toon 3 times simultaneously.
-  -- Work around that by filtering out duplicates using the bnetIDGameAccount.
-  local seen = {}
+--[[
+  Parses and returns character and battle.net friend & character information
+  @see https://wow.gamepedia.com/API_C_BattleNet.GetFriendAccountInfo
+  @see https://wow.gamepedia.com/API_C_BattleNet.GetFriendGameAccountInfo
+
+  Returns two tables, first is for friends and second is for bnet. Both are arrays of identically
+  -formatted tables. "friends" is all the normal RealID friends and "bnet" is all the friends in
+  the Battle.Net app. Any friends in the app and elsewhere are considered to only be elsewhere.
+
+  The individual player tables are formatted as follows: {
+      bnetAccountID,
+      accountName,
+      battleTag: nil if not isBattleTagFriend,
+      isAFK,
+      isDND,
+      broadcastText,
+      note,
+      focus: {
+          name,
+          client,
+          realmName,
+          realmID,
+          faction,
+          race,
+          class,
+          zone,
+          level,
+          gameText,
+          location -- zone, or gameText if zone is "" or nil
+      },
+      alts: nil or non-empty array of tables identical to focus,
+      bnet: nil or table identical to focus
+  }
+  filterClients indicates whether friends with both bnet and non-bnet should
+  be filtered out of the bnet list
+
+  @param Boolean filterClients  A flag indicating if the non-WoW clients should be filtered out
+  @returns {table friends, table bnetFriends}
+]]
+function addon:parseRealID(filterClients)
+  --[[
+    Returns the rich location information for a character
+
+    @param struct BNetGameAccountInfo
+    @returns String
+  ]]
+  local function getLocation(ai)
+    if ai.clientProgram == BNET_CLIENT_WOW and ai.realmName == playerRealmName then
+      return ai.areaName
+    end
+    return ai.richPresence
+  end
+
+  local _, numOnline = BNGetNumFriends()
 
   local friends, bnets = {}, {}
   for i=1, numOnline do
-    local bnetIDAccount, accountName, battleTag, isBattleTagPresence, _, _, _, _, _, isAFK, isDND, broadcastText, noteText = BNGetFriendInfo(i)
-    if not isBattleTagPresence then
-      battleTag = nil
-    end
+    local accountInfo = C_BattleNet.GetFriendAccountInfo(i);
+    local toons, focus, bnet = {}, nil, nil
 
-    table.wipe(seen)
+    for j=1, C_BattleNet.GetFriendNumGameAccounts(i) do
+      local ai = C_BattleNet.GetFriendGameAccountInfo(i, j)
 
-    local toons, focus, bnet
-    for j=1, BNGetNumFriendGameAccounts(i) do
-      local hasFocus, toonName, client, realmName, realmID, faction, race, class, _, zoneName, level, gameText, _, _, _, bnetIDGameAccount = BNGetFriendGameAccountInfo(i, j)
-      -- in the past I've seen this return nil data, so use the client as a marker
-      if client and seen[bnetIDGameAccount] == nil then
-        local toon = {
-          name = toonName,
-          client = client,
-          realmName = realmName,
-          realmID = realmID,
-          faction = faction,
-          race = race,
-          class = class,
-          zone = zoneName,
-          level = level,
-          gameText = gameText
-        }
-        if client == BNET_CLIENT_WOW then
-          if zoneName and zoneName ~= "" then
-            if realmName and realmName ~= "" and realmName ~= playerRealmName then
-              toon.location = zoneName.." - "..realmName
-            else
-              toon.location = zoneName
-            end
-          else
-            toon.location = realmName
-          end
-        else
-          toon.location = gameText
-        end
-        seen[bnetIDGameAccount] = toon
-        if client == "App" or client == "BSAp" then
-          -- assume no more than 1 bnet toon, but check anyway
-          if bnet == nil then bnet = toon end
-        elseif hasFocus then
-          if focus ~= nil then
-            if toons == nil then toons = {} end
-            table.insert(toons, 1, focus)
-          end
-          focus = toon
-        else
-          if toons == nil then toons = {} end
-          table.insert(toons, toon)
-        end
+      local toon = {
+        name = ai.characterName,
+        client = ai.clientProgram,
+        realmName = ai.realmName,
+        realmID = ai.realmID,
+        faction = ai.factionName,
+        race = ai.raceName,
+        class = ai.className,
+        zone = ai.areaName,
+        level = ai.characterLevel,
+        location = getLocation(ai),
+      }
+
+      if ai.clientProgram == BNET_CLIENT_APP or ai.clientProgram == "BSAp" then
+        -- assume no more than 1 bnet toon, but check anyway
+        if not bnet then bnet = toon end
+      elseif ai.hasFocus then
+        if focus ~= nil then table.insert(toons, 1, focus) end
+        focus = toon
+      else
+        table.insert(toons, toon)
       end
     end
 
-    if focus == nil and toons ~= nil and #toons > 0 then
+    if focus == nil and #toons > 0 then
       focus = toons[1]
       table.remove(toons, 1)
-      if #toons == 0 then toons = nil end
     end
 
     if focus ~= nil or bnet ~= nil then
       local friend = {
-        bnetIDAccount = bnetIDAccount,
-        accountName = accountName,
-        battleTag = battleTag,
-        isAFK = isAFK,
-        isDND = isDND,
-        broadcastText = broadcastText,
-        noteText = noteText,
+        bnetAccountID = accountInfo.bnetAccountID,
+        accountName = accountInfo.accountName,
+        battleTag = accountInfo.battleTag,
+        isAFK = accountInfo.gameAccountInfo.isAFK,
+        isDND = accountInfo.gameAccountInfo.isDND,
+        broadcastText = accountInfo.broadcastText,
+        note = accountInfo.note,
         focus = focus,
         alts = toons,
         bnet = bnet
       }
-      if focus ~= nil then
-        table.insert(friends, friend)
-      end
-      if bnet ~= nil and (not filterClients or focus == nil) then
-        table.insert(bnets, friend)
-      end
+      if focus ~= nil then table.insert(friends, friend) end
+      if bnet ~= nil and (not filterClients or focus == nil) then table.insert(bnets, friend) end
     end
   end
 
@@ -362,29 +383,19 @@ end
 -- filterClients indicates if bnet should be filtered out of friends
 -- and vice versa.
 function addon:countRealID(filterClients)
-  local numTotal, numOnline = BNGetNumFriends()
-
   local friends, bnet = 0, 0
+  local _, numOnline = BNGetNumFriends()
   for i=1, numOnline do
-    local isRegular, isBnet = false, false
-    for j=1, BNGetNumFriendGameAccounts(i) do
-      local client = select(3, BNGetFriendGameAccountInfo(i, j))
-      if client then
-        if client == "App" then
-          isBnet = true
-        else
-          isRegular = true
-          if filterClients then
-            isBnet = false
-            break
-          end
-        end
+    local ai = C_BattleNet.GetFriendAccountInfo(i);
+    local ga = ai.gameAccountInfo
+    if ga.clientProgram == BNET_CLIENT_APP or ga.clientProgram == "BSAp" then
+      bnet = bnet + 1
+    else
+      if (ga.clientProgram ~= "") then
+        friends = friends + 1
       end
     end
-    if isBnet then bnet = bnet + 1 end
-    if isRegular then friends = friends + 1 end
   end
-
   return friends, bnet
 end
 
@@ -426,7 +437,7 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
     local focus = isBnetClient and friend.bnet or friend.focus
 
     -- group member indicator
-    local check = getGroupIndicator(friend.bnetIDAccount, playerRealmName)
+    local check = getGroupIndicator(friend.bnetAccountID, playerRealmName)
 
     -- player status
     local playerStatus = ""
@@ -451,7 +462,7 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
           clientname = "BN"
         end
         level = "|cffFFFFFF"..(clientname or "??").."|r"
-        name = "|cffCCCCCC"..(focus.name or "Unknown").."|r"
+        name = "|cffCCCCCC"..(focus.name or "").."|r"
       end
       left = left..getFactionIndicator(focus.faction, focus.client)
       left = left..getStatusIcon(playerStatus)
@@ -468,9 +479,9 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
 
     -- Note
     if addon.db.ShowRealIDNotes then
-      local noteText = friend.noteText
-      if noteText and noteText ~= "" then
-        left = left.."|cffFFFFFF"..noteText.."|r"
+      local note = friend.note
+      if note and note ~= "" then
+        left = left.."|cffFFFFFF"..note.."|r"
         -- prepend "\n" onto broadcast to put it onto next line
         if broadcastText and broadcastText ~= "" then
           broadcastText = "\n"..broadcastText
@@ -502,7 +513,7 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
     local right = focus.location and focus.location ~= "" and ("|cffFFFFFF"..focus.location.."|r") or ""
 
     local y = addon.tooltip:AddLine(check, level, left, right)
-    addon.tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { friend.accountName, friend.bnetIDAccount })
+    addon.tooltip:SetLineScript(y, "OnMouseDown", clickRealID, { friend.accountName, friend.bnetAccountID })
 
     -- Extra lines
     if extraLines then
