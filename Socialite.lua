@@ -52,6 +52,7 @@ do
     if type(sv.GuildSortAscending) ~= "boolean" then sv.GuildSortAscending = false end
     if type(sv.GuildSortKey) ~= "string" then sv.GuildSortKey = "rank" end
 
+    if type(sv.ShowGroupMembers) ~= "boolean" then sv.ShowGroupMembers = true end
     if type(sv.ShowStatus) ~= "string" then sv.ShowStatus = "icon" end
     if type(sv.TooltipInteraction) ~= "string" then sv.TooltipInteraction = "always" end
 
@@ -95,7 +96,7 @@ do
       if button == "RightButton" then
         showConfig()
       else
-        if addon.db.ShowFriends or addon.db.ShowRealID or addon.db.ShowRealIDApp then
+        if addon.db.ShowFriends or addon.db.ShowRealID then
           -- ToggleFriendsFrame(1); -- friends tab
           -- We want to show the friends tab, but there's a taint issue :/
           if FriendsFrame:IsShown() then
@@ -159,7 +160,8 @@ do
   end
 
   function addon:updateTooltip(frame)
-    -- local ok, message = pcall(function ()
+    if not frame then return end
+    local ok, message = pcall(function ()
       addon.tooltip:Clear()
       addon.tooltip:AddColspanHeader(3, "LEFT", L["Socialite"])
       addon.tooltip:AddColspanLine(3, "LEFT", muted(L["usageDescription"]))
@@ -176,12 +178,12 @@ do
       end
       if (addon.db.ShowFriends) then addon:renderFriends(frame, "CollapseFriends") end
       if (addon.db.ShowGuild) then addon:renderGuild(frame, "CollapseGuild", "CollapseRemoteChat") end
-    -- end)
+    end)
 
-    -- if (not ok) then
-    --   print("error: "..message)
-    --   error(message, 0)
-    -- end
+    if (not ok) then
+      print("error: "..message)
+      error(message, 0)
+    end
   end
 
   function addon:setDB(key, value)
