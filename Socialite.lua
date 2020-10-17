@@ -162,6 +162,7 @@ do
     -- local ok, message = pcall(function ()
       addon.tooltip:Clear()
       addon.tooltip:AddColspanHeader(3, "LEFT", L["Socialite"])
+      addon.tooltip:AddColspanLine(3, "LEFT", muted(L["usageDescription"]))
       local showRealID = addon.db.ShowRealID
       local showRealIDApp = addon.db.ShowRealIDApp
       if (showRealID or showRealIDApp) then
