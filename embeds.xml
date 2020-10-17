@@ -2,8 +2,8 @@
 ..\FrameXML\UI.xsd">
   <Script file="vendor\LibStub\LibStub.lua"/>
   <Script file="vendor\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
+  <Script file="vendor\LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
   <!--@no-lib-strip@-->
   <Script file="vendor\LibDBIcon-1.0\LibDBIcon-1.0.lua"/>
   <!--@end-no-lib-strip@-->
-  <Script file="vendor\LibDataBroker-1.1\LibDataBroker-1.1.lua"/>
 </Ui>
