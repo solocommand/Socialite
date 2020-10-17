@@ -3,7 +3,6 @@ local L = addon.L
 local tooltip = addon.tooltip
 
 -- Moved blizz functions
-local BNGetNumFriendGameAccounts = C_BattleNet.GetFriendNumGameAccounts;
 local BNGetFriendGameAccountInfo = C_BattleNet.GetFriendGameAccountInfo;
 local BNGetFriendInfo = C_BattleNet.GetFriendAccountInfo;
 local InviteUnit = C_PartyInfo.InviteUnit;
@@ -191,7 +190,7 @@ local function sendBattleNetInvite(bnetAccountID)
 	local playerFactionGroup = UnitFactionGroup("player")
 	local index = BNGetFriendIndex(bnetAccountID)
 	if index then
-		local numGameAccounts = BNGetNumFriendGameAccounts(index)
+		local numGameAccounts = C_BattleNet.GetFriendNumGameAccounts(index)
 		if numGameAccounts > 1 then
 			-- See if there's only one game account we can invite
 			local validGameAccountID = nil
@@ -247,7 +246,7 @@ end
 local function getGroupIndicator(bnetAccountID, playerRealmName)
   if addon.db.ShowGroupMembers then
     local index = BNGetFriendIndex(bnetAccountID)
-    for i = 1, BNGetNumFriendGameAccounts(index) do
+    for i = 1, C_BattleNet.GetFriendNumGameAccounts(index) do
       local _, characterName, client, realmName = BNGetFriendGameAccountInfo(index, i)
       if client == BNET_CLIENT_WOW then
         if realmName and realmName ~= "" and realmName ~= playerRealmName then
