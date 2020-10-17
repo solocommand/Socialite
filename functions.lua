@@ -591,7 +591,7 @@ function addon:renderFriends(tooltip, collapseVar)
 		end
 
 		local y = addon.tooltip:AddLine(check, level, left, right)
-		addon.tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, false, false, false })
+		addon.tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { info.name, false, false, false })
 	end
 end
 
