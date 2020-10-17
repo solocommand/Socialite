@@ -5,7 +5,6 @@ local tooltip = addon.tooltip
 -- Moved blizz functions
 local BNGetFriendGameAccountInfo = C_BattleNet.GetFriendGameAccountInfo;
 local BNGetFriendInfo = C_BattleNet.GetFriendAccountInfo;
-local InviteUnit = C_PartyInfo.InviteUnit;
 
 local playerRealmName = GetRealmName()
 
@@ -172,7 +171,7 @@ local function clickPlayer(frame, info, button)
 	if player ~= "" then
 		if button == "LeftButton" then
 			if IsAltKeyDown() then
-				if not isRemote then InviteUnit(player) end
+				if not isRemote then C_PartyInfo.InviteUnit(player) end
 			else
 				ChatFrame_SendTell(player)
 			end
