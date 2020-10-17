@@ -221,7 +221,7 @@ frame:SetScript("OnShow", function(frame)
   -- Minimap button
   local MinimapButton = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
   MinimapButton:SetPoint("TOPLEFT", GuildSortAscending, "BOTTOMLEFT", 2, -16)
-  MinimapButton:SetText(L["Minimap Button"])
+  MinimapButton:SetText(L["Display Settings"])
 
   local minimapToggle = CreateFrame("CheckButton", "SocialiteCheckMinimapToggle", frame, "InterfaceOptionsCheckButtonTemplate")
   minimapToggle:SetScript("OnClick", function(self)
@@ -242,6 +242,10 @@ frame:SetScript("OnShow", function(frame)
   local ShowGroupMembers = newCheckbox("ShowGroupMembers")
   ShowGroupMembers:SetChecked(addon.db.ShowGroupMembers)
   ShowGroupMembers:SetPoint("TOPLEFT", minimapToggle, "BOTTOMLEFT", 0, -8)
+
+  local ShowLabel = newCheckbox("ShowLabel")
+  ShowLabel:SetChecked(addon.db.ShowLabel)
+  ShowLabel:SetPoint("TOPLEFT", ShowGroupMembers, "BOTTOMLEFT", 0, -8)
 
   frame:SetScript("OnShow", nil)
 end)

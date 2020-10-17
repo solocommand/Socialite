@@ -34,6 +34,7 @@ do
     if type(SocialiteSettings) ~= "table" then SocialiteSettings = {minimap={hide=false}} end
     local sv = SocialiteSettings
     if type(sv.minimap) ~= "table" then sv.minimap = {hide=false} end
+    if type(sv.ShowLabel) ~= "boolean" then sv.ShowLabel = true end
     if type(sv.ShowRealID) ~= "boolean" then sv.ShowRealID = true end
     if type(sv.ShowRealIDApp) ~= "boolean" then sv.ShowRealIDApp = false end
     if type(sv.ShowRealIDBroadcasts) ~= "boolean" then sv.ShowRealIDBroadcasts = true end
@@ -114,13 +115,17 @@ do
   addon.dataobj = dataobj
 
   local function updateText()
-    local text = L["Socialite"]..": "
+    local text = ""
     local comps = {}
 
     -- Prefix/guild label
-    if addon.db.ShowGuildLabel and addon.db.ShowGuild and IsInGuild() then
-      local guildName = GetGuildInfo("player")
-      if guildName then text = normal(guildName..": ") end
+    if (addon.db.ShowLabel) then
+      if (addon.db.ShowGuildLabel and addon.db.ShowGuild and IsInGuild()) then
+        local guildName = GetGuildInfo("player")
+        text = normal(guildName..": ")
+      else
+        text = L['Socialite']..': '
+      end
     end
 
     -- Battle.net Friends

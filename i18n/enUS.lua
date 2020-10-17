@@ -35,9 +35,6 @@ L["ShowGuildONoteDescription"] = "If enabled, the guild member's officer note wi
 L["ShowSplitRemoteChat"] = "Separate remote chat"
 L["ShowSplitRemoteChatDescription"] = "If enabled, guild members utilizing the remote chat feature will be displayed separately within the data text and tooltip."
 
-L['ShowGroupMembers'] = "Show Group Members"
-L['ShowGroupMembersDescription'] = "Show an indicator icon next to a friend when in the same group"
-
 L["Guild Sorting"] = "Guild Sorting"
 L["GuildSort"] = "Custom Sort"
 -- L["GuildSortDescription"] = "If enabled, the following options will be used to sort the guild members. If disabled, the most recently used guild sort options will be used instead."
@@ -106,9 +103,15 @@ L["MENU_GUILD_SORT_ZONE_DESCRIPTION"] = "Sort by guild member zone/login date"
 -- L["MENU_GUILD_SORT_ASCENDING"] = "Ascending"
 -- L["MENU_GUILD_SORT_DESCENDING"] = "Descending"
 
-L['Minimap Button'] = 'Minimap Button'
+L['Display Settings'] = 'Display Settings'
 L['Show minimap button'] = 'Show minimap button'
 L['Show the Scoreboard minimap button'] = 'Show the Scoreboard minimap button'
-L["usageDescription"] = "Left-click to view friends/guild. Right-click to configure."
+L["usageDescription"] = "Left-click to view social panes. Alt+Click to invite. Right-click to configure."
+
+L['ShowGroupMembers'] = "Show Group Members"
+L['ShowGroupMembersDescription'] = "Show an indicator icon next to a friend when in the same group"
+
+L["ShowLabel"] = "Show label"
+L["ShowLabelDescription"] = "If enabled, the addon label (or guild name, if enabled) will be shown in the data text."
 
 addon.L = L
