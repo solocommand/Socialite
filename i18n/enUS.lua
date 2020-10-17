@@ -35,6 +35,9 @@ L["ShowGuildONoteDescription"] = "If enabled, the guild member's officer note wi
 L["ShowSplitRemoteChat"] = "Separate remote chat"
 L["ShowSplitRemoteChatDescription"] = "If enabled, guild members utilizing the remote chat feature will be displayed separately within the data text and tooltip."
 
+L['ShowGroupMembers'] = "Show Group Members"
+L['ShowGroupMembersDescription'] = "Show an indicator icon next to a friend when in the same group"
+
 L["Guild Sorting"] = "Guild Sorting"
 L["GuildSort"] = "Custom Sort"
 -- L["GuildSortDescription"] = "If enabled, the following options will be used to sort the guild members. If disabled, the most recently used guild sort options will be used instead."

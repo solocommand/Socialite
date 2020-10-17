@@ -239,6 +239,10 @@ frame:SetScript("OnShow", function(frame)
   minimapToggle:SetChecked(not addon.db.minimap.hide)
   minimapToggle:SetPoint("TOPLEFT", MinimapButton, "BOTTOMLEFT", -2, -16)
 
+  local ShowGroupMembers = newCheckbox("ShowGroupMembers")
+  ShowGroupMembers:SetChecked(addon.db.ShowGroupMembers)
+  ShowGroupMembers:SetPoint("TOPLEFT", minimapToggle, "BOTTOMLEFT", 0, -8)
+
   frame:SetScript("OnShow", nil)
 end)
 InterfaceOptions_AddCategory(frame)
