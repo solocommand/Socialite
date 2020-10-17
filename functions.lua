@@ -242,26 +242,43 @@ local function clickRealID(frame, info, button)
 	end
 end
 
-local function getGroupIndicator(bnetAccountID, playerRealmName)
-  if addon.db.ShowGroupMembers then
-    local index = BNGetFriendIndex(bnetAccountID)
-    for i = 1, C_BattleNet.GetFriendNumGameAccounts(index) do
-      local _, characterName, client, realmName = BNGetFriendGameAccountInfo(index, i)
-      if client == BNET_CLIENT_WOW then
-        if realmName and realmName ~= "" and realmName ~= playerRealmName then
-          realmName = realmName:gsub("[%s%-]", "")
-          characterName = characterName.."-"..realmName
-        end
-        if UnitInParty(characterName) or UnitInRaid(characterName) then
-          return CHECK_ICON
-        end
-      end
-    end
-    return spacer()
-  end
-  return ""
+--[[
+spacer(width, count)
+PARAMETERS:
+  width - number - width of the space. Defaults to TextHeight
+  count - number - number of spacers. Defaults to 1
+RETURNS:
+string - the spacer
+--]]
+local function spacer(width, count)
+	if not width then width = 0 end
+	if not count then count = 1 end
+	local height = (width == 0) and 0 or 1
+	return ("|T:"..height..":"..width.."|t"):rep(count)
 end
 
+--[[
+  If enabled, returns an icon if the friend is currently in your group or raid.
+  @param table info
+--]]
+local function getGroupIndicator(info)
+  if not addon.db.ShowGroupMembers or not IsInGroup() then return "" end
+  local name
+  if info.focus then
+    if info.focus.realmName and info.focus.realmName ~= playerRealmName then
+      name = info.focus.name.."-"..info.focus.realmName
+    else
+      name = info.focus.name
+    end
+  elseif info.realmName then
+    name = info.name.."-"..info.realmName
+  else
+    name = info.name
+  end
+
+  if UnitInParty(name) or UnitInRaid(name) then return CHECK_ICON end
+  return spacer()
+end
 
 --[[
   Parses and returns character and battle.net friend & character information
@@ -428,14 +445,13 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
 
   if collapsed then return end
 
-  local playerRealmName = GetRealmName()
   for _, friend in ipairs(friends) do
     local left = ""
 
     local focus = isBnetClient and friend.bnet or friend.focus
 
     -- group member indicator
-    local check = getGroupIndicator(friend.bnetAccountID, playerRealmName)
+    local check = getGroupIndicator(friend)
 
     -- player status
     local playerStatus = ""
@@ -564,7 +580,7 @@ function addon:renderFriends(tooltip, collapseVar)
 			playerStatus = _G.CHAT_FLAG_DND
 		end
 		-- Group indicator
-		local check = getGroupIndicator(info.name)
+    local check = getGroupIndicator(info)
 
 		-- Level
 		local level = "|cffFFFFFF"..info.level.."|r"
@@ -604,7 +620,7 @@ function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
     local origname = name
     name = Ambiguate(name, "guild")
 
-    local check = getGroupIndicator(name)
+    local check = getGroupIndicator({ name = name })
 
     -- fix name
     -- local origname = name
