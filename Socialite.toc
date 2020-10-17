@@ -1,0 +1,20 @@
+## Interface: 90001
+## Title: Socialite
+## Notes: A customizable data broker for displaying friends and guild members.
+## Author: solocommand
+## SavedVariables: SocialiteSettings
+## Version: @project-version@
+## X-ReleaseDate: @project-date-iso@
+## X-License: MIT
+
+embeds.xml
+
+i18n\enUS.lua
+# i18n\deDE.lua
+# i18n\esES.lua
+# i18n\ruRU.lua
+
+tooltip.lua
+functions.lua
+Socialite.lua
+config.lua

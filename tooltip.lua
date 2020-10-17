@@ -19,7 +19,7 @@ local ResetTooltipSize, SetTooltipSize, tframe_OnMouseWheel, slider_OnValueChang
 local tooltip_OnUpdate
 local _SetLineScript
 
-local tframe = CreateFrame("ScrollFrame", nil, _G.UIParent)
+local tframe = CreateFrame("ScrollFrame", nil, _G.UIParent, BackdropTemplateMixin and "BackdropTemplate")
 tframe:Hide()
 tframe.lines = {}
 tframe.columns = {}
