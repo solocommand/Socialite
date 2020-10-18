@@ -121,8 +121,8 @@ do
     -- Prefix/guild label
     if (addon.db.ShowLabel) then
       if (addon.db.ShowGuildLabel and addon.db.ShowGuild and IsInGuild()) then
-        local guildName = GetGuildInfo("player")
-        text = normal(guildName..": ")
+        local guildName = GetGuildInfo("player") or "<unknown>"
+        text = normal(tostring(guildName)..": ")
       else
         text = L['Socialite']..': '
       end

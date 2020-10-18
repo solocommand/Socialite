@@ -122,7 +122,7 @@ end
 local function getStatusText(status)
 	if addon.db.ShowStatus == "text" then
 		if status ~= "" then
-			return "|cffFFFFFF"..status.."|r "
+			return "|cffFFFFFF"..tostring(status).."|r "
 		end
 	end
 	return ""
