@@ -376,7 +376,7 @@ function addon:parseRealID(filterClients)
       local friend = {
         bnetAccountID = accountInfo.bnetAccountID,
         accountName = accountInfo.accountName,
-        battleTag = accountInfo.battleTag,
+        battleTag = ternary(accountInfo.isBattleTagFriend, accountInfo.battleTag, accountInfo.accountName),
         isAFK = accountInfo.gameAccountInfo.isAFK,
         isDND = accountInfo.gameAccountInfo.isDND,
         broadcastText = accountInfo.broadcastText,
@@ -484,7 +484,7 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
     end
 
     -- Full name
-    left = left.."[|cff00A2E8"..(friend.battleTag or friend.accountName).."|r] "
+    left = left.."[|cff00A2E8"..friend.battleTag.."|r] "
 
     -- Status
     left = left..getStatusText(playerStatus).." "
