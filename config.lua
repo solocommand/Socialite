@@ -247,6 +247,10 @@ frame:SetScript("OnShow", function(frame)
   ShowLabel:SetChecked(addon.db.ShowLabel)
   ShowLabel:SetPoint("TOPLEFT", ShowGroupMembers, "BOTTOMLEFT", 0, -8)
 
+  local DisableUsageText = newCheckbox("DisableUsageText")
+  DisableUsageText:SetChecked(addon.db.DisableUsageText)
+  DisableUsageText:SetPoint("TOPLEFT", ShowLabel, "BOTTOMLEFT", 0, -8)
+
   frame:SetScript("OnShow", nil)
 end)
 InterfaceOptions_AddCategory(frame)

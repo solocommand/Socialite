@@ -114,4 +114,7 @@ L['ShowGroupMembersDescription'] = "Show an indicator icon next to a friend when
 L["ShowLabel"] = "Show label"
 L["ShowLabelDescription"] = "If enabled, the addon label (or guild name, if enabled) will be shown in the data text."
 
+L["DisableUsageText"] = "Disable usage text"
+L["DisableUsageTextDescription"] = "If checked, the usage instructions will not be shown on the tooltip."
+
 addon.L = L

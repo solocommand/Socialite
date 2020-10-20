@@ -56,6 +56,7 @@ do
     if type(sv.ShowGroupMembers) ~= "boolean" then sv.ShowGroupMembers = true end
     if type(sv.ShowStatus) ~= "string" then sv.ShowStatus = "icon" end
     if type(sv.TooltipInteraction) ~= "string" then sv.TooltipInteraction = "always" end
+    if type(sv.DisableUsageText) ~= "boolean" then sv.DisableUsageText = false end
 
     addon.db = sv
 
@@ -169,7 +170,9 @@ do
     local ok, message = pcall(function ()
       addon.tooltip:Clear()
       addon.tooltip:AddColspanHeader(3, "LEFT", L["Socialite"])
-      addon.tooltip:AddColspanLine(3, "LEFT", muted(L["usageDescription"]))
+      if not addon.db.DisableUsageText then
+        addon.tooltip:AddColspanLine(3, "LEFT", muted(L["usageDescription"]))
+      end
       local showRealID = addon.db.ShowRealID
       local showRealIDApp = addon.db.ShowRealIDApp
       if (showRealID or showRealIDApp) then
