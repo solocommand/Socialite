@@ -478,7 +478,7 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
         level = "|cffFFFFFF"..(clientname or "??").."|r"
         name = "|cffCCCCCC"..(focus.name or "").."|r"
       end
-      left = left..getFactionIndicator(focus.faction, focus.client)
+      left = left..getFactionIndicator(focus.faction, focus.client).." "
       left = left..getStatusIcon(playerStatus)
       left = left..name.." "
     end
