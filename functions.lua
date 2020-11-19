@@ -161,7 +161,7 @@ local function showRealIDRightClick(accountName, bnetAccountID)
 	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "BN_FRIEND", nil, accountName) end
 	frame.displayMode = "MENU"
 	frame.friendsList = true
-	frame.bnetAccountID = bnetAccountID
+	frame.bnetIDAccount = bnetAccountID
 	frame.isMobile = nil
 	ToggleDropDownMenu(1, nil, frame, "cursor")
 end
