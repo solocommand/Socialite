@@ -546,7 +546,7 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
           if toon.realmName ~= playerRealmName or toon.faction ~= playerFactionGroup then
             cooperateLabel = _G.CANNOT_COOPERATE_LABEL
           end
-          left = _G.FRIENDS_TOOLTIP_WOW_TOON_TEMPLATE:format(toString(toon.name)..cooperateLabel, toString(toon.level), tostring(toon.race), tostring(toon.class))
+          left = _G.FRIENDS_TOOLTIP_WOW_TOON_TEMPLATE:format(tostring(toon.name)..cooperateLabel, tostring(toon.level), tostring(toon.race), tostring(toon.class))
         else
           left = toon.name
         end
