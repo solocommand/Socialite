@@ -1,11 +1,11 @@
-## Interface: 11303
+## Interface: 20501
 ## Title: Titan Panel Classic [|cffeda55fSocial|r] |cff00aa001.13.3|r
 ## Notes: A Titan Panel plugin incorporating Friends, Guild, and Battle.net Friends
 ## Author: solocommand and eridius
 ## SavedVariables:
 ## SavedVariablesPerCharacter: TitanSocialVars
 ## Dependencies: TitanClassic
-## Version: 1.13.3
+## Version: 2.5.0
 ## LoadOnDemand: 0
 ## DefaultState: enabled
 TitanSocial.xml
