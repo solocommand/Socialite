@@ -19,7 +19,7 @@ local ResetTooltipSize, SetTooltipSize, tframe_OnMouseWheel, slider_OnValueChang
 local tooltip_OnUpdate
 local _SetLineScript
 
-local tframe = CreateFrame("ScrollFrame", nil, _G.UIParent, BackdropTemplateMixin and "BackdropTemplate")
+local tframe = CreateFrame("ScrollFrame", nil, _G.UIParent, BackdropTemplateMixin and TooltipBackdropTemplateMixin and "BackdropTemplate" and "TooltipBackdropTemplate")
 tframe:Hide()
 tframe.lines = {}
 tframe.columns = {}
@@ -77,6 +77,15 @@ do
 		tframe.scrollframe:SetVerticalScroll(value)
 	end)
 	tframe.scroller = slider
+end
+
+if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
+  if tframe.StripTextures then
+    tframe:StripTextures()
+  end
+  if tframe.CreateBackdrop then
+    tframe:CreateBackdrop("Transparent")
+  end
 end
 
 local acquireCell, releaseCell, acquireColumn, releaseColumn, acquireLine, releaseLine
@@ -204,13 +213,6 @@ function tooltip:Clear(...)
 
 	ResetTooltipSize()
 
-	-- pull current GameTooltip values
-	local backdrop = GameTooltip:GetBackdrop()
-	tframe:SetBackdrop(backdrop)
-	if backdrop then
-		tframe:SetBackdropColor(GameTooltip:GetBackdropColor())
-		tframe:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
-	end
 	tframe:SetScale(GameTooltip:GetScale())
 	tframe.font = _G.GameTooltipText
 	tframe.headerFont = _G.GameTooltipHeaderText
