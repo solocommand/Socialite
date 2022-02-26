@@ -6,6 +6,7 @@
 ## Version: @project-version@
 ## X-ReleaseDate: @project-date-iso@
 ## X-License: MIT
+## X-Wago-ID: rkGr7xNy
 
 embeds.xml
 
