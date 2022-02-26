@@ -1,4 +1,4 @@
-## Interface: 90105
+## Interface: 90200
 ## Title: Socialite
 ## Notes: A customizable data broker for displaying friends and guild members.
 ## Author: solocommand
