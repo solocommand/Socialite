@@ -98,7 +98,7 @@ local INTERACTION_NEVER = "never"
 -- Class support
 local TitanSocial_ClassMap = {}
 -- Classic
-local classes = { 'DRUID', 'HUNTER', 'MAGE', 'PALADIN', 'PRIEST', 'ROGUE', 'SHAMAN', 'WARLOCK', 'WARRIOR' }
+local classes = { 'DEATHKNIGHT', 'DRUID', 'HUNTER', 'MAGE', 'PALADIN', 'PRIEST', 'ROGUE', 'SHAMAN', 'WARLOCK', 'WARRIOR' }
 for i, name in ipairs(classes) do
 	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[name]] = name
 	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[name]] = name
