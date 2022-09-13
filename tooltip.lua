@@ -3,6 +3,17 @@ local addonName, addonTable = ...
 local tooltip = {}
 addonTable.tooltip = tooltip
 
+	
+local defaultBackdrop = {
+	bgFile = "Interface\\Tooltips\\UI-Tooltip-Background",
+	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+	tile = true,
+	tileSize = 16,
+	edgeSize = 16,
+	insets = {left = 4, right = 4, top = 4, bottom = 4,}
+}
+
+
 local CreateFrame = _G.CreateFrame
 local UIParent = _G.UIParent
 local GameTooltip = _G.GameTooltip
@@ -205,12 +216,9 @@ function tooltip:Clear(...)
 	ResetTooltipSize()
 
 	-- pull current GameTooltip values
-	local backdrop = GameTooltip:GetBackdrop()
-	tframe:SetBackdrop(backdrop)
-	if backdrop then
-		tframe:SetBackdropColor(GameTooltip:GetBackdropColor())
-		tframe:SetBackdropBorderColor(GameTooltip:GetBackdropBorderColor())
-	end
+	--local backdrop = GameTooltip:GetBackdrop()
+	tframe:SetBackdrop(defaultBackdrop)
+	tframe:SetBackdropColor(0,0,0,1)
 	tframe:SetScale(GameTooltip:GetScale())
 	tframe.font = _G.GameTooltipText
 	tframe.headerFont = _G.GameTooltipHeaderText
