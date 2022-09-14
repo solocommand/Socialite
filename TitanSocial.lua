@@ -78,7 +78,7 @@ local bDebugMode = false
 
 -- Required Titan variables
 local TITAN_SOCIAL_ID = "Social"
-local TITAN_SOCIAL_VERSION = "1.13.3"
+local TITAN_SOCIAL_VERSION = "3.4.0"
 local TITAN_SOCIAL_TOOLTIP_KEY = "TitanSocialTooltip"
 
 local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0:16:16:0:16:0:16:73:177:73|t"
@@ -98,7 +98,7 @@ local INTERACTION_NEVER = "never"
 -- Class support
 local TitanSocial_ClassMap = {}
 -- Classic
-local classes = { 'DRUID', 'HUNTER', 'MAGE', 'PALADIN', 'PRIEST', 'ROGUE', 'SHAMAN', 'WARLOCK', 'WARRIOR' }
+local classes = { 'DEATHKNIGHT', 'DRUID', 'HUNTER', 'MAGE', 'PALADIN', 'PRIEST', 'ROGUE', 'SHAMAN', 'WARLOCK', 'WARRIOR' }
 for i, name in ipairs(classes) do
 	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_MALE[name]] = name
 	TitanSocial_ClassMap[_G.LOCALIZED_CLASS_NAMES_FEMALE[name]] = name
