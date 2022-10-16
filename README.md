@@ -1,4 +1,7 @@
-# Socialite
+Socialite
+===========
+![Project logo, treasure chest](Socialite.png)
+
 Formerly Titan Social. An LDB addon to display information about your guild members, Battle.net friends, and character friends.
 
 ## About
