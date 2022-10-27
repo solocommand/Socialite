@@ -424,7 +424,7 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
           return "|TInterface\\FriendsFrame\\Battlenet-WoWicon:0|t"
         end
       elseif client and client ~= "" then
-        return "|T"..BNet_GetClientEmbeddedAtlas(client)..":0|t"
+        return BNet_GetClientEmbeddedAtlas(client)
       end
       return spacer()
     end
