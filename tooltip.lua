@@ -214,6 +214,9 @@ function tooltip:Clear(...)
 	ResetTooltipSize()
 
 	tframe:SetScale(GameTooltip:GetScale())
+	if (tframe:GetEffectiveScale() ~= GameTooltip:GetEffectiveScale()) then -- consider applied SetIgnoreParentScale() on GameTooltip regarding scaling of the tframe
+		tframe:SetScale(tframe:GetScale() * GameTooltip:GetEffectiveScale() / tframe:GetEffectiveScale())
+	end
 	tframe.font = _G.GameTooltipText
 	tframe.headerFont = _G.GameTooltipHeaderText
 end
