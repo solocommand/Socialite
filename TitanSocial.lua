@@ -44,7 +44,7 @@ local CreateFrame = _G.CreateFrame
 local Lib_ToggleDropDownMenu, Lib_CloseDropDownMenus = _G.Lib_ToggleDropDownMenu, _G.Lib_CloseDropDownMenus
 local PlaySound = _G.PlaySound
 local UnitFactionGroup = _G.UnitFactionGroup
-local BNet_GetClientTexture = _G.BNet_GetClientTexture
+local BNet_GetClientTexture = _G.BNet_GetClientEmbeddedAtlas
 local InCombatLockdown = _G.InCombatLockdown
 
 local TravelPassDropDown = _G.TravelPassDropDown
