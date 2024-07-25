@@ -5,8 +5,7 @@ local ldbi = LibStub:GetLibrary('LibDBIcon-1.0')
 local function print(...) _G.print("|c259054ffSocialite:|r", ...) end
 
 local function showConfig()
-  InterfaceOptionsFrame_OpenToCategory(addonName)
-  InterfaceOptionsFrame_OpenToCategory(addonName)
+  Settings.OpenToCategory(addonName)
 end
 
 local function normal(text)
@@ -60,9 +59,6 @@ do
 
     addon.db = sv
 
-		SlashCmdList.SOCIALITE = showConfig
-		SLASH_SOCIALITE1 = "/social"
-		SLASH_SOCIALITE2 = "/socialite"
 
     ldbi:Register(addonName, addon.dataobj, addon.db.minimap)
 
