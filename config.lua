@@ -8,20 +8,15 @@ local function buildCheckbox(key, order)
     name = L[key],
     order = order or 0,
     desc = L[key.."Description"],
-    get = function(info) return addon.db[info[#info]] end,
-    set = function(info, value) return addon:setDB(info[#info], value) end,
   }
 end
 
-local function buildDropdown(key, label, opts, order)
+local function buildDropdown(label, opts, order)
   return {
     type = 'select',
     name = label,
     order = order or 0,
     values = opts,
-    disabled = true, -- @todo fix dropdowns!
-    get = function(info) return addon.db[info[#info]] end,
-    set = function(info, value) addon.setDB(info[#info], value) end,
     style = 'dropdown',
   }
 end
@@ -30,6 +25,8 @@ local function build()
   local t = {
     name = "Socialite",
     type = 'group',
+    get = function(info) return addon.db[info[#info]] end,
+    set = function(info, value) return addon:setDB(info[#info], value) end,
     args = {
       showMinimapIcon = {
         type = 'toggle',
@@ -49,7 +46,6 @@ local function build()
         name = L.showInAddonCompartment,
         desc = L.showInAddonCompartmentDescription,
         order = 1,
-        get = function(info) return addon.db[info[#info]] end,
         set = function(info, value)
           addon:setDB(info[#info], value)
           if value then
@@ -95,12 +91,12 @@ local function build()
         order = 30,
         args = {
           -- @todo review these, they don't seem to work!
-          ShowStatus = buildDropdown("ShowStatus", L.MENU_STATUS, {
+          ShowStatus = buildDropdown(L.MENU_STATUS, {
             icon = L.MENU_STATUS_ICON,
             text = L.MENU_STATUS_TEXT,
             none = L.MENU_STATUS_NONE,
           }, 31),
-          TooltipInteraction = buildDropdown("TooltipInteraction", L.MENU_INTERACTION, {
+          TooltipInteraction = buildDropdown(L.MENU_INTERACTION, {
             always = L.MENU_INTERACTION_ALWAYS,
             outofcombat = L.MENU_INTERACTION_OOC,
             never = L.MENU_INTERACTION_NEVER,
@@ -125,7 +121,7 @@ local function build()
           },
           GuildSort = buildCheckbox("GuildSort", 47),
           -- @todo
-          GuildSortKey = buildDropdown("GuildSortKey", L.MENU_GUILD_SORT, {
+          GuildSortKey = buildDropdown(L.MENU_GUILD_SORT, {
             name = L.MENU_GUILD_SORT_NAME,
             rank = L.MENU_GUILD_SORT_RANK,
             class = L.MENU_GUILD_SORT_CLASS,
@@ -142,6 +138,6 @@ local function build()
   return t
 end
 
-LibStub("AceConfig-3.0"):RegisterOptionsTable("Socialite", build, "/socialite")
+LibStub("AceConfig-3.0"):RegisterOptionsTable("Socialite", build)
 addon.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(addonName, "Socialite")
--- LibStub("AceConsole-3.0"):RegisterChatCommand("socialite", function() Settings.OpenToCategory(addonName) end)
+LibStub("AceConsole-3.0"):RegisterChatCommand("socialite", function() Settings.OpenToCategory(addonName) end)
