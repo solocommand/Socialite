@@ -30,9 +30,16 @@ do
     if loadedAddon ~= addonName then return end
     self:UnregisterEvent("ADDON_LOADED")
 
-    if type(SocialiteSettings) ~= "table" then SocialiteSettings = {minimap={hide=false}} end
+    if type(SocialiteSettings) ~= "table" then SocialiteSettings = {
+      minimap={hide=true},
+      showInAddonCompartment=true,
+      DisableUsageText=false,
+    } end
     local sv = SocialiteSettings
-    if type(sv.minimap) ~= "table" then sv.minimap = {hide=false} end
+    if type(sv.minimap) ~= "table" then sv.minimap = {hide=true} end
+    if type(sv.showInAddonCompartment) ~= "boolean" then sv.showInAddonCompartment = true end
+    if type(sv.DisableUsageText) ~= "boolean" then sv.DisableUsageText = false end
+
     if type(sv.ShowLabel) ~= "boolean" then sv.ShowLabel = true end
     if type(sv.ShowRealID) ~= "boolean" then sv.ShowRealID = true end
     if type(sv.ShowRealIDApp) ~= "boolean" then sv.ShowRealIDApp = false end
@@ -55,12 +62,12 @@ do
     if type(sv.ShowGroupMembers) ~= "boolean" then sv.ShowGroupMembers = true end
     if type(sv.ShowStatus) ~= "string" then sv.ShowStatus = "icon" end
     if type(sv.TooltipInteraction) ~= "string" then sv.TooltipInteraction = "always" end
-    if type(sv.DisableUsageText) ~= "boolean" then sv.DisableUsageText = false end
 
     addon.db = sv
 
 
     ldbi:Register(addonName, addon.dataobj, addon.db.minimap)
+    if sv.showInAddonCompartment then ldbi:AddButtonToCompartment(addonName) end
 
 		self:SetScript("OnEvent", nil)
 	end)
@@ -91,19 +98,10 @@ do
       end
     end,
     OnClick = function(self, button)
-      if button == "RightButton" then
+      if button == "RightButton" or self == nil then
         showConfig()
       else
-        if addon.db.ShowFriends or addon.db.ShowRealID then
-          -- ToggleFriendsFrame(1); -- friends tab
-          -- We want to show the friends tab, but there's a taint issue :/
-          if FriendsFrame:IsShown() then
-            HideUIPanel(FriendsFrame)
-          else
-            ShowUIPanel(FriendsFrame)
-          end
-        end
-
+        if addon.db.ShowFriends or addon.db.ShowRealID then ToggleFriendsFrame(1) end
         if addon.db.ShowGuild then ToggleGuildFrame(1) end
       end
     end

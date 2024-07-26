@@ -29,7 +29,6 @@ end
 local function build()
   local t = {
     name = "Socialite",
-    handler = Socialite,
     type = 'group',
     args = {
       showMinimapIcon = {
@@ -45,19 +44,32 @@ local function build()
           ldbi:Refresh(addonName)
         end,
       },
-      DisableUsageText = buildCheckbox("DisableUsageText", 1),
-      ShowLabel = buildCheckbox("ShowLabel", 2),
-      ShowGroupMembers = buildCheckbox("ShowGroupMembers", 3),
+      showInAddonCompartment = {
+        type = 'toggle',
+        name = L.showInAddonCompartment,
+        desc = L.showInAddonCompartmentDescription,
+        order = 1,
+        get = function(info) return addon.db[info[#info]] end,
+        set = function(info, value)
+          addon:setDB(info[#info], value)
+          if value then
+            ldbi:AddButtonToCompartment(addonName)
+          else
+            ldbi:RemoveButtonFromCompartment(addonName)
+          end
+        end
+      },
+      DisableUsageText = buildCheckbox("DisableUsageText", 2),
       battleNetFriends = {
         type = "group",
         name = L["Battle.net Friends"],
         order = 10,
         args = {
-          ShowRealID = buildCheckbox("ShowRealID"),
-          ShowRealIDBroadcasts = buildCheckbox("ShowRealIDBroadcasts"),
-          ShowRealIDFactions = buildCheckbox("ShowRealIDFactions"),
-          ShowRealIDNotes = buildCheckbox("ShowRealIDNotes"),
-          ShowRealIDApp = buildCheckbox("ShowRealIDApp"),
+          ShowRealID = buildCheckbox("ShowRealID", 11),
+          ShowRealIDBroadcasts = buildCheckbox("ShowRealIDBroadcasts", 12),
+          ShowRealIDFactions = buildCheckbox("ShowRealIDFactions", 13),
+          ShowRealIDNotes = buildCheckbox("ShowRealIDNotes", 14),
+          ShowRealIDApp = buildCheckbox("ShowRealIDApp", 15),
         }
       },
       characterFriends = {
@@ -65,9 +77,17 @@ local function build()
         name = L["Character Friends"],
         order = 20,
         args = {
-          ShowFriends = buildCheckbox("ShowFriends"),
-          ShowFriendsNote = buildCheckbox("ShowFriendsNote"),
+          ShowFriends = buildCheckbox("ShowFriends", 21),
+          ShowFriendsNote = buildCheckbox("ShowFriendsNote", 22),
         }
+      },
+      dataText = {
+        type = "group",
+        name = L["Data text"],
+        order = 25,
+        args = {
+          ShowLabel = buildCheckbox("ShowLabel", 3),
+        },
       },
       tooltip = {
         type = "group",
@@ -85,7 +105,8 @@ local function build()
             outofcombat = L.MENU_INTERACTION_OOC,
             never = L.MENU_INTERACTION_NEVER,
           }, 32),
-        }
+          ShowGroupMembers = buildCheckbox("ShowGroupMembers", 33),
+        },
       },
       guild = {
         type = 'group',
@@ -121,6 +142,6 @@ local function build()
   return t
 end
 
-LibStub("AceConfig-3.0"):RegisterOptionsTable("Socialite", build, nil)
+LibStub("AceConfig-3.0"):RegisterOptionsTable("Socialite", build, "/socialite")
 addon.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions(addonName, "Socialite")
-LibStub("AceConsole-3.0"):RegisterChatCommand("socialite", function() Settings.OpenToCategory(addonName) end)
+-- LibStub("AceConsole-3.0"):RegisterChatCommand("socialite", function() Settings.OpenToCategory(addonName) end)

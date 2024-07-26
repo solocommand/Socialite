@@ -9,6 +9,7 @@
 ## X-Curse-Project-ID: 26811
 ## X-Wago-ID: rkGr7xNy
 ## OptionalDeps: Ace3, LibDataBroker-1.1, LibDBIcon-1.0
+## IconTexture: Interface\AddOns\Socialite\Socialite
 
 embeds.xml
 
