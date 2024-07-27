@@ -1,4 +1,8 @@
-local addonName, addon = ...
+local
+  ---@class string
+  addonName,
+  ---@class ns
+  addon = ...
 local L = addon.L
 local tooltip = addon.tooltip
 

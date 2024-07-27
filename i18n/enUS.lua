@@ -1,5 +1,9 @@
 -- @todo pull from localization
-local addonName, addon = ...
+local
+  ---@class string
+  addonName,
+  ---@class ns
+  addon = ...
 
 local L = {}
 
@@ -19,6 +23,7 @@ L["ShowRealIDNotesDescription"] = "Show your friends' note"
 L["showInAddonCompartment"] = "Show in compartment"
 L["showInAddonCompartmentDescription"] = "Toggles the display of Socialite within the addon compartment."
 L["Data text"] = "Data text"
+L["Tooltip Width"] = "Extra Tooltip Width"
 
 L["Character Friends"] = "Character Friends"
 L["ShowFriends"] = "Show friends"

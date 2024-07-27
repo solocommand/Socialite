@@ -1,4 +1,8 @@
-local addonName, addon = ...
+local
+---@class string
+addonName,
+---@class ns
+addon = ...
 local L = addon.L
 local ldbi = LibStub('LibDBIcon-1.0', true)
 
@@ -7,7 +11,7 @@ local function buildCheckbox(key, order)
     type = 'toggle',
     name = L[key],
     order = order or 0,
-    desc = L[key.."Description"],
+    desc = L[key .. "Description"],
   }
 end
 
@@ -22,12 +26,14 @@ local function buildDropdown(label, opts, order)
 end
 
 local function build()
+  ---@type AceConfig.OptionsTable
   local t = {
     name = "Socialite",
     type = 'group',
     get = function(info) return addon.db[info[#info]] end,
     set = function(info, value) return addon:setDB(info[#info], value) end,
     args = {
+      ---@diagnostic disable-next-line: missing-fields
       showMinimapIcon = {
         type = 'toggle',
         name = L['Show minimap button'],
@@ -38,9 +44,10 @@ local function build()
           local config = addon.db.minimap
           config.hide = not value
           addon:setDB("minimap", config)
-          ldbi:Refresh(addonName)
+          ldbi:Refresh(addonName, config)
         end,
       },
+      ---@diagnostic disable-next-line: missing-fields
       showInAddonCompartment = {
         type = 'toggle',
         name = L.showInAddonCompartment,
@@ -53,7 +60,7 @@ local function build()
           else
             ldbi:RemoveButtonFromCompartment(addonName)
           end
-        end
+        end,
       },
       DisableUsageText = buildCheckbox("DisableUsageText", 2),
       battleNetFriends = {
@@ -90,7 +97,6 @@ local function build()
         name = L["Tooltip Settings"],
         order = 30,
         args = {
-          -- @todo review these, they don't seem to work!
           ShowStatus = buildDropdown(L.MENU_STATUS, {
             icon = L.MENU_STATUS_ICON,
             text = L.MENU_STATUS_TEXT,
@@ -102,6 +108,14 @@ local function build()
             never = L.MENU_INTERACTION_NEVER,
           }, 32),
           ShowGroupMembers = buildCheckbox("ShowGroupMembers", 33),
+          ---@diagnostic disable-next-line: missing-fields
+          TooltipWidth = {
+            name = L["Tooltip Width"],
+            type = "range",
+            min = 0,
+            max = 1,
+            step = 0.1,
+          },
         },
       },
       guild = {
@@ -114,13 +128,13 @@ local function build()
           ShowGuildNote = buildCheckbox("ShowGuildNote", 43),
           ShowGuildONote = buildCheckbox("ShowGuildONote", 44),
           ShowSplitRemoteChat = buildCheckbox("ShowSplitRemoteChat", 45),
+          ---@diagnostic disable-next-line: missing-fields
           GuildSorting = {
             type = 'header',
             name = L["Guild Sorting"],
             order = 46,
           },
           GuildSort = buildCheckbox("GuildSort", 47),
-          -- @todo
           GuildSortKey = buildDropdown(L.MENU_GUILD_SORT, {
             name = L.MENU_GUILD_SORT_NAME,
             rank = L.MENU_GUILD_SORT_RANK,

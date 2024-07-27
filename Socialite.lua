@@ -1,4 +1,8 @@
-local addonName, addon = ...
+local
+  ---@class string
+  addonName,
+  ---@class ns
+  addon = ...
 local L = addon.L
 local ldb = LibStub:GetLibrary("LibDataBroker-1.1")
 local ldbi = LibStub:GetLibrary('LibDBIcon-1.0')
@@ -34,6 +38,7 @@ do
       minimap={hide=true},
       showInAddonCompartment=true,
       DisableUsageText=false,
+      TooltipWidth=0,
     } end
     local sv = SocialiteSettings
     if type(sv.minimap) ~= "table" then sv.minimap = {hide=true} end
@@ -62,6 +67,7 @@ do
     if type(sv.ShowGroupMembers) ~= "boolean" then sv.ShowGroupMembers = true end
     if type(sv.ShowStatus) ~= "string" then sv.ShowStatus = "icon" end
     if type(sv.TooltipInteraction) ~= "string" then sv.TooltipInteraction = "always" end
+    if type(sv.TooltipWidth) ~= "number" then sv.TooltipWidth = 0 end
 
     addon.db = sv
 

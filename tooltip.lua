@@ -1,13 +1,20 @@
-local addonName, addonTable = ...
+local
+  ---@class string
+  addonName,
+  ---@class ns
+  addon = ...
 
 local tooltip = {}
-addonTable.tooltip = tooltip
+addon.tooltip = tooltip
 
 local CreateFrame = _G.CreateFrame
 local UIParent = _G.UIParent
 local GameTooltip = _G.GameTooltip
-local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR = _G.NORMAL_FONT_COLOR, _G.HIGHLIGHT_FONT_COLOR
-
+local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR
+for i, item in ipairs(C_UIColor.GetColors()) do
+  if (item.baseTag == "NORMAL_FONT_COLOR") then NORMAL_FONT_COLOR = item.color end
+  if (item.baseTag == "HIGHLIGHT_FONT_COLOR") then HIGHLIGHT_FONT_COLOR = item.color end
+end
 local H_PADDING = 6
 local V_PADDING = 3
 local H_MARGIN = 10
@@ -79,13 +86,13 @@ do
 	tframe.scroller = slider
 end
 
-if IsAddOnLoaded("ElvUI") or IsAddOnLoaded("Tukui") then
   if tframe.StripTextures then
     tframe:StripTextures()
   end
   if tframe.CreateBackdrop then
     tframe:CreateBackdrop("Transparent")
   end
+if C_AddOns.IsAddOnLoaded("ElvUI") or C_AddOns.IsAddOnLoaded("Tukui") then
 end
 
 local acquireCell, releaseCell, acquireColumn, releaseColumn, acquireLine, releaseLine
@@ -311,12 +318,13 @@ end
 
 -- local
 function SetTooltipSize(width, height)
-	tframe.width = width
+	tframe.width = width + (addon.db.TooltipWidth or 0)
 	tframe.scrollchild:SetWidth(width)
 	tframe.height = height
 	tframe.scrollchild:SetHeight(height)
 
 	tframe:SetScript("OnUpdate", tooltip_OnUpdate)
+	-- DevTools_Dump(tframe)
 end
 
 local _AddLine

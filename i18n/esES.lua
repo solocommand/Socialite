@@ -1,5 +1,9 @@
+local
+  ---@class string
+  addonName,
+  ---@class ns
+  addon = ...
 
-local addonName, addon = ...
 local locale = GetLocale()
 
 if locale == "esES" then
