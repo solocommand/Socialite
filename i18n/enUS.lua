@@ -17,7 +17,7 @@ L["ShowRealIDFactionsDescription"] = "Show the faction of your Battle.net friend
 L["ShowRealIDNotes"] = "Show friend note"
 L["ShowRealIDNotesDescription"] = "Show your friends' note"
 L["showInAddonCompartment"] = "Show in compartment"
-L["showInAddonCompartmentDescription"] = "Toggles the display of Scoreboard within the addon compartment."
+L["showInAddonCompartmentDescription"] = "Toggles the display of Socialite within the addon compartment."
 L["Data text"] = "Data text"
 
 L["Character Friends"] = "Character Friends"
