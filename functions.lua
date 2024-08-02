@@ -141,52 +141,33 @@ local function getRightClickFrame()
 end
 
 local function showGuildRightClick(player, isMobile)
-	local frame = getRightClickFrame()
-	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end -- COMMUNITIES_WOW_MEMBER
-	frame.displayMode = "MENU";
-	frame.friendsList = false
-	frame.bnetAccountID = nil
-	frame.isMobile = isMobile
-	ToggleDropDownMenu(1, nil, frame, "cursor")
-end
-
-local function showFriendRightClick(player)
-	local frame = getRightClickFrame()
-	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end
-	frame.displayMode = "MENU"
-	frame.friendsList = true
-	frame.bnetAccountID = nil
-	frame.isMobile = nil
-	ToggleDropDownMenu(1, nil, frame, "cursor")
-end
-
-local function showRealIDRightClick(accountName, bnetAccountID)
-	local frame = getRightClickFrame()
-	frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "BN_FRIEND", nil, accountName) end
-	frame.displayMode = "MENU"
-	frame.friendsList = true
-	frame.bnetIDAccount = bnetAccountID
-	frame.isMobile = nil
-	ToggleDropDownMenu(1, nil, frame, "cursor")
+  local frame = getRightClickFrame()
+  frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end -- COMMUNITIES_WOW_MEMBER
+  frame.displayMode = "MENU";
+  frame.friendsList = false
+  frame.bnetAccountID = nil
+  frame.isMobile = isMobile
+  ToggleDropDownMenu(1, nil, frame, "cursor")
 end
 
 local function clickPlayer(frame, info, button)
-	local player, isGuild, isMobile, isRemote = unpack(info)
-	if player ~= "" then
-		if button == "LeftButton" then
-			if IsAltKeyDown() then
-				if not isRemote then C_PartyInfo.InviteUnit(player) end
-			else
-				ChatFrame_SendTell(player)
-			end
-		elseif button == "RightButton" then
-			if isGuild then
-				showGuildRightClick(player, isRemote)
-			else
-				showFriendRightClick(player)
-			end
-		end
-	end
+  local player, isGuild, isMobile, isRemote = unpack(info)
+  if player ~= "" then
+    if button == "LeftButton" then
+      if IsAltKeyDown() then
+        if not isRemote then C_PartyInfo.InviteUnit(player) end
+      else
+        ChatFrame_SendTell(player)
+      end
+    elseif button == "RightButton" then
+      if isGuild then
+        showGuildRightClick(player, isRemote)
+      else
+        local info = C_FriendList.GetFriendInfo(player);
+        FriendsFrame_ShowDropdown(info.name, info.connected, nil, nil, nil, 1);
+      end
+    end
+  end
 end
 
 local function sendBattleNetInvite(bnetAccountID)
@@ -232,18 +213,18 @@ local function sendBattleNetInvite(bnetAccountID)
 end
 
 local function clickRealID(frame, info, button)
-	local accountName, bnetAccountID = unpack(info)
-	if button == "LeftButton" then
-		if IsAltKeyDown() then
-			if CanGroupWithAccount(bnetAccountID) then
-				sendBattleNetInvite(bnetAccountID)
-			end
-		else
-			ChatFrame_SendBNetTell(accountName)
-		end
-	elseif button == "RightButton" then
-		showRealIDRightClick(accountName, bnetAccountID)
-	end
+  local accountName, bnetAccountID = unpack(info)
+  if button == "LeftButton" then
+    if IsAltKeyDown() then
+      if CanGroupWithAccount(bnetAccountID) then
+        sendBattleNetInvite(bnetAccountID)
+      end
+    else
+      ChatFrame_SendBNetTell(accountName)
+    end
+  elseif button == "RightButton" then
+    FriendsFrame_ShowBNDropdown(accountName, true, nil, nil, nil, 1, bnetAccountID);
+  end
 end
 
 --[[
