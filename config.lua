@@ -127,7 +127,6 @@ local function build()
           ShowGuildLabel = buildCheckbox("ShowGuildLabel", 42),
           ShowGuildNote = buildCheckbox("ShowGuildNote", 43),
           ShowGuildONote = buildCheckbox("ShowGuildONote", 44),
-          ShowSplitRemoteChat = buildCheckbox("ShowSplitRemoteChat", 45),
           ---@diagnostic disable-next-line: missing-fields
           GuildSorting = {
             type = 'header',

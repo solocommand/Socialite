@@ -142,7 +142,10 @@ end
 
 local function showGuildRightClick(player, isMobile)
   local frame = getRightClickFrame()
-  frame.initialize = function() UnitPopup_ShowMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player) end -- COMMUNITIES_WOW_MEMBER
+  frame.initialize = function()
+    print("Guild member right click temporarily disabled, sorry!")
+    -- UnitPopup_OpenMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player)
+  end -- COMMUNITIES_WOW_MEMBER
   frame.displayMode = "MENU";
   frame.friendsList = false
   frame.bnetAccountID = nil
@@ -151,17 +154,17 @@ local function showGuildRightClick(player, isMobile)
 end
 
 local function clickPlayer(frame, info, button)
-  local player, isGuild, isMobile, isRemote = unpack(info)
+  local player, isGuild, isMobile = unpack(info)
   if player ~= "" then
     if button == "LeftButton" then
       if IsAltKeyDown() then
-        if not isRemote then C_PartyInfo.InviteUnit(player) end
+        C_PartyInfo.InviteUnit(player)
       else
         ChatFrame_SendTell(player)
       end
     elseif button == "RightButton" then
       if isGuild then
-        showGuildRightClick(player, isRemote)
+        showGuildRightClick(player, isMobile)
       else
         local info = C_FriendList.GetFriendInfo(player);
         FriendsFrame_ShowDropdown(info.name, info.connected, nil, nil, nil, 1);
@@ -596,8 +599,8 @@ function addon:renderFriends(tooltip, collapseVar)
 end
 
 
-function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
-  local function processGuildMember(i, isRemote, tooltip)
+function addon:renderGuild(tooltip, collapseGuildVar)
+  local function processGuildMember(i, tooltip)
     local left = ""
 
     local name, rank, rankIndex, level, class, zone, note, officerNote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(i)
@@ -623,7 +626,6 @@ function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
     end
 
     if isMobile then
-      if isRemote then zone = REMOTE_CHAT end
       if playerStatus == CHAT_FLAG_DND then
         name = MOBILE_BUSY_ICON..name
       elseif playerStatus == CHAT_FLAG_AFK then
@@ -672,7 +674,7 @@ function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
     end
 
     local y = addon.tooltip:AddLine(check, level, left, right)
-    addon.tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, true, isMobile, isRemote })
+    addon.tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, true, isMobile })
   end
 
   -- collectGuildRosterInfo(split, sortKey, sortAscending)
@@ -685,31 +687,18 @@ function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
   --   table - array of guild roster indices
   --   number - total guild members
   --   number - online guild members
-  --   number - remote guild members
   --
   -- If `split` is true, the online and remote sections of the roster are
   -- sorted independently. If false, they're sorted into the same table.
   -- Every entry in the roster is an index suitable for GetGuildRosterInfo()
-  local function collectGuildRosterInfo(split, sortKey, sortAscending)
+  local function collectGuildRosterInfo(sortKey, sortAscending)
     SetGuildRosterShowOffline(false)
 
-    local guildTotal, guildOnline, guildRemote = GetNumGuildMembers()
+    local guildTotal, guildOnline = GetNumGuildMembers()
 
-    local onlineTable, remoteTable = {}, {}
-    local numOnline = split and guildOnline or guildRemote
-    for i = 1, numOnline do
+    local onlineTable = {}
+    for i = 1, guildOnline do
       onlineTable[i] = i
-    end
-    for i = numOnline+1, guildRemote do
-      remoteTable[i-numOnline] = i
-    end
-    local function tableDesc(t)
-      local desc = "{"
-      for i = 1, #t do
-        if i ~= 1 then desc = desc .. ", " end
-        desc = desc .. (t[i] == nil and "nil" or tostring(t[i]))
-      end
-      return desc.."}"
     end
 
     if sortKey then
@@ -746,15 +735,9 @@ function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
       end
 
       table.sort(onlineTable, sortFunc)
-      table.sort(remoteTable, sortFunc)
     end
 
-    -- tack remoteTable onto the end of onlineTable so our caller only has 1 table to traverse
-    for i, v in ipairs(remoteTable) do
-      onlineTable[i+numOnline] = v
-    end
-
-    return onlineTable, guildTotal, guildOnline, guildRemote
+    return onlineTable, guildTotal, guildOnline
   end
 
 	addon.tooltip:AddLine()
@@ -764,31 +747,13 @@ function addon:renderGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
 		SetGuildRosterShowOffline(false)
 	end
 
-	local split = addon.db.ShowSplitRemoteChat
 	local sortKey = addon.db.GuildSort and addon.db.GuildSortKey or nil
-	local roster, numTotal, numOnline, numRemote = collectGuildRosterInfo(split, sortKey, addon.db.GuildSortAscending or false)
-
-	local numGuild = split and numOnline or numRemote
-
+	local roster, numTotal, numOnline = collectGuildRosterInfo(sortKey, addon.db.GuildSortAscending or false)
 	local collapseGuild = addon.db[collapseGuildVar]
-	local collapseRemoteChat = addon.db[collapseRemoteChatVar]
-	addHeader(L.TOOLTIP_GUILD, "00FF00", numGuild, numTotal, collapseGuild, collapseGuildVar)
+	addHeader(L.TOOLTIP_GUILD, "00FF00", numOnline, numTotal, collapseGuild, collapseGuildVar)
 
 	for i, guildIndex in ipairs(roster) do
-		local isRemote = guildIndex > numOnline
-		local afterSplit = split and isRemote
-		if (afterSplit and collapseRemoteChat) or (not afterSplit and collapseGuild) then
-			-- collapsed
-		else
-			processGuildMember(guildIndex, isRemote, tooltip)
-		end
-
-		if split and i == numOnline then
-			-- add header for Remote Chat
-			local numRemoteChat = numRemote - numOnline
-			addon.tooltip:AddLine()
-			addHeader(L.TOOLTIP_REMOTE_CHAT, "00FF00", numRemoteChat, numTotal, collapseRemoteChat, collapseRemoteChatVar)
-		end
+    processGuildMember(guildIndex, tooltip)
 	end
 
 	if wasOffline then

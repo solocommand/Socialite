@@ -59,7 +59,6 @@ do
     if type(sv.ShowGuildLabel) ~= "boolean" then sv.ShowGuildLabel = true end
     if type(sv.ShowGuildNote) ~= "boolean" then sv.ShowGuildNote = true end
     if type(sv.ShowGuildONote) ~= "boolean" then sv.ShowGuildONote = true end
-    if type(sv.ShowSplitRemoteChat) ~= "boolean" then sv.ShowSplitRemoteChat = false end
     if type(sv.GuildSort) ~= "boolean" then sv.GuildSort = false end
     if type(sv.GuildSortAscending) ~= "boolean" then sv.GuildSortAscending = false end
     if type(sv.GuildSortKey) ~= "string" then sv.GuildSortKey = "rank" end
@@ -149,17 +148,8 @@ do
 
     -- Guild Members
     if addon.db.ShowGuild and IsInGuild() then
-      local online, remote = select(2, GetNumGuildMembers())
-      local _, online, remote = GetNumGuildMembers()
-      if addon.db.ShowSplitRemoteChat then
-        remote = remote - online
-      else
-        online, remote = remote, nil
-      end
+      local _, online = GetNumGuildMembers()
       table.insert(comps, "|cff00FF00"..online.."|r")
-      if remote ~= nil then
-        table.insert(comps, "|cff00BB00"..remote.."|r")
-      end
     end
 
     dataobj.text = text..table.concat(comps, " |cffffd200/|r ")
@@ -185,7 +175,7 @@ do
         end
       end
       if (addon.db.ShowFriends) then addon:renderFriends(frame, "CollapseFriends") end
-      if (addon.db.ShowGuild) then addon:renderGuild(frame, "CollapseGuild", "CollapseRemoteChat") end
+      if (addon.db.ShowGuild) then addon:renderGuild(frame, "CollapseGuild") end
     end)
 
     if (not ok) then
