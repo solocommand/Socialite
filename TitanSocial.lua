@@ -51,7 +51,6 @@ local TravelPassDropDown = _G.TravelPassDropDown
 
 local BNET_CLIENT_WOW = _G.BNET_CLIENT_WOW
 local BNET_CLIENT_WTCG = _G.BNET_CLIENT_WTCG
-local REMOTE_CHAT = _G.REMOTE_CHAT
 local CHAT_FLAG_AFK, CHAT_FLAG_DND = _G.CHAT_FLAG_AFK, _G.CHAT_FLAG_DND
 local FRIENDS_TEXTURE_AFK, FRIENDS_TEXTURE_DND = _G.FRIENDS_TEXTURE_AFK, _G.FRIENDS_TEXTURE_DND
 local NORMAL_FONT_COLOR, HIGHLIGHT_FONT_COLOR = _G.NORMAL_FONT_COLOR, _G.HIGHLIGHT_FONT_COLOR
@@ -78,7 +77,7 @@ local bDebugMode = false
 
 -- Required Titan variables
 local TITAN_SOCIAL_ID = "Social"
-local TITAN_SOCIAL_VERSION = "1.13.3"
+local TITAN_SOCIAL_VERSION = "1.15.7"
 local TITAN_SOCIAL_TOOLTIP_KEY = "TitanSocialTooltip"
 
 local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0:16:16:0:16:0:16:73:177:73|t"
@@ -224,7 +223,6 @@ function TitanPanelRightClickMenu_PrepareSocialMenu(frame, level, menuList)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_LABEL, TITAN_SOCIAL_ID, "ShowGuildLabel", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_NOTE, TITAN_SOCIAL_ID, "ShowGuildNote", nil, level)
 			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_ONOTE, TITAN_SOCIAL_ID, "ShowGuildONote", nil, level)
-			TitanPanelRightClickMenu_AddToggleVar(L.MENU_GUILD_REMOTE_CHAT, TITAN_SOCIAL_ID, "ShowSplitRemoteChat", nil, level)
 
 			TitanPanelRightClickMenu_AddSpacer(level)
 			addSubmenu(L.MENU_GUILD_SORT, "GuildSort", level)
@@ -308,17 +306,8 @@ function TitanPanelSocialButton_GetButtonText(id)
 		table.insert(comps, "|cffFFFFFF"..C_FriendList.GetNumOnlineFriends().."|r")
 	end
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
-		local online, remote = select(2, GetNumGuildMembers())
-		local _, online, remote = GetNumGuildMembers()
-		if TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat") then
-			remote = remote - online
-		else
-			online, remote = remote, nil
-		end
+		local _, online = GetNumGuildMembers()
 		table.insert(comps, "|cff00FF00"..online.."|r")
-		if remote ~= nil then
-			table.insert(comps, "|cff00BB00"..remote.."|r")
-		end
 	end
 
 	label = label .. table.concat(comps, " |cffffd200/|r ")
@@ -349,18 +338,15 @@ end
 -- If `split` is true, the online and remote sections of the roster are
 -- sorted independently. If false, they're sorted into the same table.
 -- Every entry in the roster is an index suitable for GetGuildRosterInfo()
-local function collectGuildRosterInfo(split, sortKey, sortAscending)
+local function collectGuildRosterInfo(sortKey, sortAscending)
 	SetGuildRosterShowOffline(false)
 
-	local guildTotal, guildOnline, guildRemote = GetNumGuildMembers()
+	local guildTotal, guildOnline = GetNumGuildMembers()
 
-	local onlineTable, remoteTable = {}, {}
-	local numOnline = split and guildOnline or guildRemote
+	local onlineTable = {}
+	local numOnline = guildOnline
 	for i = 1, numOnline do
 		onlineTable[i] = i
-	end
-	for i = numOnline+1, guildRemote do
-		remoteTable[i-numOnline] = i
 	end
 	local function tableDesc(t)
 		local desc = "{"
@@ -405,15 +391,9 @@ local function collectGuildRosterInfo(split, sortKey, sortAscending)
 		end
 
 		table.sort(onlineTable, sortFunc)
-		table.sort(remoteTable, sortFunc)
 	end
 
-	-- tack remoteTable onto the end of onlineTable so our caller only has 1 table to traverse
-	for i, v in ipairs(remoteTable) do
-		onlineTable[i+numOnline] = v
-	end
-
-	return onlineTable, guildTotal, guildOnline, guildRemote
+	return onlineTable, guildTotal, guildOnline
 end
 
 -- spacer(width, count)
@@ -536,17 +516,17 @@ local function showRealIDRightClick(accountName, bnetIDAccount)
 end
 
 local function clickPlayer(frame, info, button)
-	local player, isGuild, isMobile, isRemote = unpack(info)
+	local player, isGuild = unpack(info)
 	if player ~= "" then
 		if button == "LeftButton" then
 			if IsAltKeyDown() then
-				if not isRemote then InviteUnit(player) end
+				InviteUnit(player)
 			else
 				ChatFrame_SendTell(player)
 			end
 		elseif button == "RightButton" then
 			if isGuild then
-				showGuildRightClick(player, isRemote)
+				showGuildRightClick(player)
 			else
 				showFriendRightClick(player)
 			end
@@ -985,7 +965,7 @@ local function addFriends(tooltip, collapseVar)
 	end
 end
 
-local function processGuildMember(i, isRemote, tooltip)
+local function processGuildMember(i, tooltip)
 	local left = ""
 
 	local name, rank, rankIndex, level, class, zone, note, officerNote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(i)
@@ -1011,7 +991,6 @@ local function processGuildMember(i, isRemote, tooltip)
 	end
 
 	if isMobile then
-		if isRemote then zone = REMOTE_CHAT end
 		if playerStatus == CHAT_FLAG_DND then
 			name = MOBILE_BUSY_ICON..name
 		elseif playerStatus == CHAT_FLAG_AFK then
@@ -1062,40 +1041,29 @@ local function processGuildMember(i, isRemote, tooltip)
 	end
 
 	local y = tooltip:AddLine(check, level, left, right)
-	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, true, isMobile, isRemote })
+	tooltip:SetLineScript(y, "OnMouseDown", clickPlayer, { origname, true, isMobile })
 end
 
-local function addGuild(tooltip, collapseGuildVar, collapseRemoteChatVar)
+local function addGuild(tooltip, collapseGuildVar)
 	local wasOffline = GetGuildRosterShowOffline()
 	if wasOffline then
 		-- SetGuildRosterShowOffline() seems to sometimes trigger GUILD_ROSTER_UPDATE
 		SetGuildRosterShowOffline(false)
 	end
 
-	local split = TitanGetVar(TITAN_SOCIAL_ID, "ShowSplitRemoteChat")
 	local sortKey = TitanGetVar(TITAN_SOCIAL_ID, "SortGuild") and TitanGetVar(TITAN_SOCIAL_ID, "GuildSortKey") or nil
-	local roster, numTotal, numOnline, numRemote = collectGuildRosterInfo(split, sortKey, TitanGetVar(TITAN_SOCIAL_ID, "GuildSortAscending") or false)
+	local roster, numTotal, numOnline = collectGuildRosterInfo(sortKey, TitanGetVar(TITAN_SOCIAL_ID, "GuildSortAscending") or false)
 
-	local numGuild = split and numOnline or numRemote
+	local numGuild = numOnline
 
 	local collapseGuild = TitanGetVar(TITAN_SOCIAL_ID, collapseGuildVar)
-	local collapseRemoteChat = TitanGetVar(TITAN_SOCIAL_ID, collapseRemoteChatVar)
 	addHeader(L.TOOLTIP_GUILD, "00FF00", numGuild, numTotal, collapseGuild, collapseGuildVar)
 
 	for i, guildIndex in ipairs(roster) do
-		local isRemote = guildIndex > numOnline
-		local afterSplit = split and isRemote
-		if (afterSplit and collapseRemoteChat) or (not afterSplit and collapseGuild) then
+		if (collapseGuild) then
 			-- collapsed
 		else
-			processGuildMember(guildIndex, isRemote, tooltip)
-		end
-
-		if split and i == numOnline then
-			-- add header for Remote Chat
-			local numRemoteChat = numRemote - numOnline
-			tooltip:AddLine()
-			addHeader(L.TOOLTIP_REMOTE_CHAT, "00FF00", numRemoteChat, numTotal, collapseRemoteChat, collapseRemoteChatVar)
+			processGuildMember(guildIndex, tooltip)
 		end
 	end
 
@@ -1130,7 +1098,7 @@ local function buildTooltip(tooltip)
 
 	if TitanGetVar(TITAN_SOCIAL_ID, "ShowGuild") then
 		tooltip:AddLine()
-		addGuild(tooltip, "CollapseGuild", "CollapseRemoteChat")
+		addGuild(tooltip, "CollapseGuild")
 	end
 end
 
@@ -1179,7 +1147,6 @@ function TitanPanelSocialButton_OnLoad(self)
 			ShowGuild = true,
 			ShowGuildLabel = false,
 			ShowGuildNote = true,
-			ShowSplitRemoteChat = true,
 			ShowGuildONote = true,
 			ShowGroupMembers = true,
 			SortGuild = false,
@@ -1193,7 +1160,6 @@ function TitanPanelSocialButton_OnLoad(self)
 			CollapseRealIDApp = false,
 			CollapseFriends = false,
 			CollapseGuild = false,
-			CollapseRemoteChat = false
 		}
 	}
 
@@ -1282,3 +1248,4 @@ function TitanPanelSocialButton_OnClick(self, button)
 		tooltip:Hide()
 	end
 end
+
