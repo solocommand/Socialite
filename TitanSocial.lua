@@ -77,7 +77,7 @@ local bDebugMode = false
 
 -- Required Titan variables
 local TITAN_SOCIAL_ID = "Social"
-local TITAN_SOCIAL_VERSION = "1.13.3"
+local TITAN_SOCIAL_VERSION = "1.15.7"
 local TITAN_SOCIAL_TOOLTIP_KEY = "TitanSocialTooltip"
 
 local MOBILE_HERE_ICON = "|TInterface\\ChatFrame\\UI-ChatIcon-ArmoryChat:0:0:0:0:16:16:0:16:0:16:73:177:73|t"
@@ -1248,3 +1248,4 @@ function TitanPanelSocialButton_OnClick(self, button)
 		tooltip:Hide()
 	end
 end
+
