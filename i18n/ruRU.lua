@@ -107,7 +107,7 @@ L["MENU_GUILD_SORT_ZONE_DESCRIPTION"] = "Сортировать по зоне/д
 L['Display Settings'] = 'Настройки отображения'
 L['Show minimap button'] = 'Показывать кнопку миникарты'
 L['Show the Scoreboard minimap button'] = 'Показывать кнопку миникарты Scoreboard'
-L["usageDescription"] = "Левый клик для просмотра социальных панелей. Alt+Клик для приглашения. Правый клик для настройки."
+L["usageDescription"] = "ЛКМ для просмотра социальных панелей. Alt+Клик для приглашения. ПКМ для настройки."
 
 L['ShowGroupMembers'] = "Показывать членов группы"
 L['ShowGroupMembersDescription'] = "Показывать иконку-индикатор рядом с другом, если он находится в той же группе"
