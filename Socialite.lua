@@ -9,7 +9,7 @@ local ldbi = LibStub:GetLibrary('LibDBIcon-1.0')
 local function print(...) _G.print("|c259054ffSocialite:|r", ...) end
 
 local function showConfig()
-  Settings.OpenToCategory(addonName)
+  Settings.OpenToCategory(addon.optionsFrame)
 end
 
 local function normal(text)
