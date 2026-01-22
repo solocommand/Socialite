@@ -223,7 +223,7 @@ local function clickRealID(frame, info, button)
         sendBattleNetInvite(bnetAccountID)
       end
     else
-      ChatFrame_SendBNetTell(accountName)
+      ChatFrameUtil.SendBNetTell(accountName)
     end
   elseif button == "RightButton" then
     FriendsFrame_ShowBNDropdown(accountName, true, nil, nil, nil, 1, bnetAccountID);
