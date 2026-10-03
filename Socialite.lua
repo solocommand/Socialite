@@ -12,6 +12,15 @@ local function showConfig()
   Settings.OpenToCategory(addon.optionsFrame)
 end
 
+local function toggleGuildFrame()
+  if type(ToggleGuildFrame) == "function" then
+    ToggleGuildFrame(1)
+  elseif type(ToggleFriendsFrame) == "function" then
+    -- Classic clients keep the guild roster inside the Friends frame.
+    ToggleFriendsFrame(3)
+  end
+end
+
 local function normal(text)
   if not text then return "" end
   return NORMAL_FONT_COLOR_CODE..text..FONT_COLOR_CODE_CLOSE;
@@ -107,7 +116,7 @@ do
         showConfig()
       else
         if addon.db.ShowFriends or addon.db.ShowRealID then ToggleFriendsFrame(1) end
-        if addon.db.ShowGuild then ToggleGuildFrame(1) end
+        if addon.db.ShowGuild then toggleGuildFrame() end
       end
     end
   })
@@ -157,6 +166,8 @@ do
 
   function addon:updateTooltip(frame)
     if not frame then return end
+    -- remembered so header-collapse clicks can re-render in place
+    addon._tooltipAnchorFrame = frame
     local ok, message = pcall(function ()
       addon.tooltip:Clear()
       addon.tooltip:AddColspanHeader(3, "LEFT", L["Socialite"])
@@ -175,7 +186,7 @@ do
         end
       end
       if (addon.db.ShowFriends) then addon:renderFriends(frame, "CollapseFriends") end
-      if (addon.db.ShowGuild) then addon:renderGuild(frame, "CollapseGuild") end
+      if (addon.db.ShowGuild and IsInGuild()) then addon:renderGuild(frame, "CollapseGuild") end
     end)
 
     if (not ok) then

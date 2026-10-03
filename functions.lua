@@ -6,9 +6,6 @@ local
 local L = addon.L
 local tooltip = addon.tooltip
 
--- Moved blizz functions
-local BNGetFriendGameAccountInfo = C_BattleNet.GetFriendGameAccountInfo;
-local BNGetFriendInfo = C_BattleNet.GetFriendAccountInfo;
 
 local playerRealmName = GetRealmName()
 
@@ -71,11 +68,17 @@ local function IsOfficerNoteVisible(...)
 end
 
 -- Class support
+-- Maps localized class names (both genders) back to the class token so names can
+-- be class-coloured. Built from the LOCALIZED_CLASS_NAMES_* tables instead of
+-- GetNumClasses()/GetClassInfo(): on Classic clients the class ID range covers
+-- classes that don't exist in that flavour and GetClassInfo() returns nil for
+-- them, which made the old loop error with "table index is nil".
 local Classes = {}
-for i = 1, _G.GetNumClasses() do
-  local name, className, classId = _G.GetClassInfo(i)
-  Classes[_G.LOCALIZED_CLASS_NAMES_MALE[className]] = className
-  Classes[_G.LOCALIZED_CLASS_NAMES_FEMALE[className]] = className
+for token, localized in pairs(_G.LOCALIZED_CLASS_NAMES_MALE or {}) do
+  Classes[localized] = token
+end
+for token, localized in pairs(_G.LOCALIZED_CLASS_NAMES_FEMALE or {}) do
+  Classes[localized] = token
 end
 
 local function addDoubleLine(indented, left, right)
@@ -84,6 +87,13 @@ local function addDoubleLine(indented, left, right)
 	else
 		return tooltip:AddColspanLine(3, "LEFT", left, 1, "RIGHT", right)
 	end
+end
+
+local function clickHeader(frame, collapseVar)
+  addon.db[collapseVar] = not addon.db[collapseVar]
+  if addon._tooltipAnchorFrame then
+    addon:updateTooltip(addon._tooltipAnchorFrame)
+  end
 end
 
 local function addHeader(header, color, online, total, collapsed, collapseVar)
@@ -100,16 +110,12 @@ local function addHeader(header, color, online, total, collapsed, collapseVar)
 end
 
 local function colorText(text, className)
-	local classIndex, coloredText=nil
-
-	local class = Classes[className]
-	local color = nil
-	if class == nil then
-		color = "ffcccccc"
-	else
-		color = RAID_CLASS_COLORS[class].colorStr
-	end
-	return "|c"..color..text.."|r"
+  -- className may be a localized name (friends list, Battle.net) or already a
+  -- class token (guild roster classFileName); accept either.
+  local class = className and (Classes[className] or (RAID_CLASS_COLORS[className] and className))
+  local colorInfo = class and RAID_CLASS_COLORS[class]
+  local color = colorInfo and colorInfo.colorStr or "ffcccccc"
+  return "|c"..color..text.."|r"
 end
 
 local function getStatusIcon(status)
@@ -132,25 +138,30 @@ local function getStatusText(status)
 	return ""
 end
 
-local rightClickFrame
-local function getRightClickFrame()
-	if not rightClickFrame then
-		rightClickFrame = CreateFrame("Frame", addonName.."TooltipContextualMenu", _G.UIParent, "UIDropDownMenuTemplate")
-	end
-	return rightClickFrame
-end
-
+-- Right-click context menu for guild members. Uses the MenuUtil API that ships
+-- with 11.x+ retail and the Classic clients built on the same UI codebase.
 local function showGuildRightClick(player, isMobile)
-  local frame = getRightClickFrame()
-  frame.initialize = function()
-    print("Guild member right click temporarily disabled, sorry!")
-    -- UnitPopup_OpenMenu(_G.UIDROPDOWNMENU_OPEN_MENU, "FRIEND", nil, player)
-  end -- COMMUNITIES_WOW_MEMBER
-  frame.displayMode = "MENU";
-  frame.friendsList = false
-  frame.bnetAccountID = nil
-  frame.isMobile = isMobile
-  ToggleDropDownMenu(1, nil, frame, "cursor")
+  if not (MenuUtil and MenuUtil.CreateContextMenu) then
+    print("Socialite: the right-click menu is not available on this client.")
+    return
+  end
+  -- Full Name-Realm is kept for the API calls; the realm is stripped for display.
+  local displayName = Ambiguate(player, "none")
+  MenuUtil.CreateContextMenu(UIParent, function(ownerRegion, rootDescription)
+    rootDescription:CreateTitle(displayName)
+    rootDescription:CreateButton(WHISPER, function()
+      ChatFrame_SendTell(player)
+    end)
+    if not isMobile then
+      rootDescription:CreateButton(INVITE, function()
+        C_PartyInfo.InviteUnit(player)
+      end)
+    end
+    rootDescription:CreateDivider()
+    rootDescription:CreateButton(WHO, function()
+      C_FriendList.SendWho("n-" .. displayName)
+    end)
+  end)
 end
 
 local function clickPlayer(frame, info, button)
@@ -167,52 +178,41 @@ local function clickPlayer(frame, info, button)
         showGuildRightClick(player, isMobile)
       else
         local info = C_FriendList.GetFriendInfo(player);
-        FriendsFrame_ShowDropdown(info.name, info.connected, nil, nil, nil, 1);
+        if info then
+          FriendsFrame_ShowDropdown(info.name, info.connected, nil, nil, nil, 1);
+        end
       end
     end
   end
 end
 
+-- Invites a Battle.net friend to the group. Blizzard's FriendsFrame_BattlenetInvite
+-- already handles friends who are online on several WoW accounts (it shows the
+-- travel-pass dropdown), so prefer it when the client provides it. Otherwise
+-- invite the single eligible game account, if there is exactly one.
 local function sendBattleNetInvite(bnetAccountID)
-	local playerFactionGroup = UnitFactionGroup("player")
-	local index = BNGetFriendIndex(bnetAccountID)
-	if index then
-		local numGameAccounts = C_BattleNet.GetFriendNumGameAccounts(index)
-		if numGameAccounts > 1 then
-			-- See if there's only one game account we can invite
-			local validGameAccountID = nil
-			for i = 1, numGameAccounts do
-				local _, _, client, _, realmID, faction, _, _, _, _, _, _, _, _, _, bnetIDGameAccount = BNGetFriendGameAccountInfo(index, i)
-				if client == BNET_CLIENT_WOW and faction == playerFactionGroup and realmID ~= 0 then
-					-- Valid account
-					if validGameAccountID and validGameAccountID ~= bnetIDGameAccount then
-						-- Found two accounts. Bail out.
-						validGameAccountID = nil
-						break
-					else
-						validGameAccountID = bnetIDGameAccount
-					end
-				end
-			end
-			if validGameAccountID then
-				BNInviteFriend(validGameAccountID)
-				return
-			end
-			-- More than one account, show the dropdown
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			local dropDown = TravelPassDropDown
-			if dropDown.index ~= index then
-				Lib_CloseDropDownMenus()
-			end
-			dropDown.index = index
-			Lib_ToggleDropDownMenu(1, nil, dropDown, "cursor", 1, -1)
-		else
-			local bnetIDGameAccount = select(6, BNGetFriendInfo(index))
-			if bnetIDGameAccount then
-				BNInviteFriend(bnetIDGameAccount)
-			end
-		end
-	end
+  if type(FriendsFrame_BattlenetInvite) == "function" then
+    FriendsFrame_BattlenetInvite(nil, bnetAccountID)
+    return
+  end
+  local playerFactionGroup = UnitFactionGroup("player")
+  local index = BNGetFriendIndex(bnetAccountID)
+  if not index then return end
+  local validGameAccountID = nil
+  for i = 1, C_BattleNet.GetFriendNumGameAccounts(index) do
+    local ai = C_BattleNet.GetFriendGameAccountInfo(index, i)
+    if ai and ai.clientProgram == BNET_CLIENT_WOW and ai.factionName == playerFactionGroup and ai.realmID ~= 0 then
+      if validGameAccountID and validGameAccountID ~= ai.gameAccountID then
+        -- More than one eligible account; we can't tell which one to invite.
+        print("Socialite: this friend is online on more than one character, use the Friends list to invite them.")
+        return
+      end
+      validGameAccountID = ai.gameAccountID
+    end
+  end
+  if validGameAccountID then
+    BNInviteFriend(validGameAccountID)
+  end
 end
 
 local function clickRealID(frame, info, button)
@@ -223,7 +223,11 @@ local function clickRealID(frame, info, button)
         sendBattleNetInvite(bnetAccountID)
       end
     else
-      ChatFrameUtil.SendBNetTell(accountName)
+      if ChatFrameUtil and ChatFrameUtil.SendBNetTell then
+        ChatFrameUtil.SendBNetTell(accountName)
+      else
+        ChatFrame_SendBNetTell(accountName)
+      end
     end
   elseif button == "RightButton" then
     FriendsFrame_ShowBNDropdown(accountName, true, nil, nil, nil, 1, bnetAccountID);
@@ -412,7 +416,11 @@ function addon:renderBattleNet(tooltip, friends, isBnetClient, collapseVar)
           return "|TInterface\\FriendsFrame\\Battlenet-WoWicon:0|t"
         end
       elseif client and client ~= "" then
-        return BNet_GetClientEmbeddedAtlas(client)
+        if BNet_GetClientEmbeddedAtlas then
+          return BNet_GetClientEmbeddedAtlas(client)
+        elseif BNet_GetClientEmbeddedTexture then
+          return BNet_GetClientEmbeddedTexture(client, 0)
+        end
       end
       return spacer()
     end
@@ -600,10 +608,15 @@ end
 
 
 function addon:renderGuild(tooltip, collapseGuildVar)
+  -- Unguilded characters have no roster; on Classic the roster APIs can also
+  -- report stale counts with nil entries, so bail out here as well as at the call site.
+  if not IsInGuild() then return end
+
   local function processGuildMember(i, tooltip)
     local left = ""
 
     local name, rank, rankIndex, level, class, zone, note, officerNote, online, playerStatus, classFileName, achievementPoints, achievementRank, isMobile = GetGuildRosterInfo(i)
+    if not name then return end
 
     local origname = name
     name = Ambiguate(name, "guild")
@@ -695,6 +708,7 @@ function addon:renderGuild(tooltip, collapseGuildVar)
     SetGuildRosterShowOffline(false)
 
     local guildTotal, guildOnline = GetNumGuildMembers()
+    guildTotal, guildOnline = guildTotal or 0, guildOnline or 0
 
     local onlineTable = {}
     for i = 1, guildOnline do
