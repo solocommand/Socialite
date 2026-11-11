@@ -705,8 +705,7 @@ function addon:renderGuild(tooltip, collapseGuildVar)
   -- sorted independently. If false, they're sorted into the same table.
   -- Every entry in the roster is an index suitable for GetGuildRosterInfo()
   local function collectGuildRosterInfo(sortKey, sortAscending)
-    SetGuildRosterShowOffline(false)
-
+    -- the caller has already turned off offline members (and restores it after)
     local guildTotal, guildOnline = GetNumGuildMembers()
     guildTotal, guildOnline = guildTotal or 0, guildOnline or 0
 

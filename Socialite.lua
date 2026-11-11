@@ -89,6 +89,28 @@ do
   addon.frame = eventFrame
 end
 
+-- Guild zones and character-friend areas are not pushed by the server; the
+-- client cache only refreshes when something asks for it. Ask when the tooltip
+-- opens and periodically while it stays open. The server silently ignores
+-- GuildRoster() calls made within 10s of the previous one, so match that.
+local ROSTER_REQUEST_INTERVAL = 10
+local lastRosterRequest = -ROSTER_REQUEST_INTERVAL
+local function requestRosterUpdates()
+  local now = GetTime()
+  if now - lastRosterRequest < ROSTER_REQUEST_INTERVAL then return end
+  lastRosterRequest = now
+  if addon.db.ShowGuild and IsInGuild() then
+    if C_GuildInfo and C_GuildInfo.GuildRoster then
+      C_GuildInfo.GuildRoster()
+    elseif type(GuildRoster) == "function" then
+      GuildRoster()
+    end
+  end
+  if addon.db.ShowFriends and C_FriendList and C_FriendList.ShowFriends then
+    C_FriendList.ShowFriends()
+  end
+end
+
 -- data text
 do
   local f = CreateFrame("frame")
@@ -99,6 +121,7 @@ do
     icon = "Interface\\FriendsFrame\\BroadcastIcon",
     text = text,
     OnEnter = function(frame)
+      requestRosterUpdates()
       addon.tooltip:Clear("LEFT", 0, "RIGHT", "LEFT", "RIGHT")
       addon.tooltip:SetAutoHideDelay(0.2, frame)
       addon:updateTooltip(frame)
@@ -188,6 +211,7 @@ do
       if (addon.db.ShowFriends) then addon:renderFriends(frame, "CollapseFriends") end
       if (addon.db.ShowGuild and IsInGuild()) then addon:renderGuild(frame, "CollapseGuild") end
     end)
+    addon._lastRender = GetTime()
 
     if (not ok) then
       print("error: "..message)
@@ -209,6 +233,30 @@ do
   f:RegisterEvent("BN_FRIEND_ACCOUNT_ONLINE")
   f:RegisterEvent("BN_FRIEND_ACCOUNT_OFFLINE")
 
-  f:SetScript("OnEvent", updateText)
+  -- Re-render an open tooltip when fresh data arrives, coalescing bursts of
+  -- events. Events within 0.5s of our own render are ignored: toggling
+  -- SetGuildRosterShowOffline() in renderGuild can itself fire GUILD_ROSTER_UPDATE,
+  -- which would otherwise re-render in a loop.
+  local refreshPending = false
+  local function refreshOpenTooltip()
+    refreshPending = false
+    if addon.tooltip:IsShown() and addon._tooltipAnchorFrame then
+      addon:updateTooltip(addon._tooltipAnchorFrame)
+    end
+  end
+
+  f:SetScript("OnEvent", function(self, event)
+    updateText()
+    if event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then return end
+    if refreshPending or not addon.tooltip:IsShown() then return end
+    if addon._lastRender and GetTime() - addon._lastRender < 0.5 then return end
+    refreshPending = true
+    C_Timer.After(0.25, refreshOpenTooltip)
+  end)
+
+  -- Keep requesting fresh roster data while the tooltip is open.
+  C_Timer.NewTicker(ROSTER_REQUEST_INTERVAL, function()
+    if addon.db and addon.tooltip:IsShown() then requestRosterUpdates() end
+  end)
 
 end
